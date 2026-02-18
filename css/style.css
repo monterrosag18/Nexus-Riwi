@@ -2603,6 +2603,7 @@ button:hover {
     border: 1px solid rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(5px);
 }
+
 /* --- NEW UI LAYOUT: CHAT & LEADERBOARD --- */
 
 /* 1. Chat Widget (Floating Button Mode) */
@@ -2630,7 +2631,8 @@ button:hover {
 }
 
 #chat-widget.expanded .chat-toggle-btn {
-    display: none; /* Hide button when open */
+    display: none;
+    /* Hide button when open */
 }
 
 /* Chat Toggle Button (FAB) */
@@ -2639,7 +2641,7 @@ button:hover {
     height: 60px;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--primary-blue), #2b2b2b);
-    border: 2px solid rgba(255,255,255,0.2);
+    border: 2px solid rgba(255, 255, 255, 0.2);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -2669,7 +2671,7 @@ button:hover {
     flex-direction: column;
     overflow: hidden;
     backdrop-filter: blur(10px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
     transition: all 0.3s ease;
     transform-origin: bottom right;
 }
@@ -2678,20 +2680,22 @@ button:hover {
 /* 2. Mini Leaderboard (Bottom HUD) */
 #mini-leaderboard {
     position: fixed;
-    bottom: 20px; /* Aligned with chat button height roughly */
+    bottom: 20px;
+    /* Aligned with chat button height roughly */
     left: 50%;
     transform: translateX(-50%);
     width: 60%;
     height: 70px;
     background: rgba(10, 10, 15, 0.7);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 50px; /* Pill shape */
+    border-radius: 50px;
+    /* Pill shape */
     backdrop-filter: blur(15px);
     display: flex;
     align-items: center;
     padding: 0 30px;
     z-index: 1000;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
     justify-content: space-between;
 }
 
@@ -2719,26 +2723,1204 @@ button:hover {
     gap: 10px;
     padding: 5px 15px;
     border-radius: 20px;
-    background: rgba(255,255,255,0.05);
+    background: rgba(255, 255, 255, 0.05);
     border: 1px solid transparent;
     transition: all 0.3s ease;
 }
 
 .rank-chip:hover {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
     transform: translateY(-2px);
 }
 
 /* Rank Colors */
-.rank-chip.rank-1 { border-color: #ffd700; box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.1); }
-.rank-chip.rank-1 .rank-num { color: #ffd700; font-weight: bold; }
+.rank-chip.rank-1 {
+    border-color: #ffd700;
+    box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.1);
+}
 
-.rank-chip.rank-2 { border-color: #c0c0c0; }
-.rank-chip.rank-2 .rank-num { color: #c0c0c0; font-weight: bold; }
+.rank-chip.rank-1 .rank-num {
+    color: #ffd700;
+    font-weight: bold;
+}
 
-.rank-chip.rank-3 { border-color: #cd7f32; }
-.rank-chip.rank-3 .rank-num { color: #cd7f32; font-weight: bold; }
+.rank-chip.rank-2 {
+    border-color: #c0c0c0;
+}
 
-.clan-name { font-weight: 600; color: #fff; }
-.clan-xp { font-family: 'Courier New', monospace; color: var(--primary-green); font-size: 0.85rem; }
+.rank-chip.rank-2 .rank-num {
+    color: #c0c0c0;
+    font-weight: bold;
+}
 
+.rank-chip.rank-3 {
+    border-color: #cd7f32;
+}
+
+.rank-chip.rank-3 .rank-num {
+    color: #cd7f32;
+    font-weight: bold;
+}
+
+.clan-name {
+    font-weight: 600;
+    color: #fff;
+}
+
+.clan-xp {
+    font-family: 'Courier New', monospace;
+    color: var(--primary-green);
+    font-size: 0.85rem;
+}
+
+/* --- REWARD SHOP HUD OVERHAUL --- */
+.reward-hub-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    padding: 2rem 5%;
+    position: relative;
+    overflow: hidden;
+    perspective: 1000px;
+    background: radial-gradient(circle at center, #131522 0%, #000000 100%);
+    /* Opaque background to isolate shop */
+    z-index: 10;
+    /* Ensure it sits above the global bg */
+}
+
+/* --- Planet Background (CSS Procedural) --- */
+.reward-hub-container::before {
+    content: '';
+    position: absolute;
+    top: -10%;
+    right: -10%;
+    width: 60vh;
+    height: 60vh;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%,
+            rgba(0, 150, 255, 1) 0%,
+            rgba(0, 50, 150, 1) 40%,
+            rgba(0, 0, 50, 1) 80%,
+            transparent 100%);
+    box-shadow:
+        inset -20px -20px 50px rgba(0, 0, 0, 0.8),
+        /* Shadow side */
+        0 0 50px rgba(0, 100, 255, 0.3);
+    /* Atmosphere glow */
+    z-index: 0;
+    opacity: 0.8;
+    filter: blur(2px);
+    pointer-events: none;
+}
+
+.hub-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Vignette + Grid */
+    background:
+        radial-gradient(circle at center, transparent 40%, rgba(0, 0, 0, 0.8) 100%),
+        linear-gradient(rgba(0, 240, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.05) 1px, transparent 1px);
+    background-size: 100% 100%, 60px 60px, 60px 60px;
+    pointer-events: none;
+    z-index: 1;
+    /* Above planet, below UI */
+}
+
+/* --- Left Stats Panel --- */
+.hud-panel {
+    width: 280px;
+    background: rgba(13, 14, 23, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 240, 255, 0.1);
+    border-left: 2px solid var(--primary-blue);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    z-index: 10;
+    transform: rotateY(5deg);
+    position: relative;
+}
+
+.hud-panel::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    width: 20px;
+    height: 20px;
+    border-top: 2px solid var(--primary-blue);
+    border-left: 2px solid var(--primary-blue);
+}
+
+.hud-panel::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 20px;
+    height: 20px;
+    border-bottom: 2px solid var(--primary-blue);
+    border-right: 2px solid var(--primary-blue);
+}
+
+.panel-header {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    color: var(--primary-blue);
+    border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+    letter-spacing: 2px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.stat-value {
+    color: #fff;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+}
+
+.stat-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    margin: 0.5rem 0;
+}
+
+/* --- Center Core (Shield) --- */
+.center-stage {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    position: relative;
+}
+
+.hologram-title {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    margin-bottom: 2rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    background: linear-gradient(to bottom, #fff, #888);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+.shield-core-container {
+    width: 350px;
+    height: 350px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 3rem;
+}
+
+.energy-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid transparent;
+}
+
+.ring-outer {
+    width: 100%;
+    height: 100%;
+    border-top: 2px solid var(--primary-blue);
+    border-bottom: 2px solid var(--primary-blue);
+    box-shadow: 0 0 15px var(--primary-blue), inset 0 0 15px var(--primary-blue);
+    animation: spin-slow 10s linear infinite;
+    opacity: 0.8;
+}
+
+.ring-inner {
+    width: 70%;
+    height: 70%;
+    border-left: 2px solid rgba(255, 255, 255, 0.5);
+    border-right: 2px solid rgba(255, 255, 255, 0.5);
+    animation: spin-reverse 8s linear infinite;
+    opacity: 0.6;
+}
+
+.shield-emblem {
+    font-size: 6rem;
+    color: #fff;
+    z-index: 20;
+    filter: drop-shadow(0 0 20px var(--primary-blue));
+    animation: pulse-glow 3s ease-in-out infinite;
+    background: radial-gradient(circle, rgba(0, 240, 255, 0.2) 0%, transparent 70%);
+    width: 150px;
+    height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 240, 255, 0.3);
+}
+
+.arc-text {
+    position: absolute;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    color: var(--primary-blue);
+    text-transform: uppercase;
+    text-shadow: 0 0 5px var(--primary-blue);
+}
+
+.arc-text.top {
+    top: -20px;
+    /* Transformation for arc effect would require SVG paths or complex CSS transforms. keeping simple for now */
+}
+
+.arc-text.bottom {
+    bottom: -20px;
+}
+
+
+.core-footer {
+    text-align: center;
+    width: 100%;
+    max-width: 400px;
+}
+
+.territory-label {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+    margin-bottom: 1rem;
+    color: #fff;
+}
+
+.points-available-bar {
+    width: 100%;
+    height: 30px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--glass-border);
+    position: relative;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bar-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, var(--primary-blue));
+    opacity: 0.3;
+}
+
+.bar-text {
+    position: relative;
+    z-index: 2;
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+}
+
+.confirm-redemption-btn {
+    background: transparent;
+    border: 1px solid var(--primary-blue);
+    color: var(--primary-blue);
+    padding: 10px 30px;
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.1);
+}
+
+.confirm-redemption-btn:hover {
+    background: var(--primary-blue);
+    color: #000;
+    box-shadow: 0 0 20px var(--primary-blue);
+}
+
+/* --- Right Cards Cluster --- */
+.cards-cluster {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 220px;
+    z-index: 10;
+    transform: rotateY(-5deg);
+}
+
+.hud-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s;
+    backdrop-filter: blur(5px);
+    border-radius: 4px;
+}
+
+.hud-card:hover {
+    border-color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+    transform: scale(1.05) translateZ(20px);
+}
+
+.card-glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.hud-card:hover .card-glow {
+    opacity: 1;
+}
+
+.card-icon-area {
+    margin-bottom: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    transition: color 0.3s;
+}
+
+.hud-card:hover .card-icon-area {
+    color: #fff;
+    text-shadow: 0 0 10px #fff;
+}
+
+.card-title {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    color: #ddd;
+    margin-bottom: 0.5rem;
+}
+
+.card-cooldown {
+    font-family: 'Courier New', monospace;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+/* --- Animations --- */
+@keyframes spin-slow {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes spin-reverse {
+    0% {
+        transform: rotate(360deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+@keyframes pulse-glow {
+
+    0%,
+    100% {
+        filter: drop-shadow(0 0 15px var(--primary-blue));
+        transform: scale(1);
+    }
+
+    50% {
+        filter: drop-shadow(0 0 30px var(--primary-blue));
+        transform: scale(1.05);
+    }
+}
+
+/* --- COCKPIT ENVIRONMENT --- */
+.cockpit-wrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.cockpit-frame {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 50;
+    /* Highest layer */
+}
+
+/* Simulated Cockpit Bars */
+.frame-top,
+.frame-bottom {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    background: linear-gradient(180deg, #0a0b10 0%, #1a1e2e 50%, #0a0b10 100%);
+    border-bottom: 2px solid #333;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+}
+
+.frame-bottom {
+    bottom: 0;
+    top: auto;
+    height: 60px;
+    border-top: 2px solid #333;
+    border-bottom: none;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.8);
+}
+
+.frame-left,
+.frame-right {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 60px;
+    background: linear-gradient(90deg, #0a0b10 0%, #1a1e2e 50%, #0a0b10 100%);
+    border-right: 2px solid #333;
+}
+
+.frame-right {
+    right: 0;
+    border-left: 2px solid #333;
+    border-right: none;
+}
+
+.scan-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0.2));
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 5;
+    opacity: 0.3;
+}
+
+/* --- Physical Consoles (Bottom Corners) --- */
+.console-panel {
+    position: absolute;
+    bottom: 40px;
+    /* Just above frame */
+    width: 320px;
+    height: 180px;
+    background: linear-gradient(145deg, #1a1e2e, #0f111a);
+    border: 1px solid #333;
+    border-radius: 10px 10px 0 0;
+    padding: 15px;
+    transform-style: preserve-3d;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.left-console {
+    left: 50px;
+    transform: perspective(600px) rotateX(20deg) rotateY(10deg);
+}
+
+.right-console {
+    right: 50px;
+    transform: perspective(600px) rotateX(20deg) rotateY(-10deg);
+}
+
+/* Console Screens */
+.console-screen {
+    background: #000;
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 10px;
+    flex: 1;
+    overflow: hidden;
+    box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.2);
+    position: relative;
+}
+
+.console-header {
+    font-size: 0.6rem;
+    color: var(--primary-blue);
+    margin-bottom: 5px;
+    letter-spacing: 1px;
+    border-bottom: 1px solid rgba(0, 240, 255, 0.3);
+    padding-bottom: 2px;
+}
+
+.console-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.console-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.6rem;
+    color: #fff;
+}
+
+.bar-container {
+    width: 60px;
+    height: 4px;
+    background: #222;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.bar-val {
+    height: 100%;
+    width: 40%;
+    background: var(--primary-green);
+    box-shadow: 0 0 5px var(--primary-green);
+}
+
+.blink-text {
+    animation: blink 1s infinite;
+    color: var(--primary-red);
+}
+
+/* Console Buttons */
+.console-buttons {
+    display: flex;
+    gap: 10px;
+    height: 20px;
+}
+
+.phys-btn {
+    width: 20px;
+    height: 20px;
+    border-radius: 2px;
+    box-shadow: 0 2px 0 #000;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.phys-btn:active {
+    transform: translateY(2px);
+    box-shadow: none;
+}
+
+.phys-btn.red {
+    background: #a00;
+}
+
+.phys-btn.yellow {
+    background: #aa0;
+}
+
+.phys-btn.blue {
+    background: #00a;
+}
+
+/* Radar (Right Console) */
+.radar-screen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.radar-circle {
+    width: 80px;
+    height: 80px;
+    border: 1px solid rgba(0, 255, 0, 0.3);
+    border-radius: 50%;
+    position: relative;
+    background: radial-gradient(circle, rgba(0, 50, 0, 0.2), transparent);
+}
+
+.radar-sweep {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, transparent 0deg, rgba(0, 255, 0, 0.4) 360deg);
+    animation: spin-slow 4s linear infinite;
+    clip-path: polygon(50% 50%, 50% 0, 100% 0, 100% 50%);
+}
+
+.radar-dot {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 4px #fff;
+    opacity: 0;
+}
+
+.dot-1 {
+    top: 30%;
+    left: 60%;
+    animation: radar-blip 4s infinite 1s;
+}
+
+.dot-2 {
+    top: 70%;
+    left: 40%;
+    animation: radar-blip 4s infinite 2.5s;
+}
+
+@keyframes radar-blip {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+/* Projector Base */
+.projector-base {
+    position: absolute;
+    bottom: -50px;
+    /* Below the shield core */
+    width: 200px;
+    height: 60px;
+    background: radial-gradient(ellipse at center, #2a3045, #0a0b10);
+    border-radius: 50%;
+    border: 1px solid #444;
+    box-shadow: 0 0 30px rgba(0, 240, 255, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform: rotateX(60deg);
+    z-index: 5;
+}
+
+.base-light {
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle, rgba(0, 240, 255, 0.8), transparent 70%);
+    opacity: 0.6;
+    animation: pulse-glow 2s infinite;
+}
+
+/* Floating UI Enhancements */
+/* --- Ultra-Premium FX: Lightning Arcs --- */
+.lightning-arc {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    border-top: 2px solid #fff;
+    filter: drop-shadow(0 0 10px #fff);
+    pointer-events: none;
+    z-index: 25;
+}
+
+.arc-1 {
+    width: 110%;
+    height: 110%;
+    animation: lightning-spin 0.5s linear infinite;
+    border-top-color: rgba(0, 240, 255, 0.8);
+    opacity: 0.6;
+}
+
+.arc-2 {
+    width: 90%;
+    height: 90%;
+    animation: lightning-spin 0.3s linear infinite reverse;
+    border-left: 2px solid rgba(0, 240, 255, 0.6);
+    border-top: none;
+    opacity: 0.5;
+}
+
+.arc-3 {
+    width: 120%;
+    height: 120%;
+    border: 4px solid transparent;
+    border-right: 4px solid #fff;
+    animation: lightning-flash 2s infinite;
+    filter: blur(2px) drop-shadow(0 0 10px #fff);
+}
+
+@keyframes lightning-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes lightning-flash {
+
+    0%,
+    100% {
+        opacity: 0;
+        transform: scale(1) rotate(45deg);
+    }
+
+    5%,
+    15% {
+        opacity: 0.8;
+        transform: scale(1.1) rotate(50deg);
+    }
+
+    20% {
+        opacity: 0;
+    }
+
+    40%,
+    45% {
+        opacity: 0.6;
+        transform: scale(1.05) rotate(120deg);
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+/* --- Ultra-Premium FX: Hologram Beam --- */
+.projector-base::after {
+    content: '';
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 300px;
+    background: conic-gradient(from 180deg at 50% 100%,
+            transparent 150deg,
+            rgba(0, 240, 255, 0.2) 175deg,
+            rgba(255, 255, 255, 0.4) 180deg,
+            rgba(0, 240, 255, 0.2) 185deg,
+            transparent 210deg);
+    z-index: 10;
+    pointer-events: none;
+    filter: blur(10px);
+    opacity: 0.6;
+    animation: beam-flicker 0.1s infinite;
+}
+
+@keyframes beam-flicker {
+    0% {
+        opacity: 0.5;
+        height: 300px;
+    }
+
+    50% {
+        opacity: 0.7;
+        height: 305px;
+    }
+
+    100% {
+        opacity: 0.5;
+        height: 295px;
+    }
+}
+
+/* --- Ultra-Premium FX: Scanline Texture on Panels --- */
+.console-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(0deg,
+            rgba(255, 255, 255, 0.03) 0px,
+            rgba(255, 255, 255, 0.03) 1px,
+            transparent 1px,
+            transparent 4px);
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* --- MEGA ULTRA PREMIUM: CINEMATIC POLISH --- */
+
+/* 1. Global Color Grading & Aberration */
+.reward-hub-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+    /* Top most overlay */
+
+    /* Film Grain */
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+
+    /* Subtle Vignette & Contrast Boost */
+    box-shadow: inset 0 0 150px rgba(0, 0, 0, 0.9);
+    mix-blend-mode: overlay;
+    opacity: 0.8;
+}
+
+/* 2. Text Chromatic Aberration (RGB Split) on Hover */
+.hologram-title:hover,
+.hud-card:hover .card-title,
+.console-header:hover {
+    animation: glitch-skew 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite;
+    text-shadow:
+        2px 0 var(--primary-red),
+        -2px 0 var(--primary-blue);
+}
+
+@keyframes glitch-skew {
+    0% {
+        transform: skew(0deg);
+    }
+
+    20% {
+        transform: skew(-2deg);
+    }
+
+    40% {
+        transform: skew(2deg);
+    }
+
+    60% {
+        transform: skew(-1deg);
+    }
+
+    80% {
+        transform: skew(1deg);
+    }
+
+    100% {
+        transform: skew(0deg);
+    }
+}
+
+/* 3. Enhanced Glass Reflections */
+.hud-panel::before,
+.console-screen::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transform: skewX(-25deg);
+    animation: shine-swipe 6s infinite ease-in-out;
+    pointer-events: none;
+}
+
+@keyframes shine-swipe {
+    0% {
+        left: -150%;
+    }
+
+    20% {
+        left: 150%;
+    }
+
+    100% {
+        left: 150%;
+    }
+}
+
+/* 4. Lens Flare / Light Leak Source (Simulated Top Light) */
+.cockpit-wrapper::before {
+    content: '';
+    position: absolute;
+    top: -10%;
+    left: 20%;
+    width: 60%;
+    height: 400px;
+    background: radial-gradient(ellipse at center, rgba(0, 240, 255, 0.15), transparent 70%);
+    z-index: 20;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    opacity: 0.6;
+    animation: light-pulse 5s infinite ease-in-out;
+}
+
+@keyframes light-pulse {
+
+    0%,
+    100% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+}
+
+/* 5. UI Border Glow Enhancement */
+.hud-panel,
+.hud-card,
+.console-panel {
+    border: 1px solid rgba(0, 240, 255, 0.15);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.05), inset 0 0 20px rgba(0, 240, 255, 0.05);
+}
+
+/* Make shield brightness react to "power" */
+.shield-core-container:hover .shield-emblem {
+    ```css filter: drop-shadow(0 0 50px var(--primary-blue));
+    transform: scale(1.1);
+    transition: all 0.3s ease-out;
+}
+
+/* --- HEAVY MECHANICAL DOORS (GSAP POWERED) --- */
+#transition-doors {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    pointer-events: none;
+    /* Controlled by JS */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.mech-door {
+    position: absolute;
+    top: 0;
+    width: 55vw;
+    /* Overlap for teeth */
+    height: 100%;
+    background: #1a1b26;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 1);
+    z-index: 2;
+}
+
+.door-left {
+    left: 0;
+    transform: translateX(-100%);
+    /* Interlocking Teeth Shape */
+    clip-path: polygon(0 0, 100% 0, 90% 10%, 100% 20%, 90% 30%, 100% 40%, 90% 50%, 100% 60%, 90% 70%, 100% 80%, 90% 90%, 100% 100%, 0 100%);
+    border-right: 5px solid #444;
+}
+
+.door-right {
+    right: 0;
+    transform: translateX(100%);
+    /* Interlocking Teeth Shape (Inverse) */
+    clip-path: polygon(10% 0, 100% 0, 100% 100%, 10% 100%, 0% 90%, 10% 80%, 0% 70%, 10% 60%, 0% 50%, 10% 40%, 0% 30%, 10% 20%, 0% 10%);
+    border-left: 5px solid #444;
+}
+
+/* Metallic Texture */
+.door-plate {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background:
+        repeating-linear-gradient(90deg, transparent 0, transparent 50px, rgba(0, 0, 0, 0.5) 50px, rgba(0, 0, 0, 0.5) 52px),
+        linear-gradient(180deg, #2a2b36, #111);
+}
+
+.hazard-stripe {
+    position: absolute;
+    bottom: 20%;
+    width: 100%;
+    height: 100px;
+    background: repeating-linear-gradient(-45deg,
+            #ffae00,
+            #ffae00 20px,
+            #000 20px,
+            #000 40px);
+    opacity: 0.8;
+    mix-blend-mode: overlay;
+    border-top: 5px solid #fff;
+    border-bottom: 5px solid #fff;
+}
+
+.lock-mechanism {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    /* On edge */
+    width: 150px;
+    height: 150px;
+    background: url('https://cdn-icons-png.flaticon.com/512/93/93154.png');
+    /* Generic Gear/Lock Icon */
+    background-size: contain;
+    filter: invert(1) drop-shadow(0 0 10px cyan);
+    opacity: 0.5;
+}
+
+.door-right .lock-mechanism {
+    left: 10px;
+    right: auto;
+}
+
+/* Impact Flash */
+.door-flash {
+    position: absolute;
+    width: 100vw;
+    height: 10px;
+    background: #fff;
+    z-index: 5;
+    opacity: 0;
+    box-shadow: 0 0 100px 50px rgba(255, 255, 255, 0.8);
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Central Emblem */
+.door-emblem {
+    position: relative;
+    z-index: 10;
+    opacity: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.loader-ring {
+    width: 80px;
+    height: 80px;
+    border: 5px solid rgba(0, 240, 255, 0.3);
+    border-top: 5px solid #00f0ff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    box-shadow: 0 0 20px #00f0ff;
+}
+
+.loading-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 5px;
+    color: #fff;
+    text-shadow: 0 0 10px #00f0ff;
+}
+
+.status-lights {
+    display: flex;
+    gap: 10px;
+}
+
+.light {
+    width: 10px;
+    height: 10px;
+    background: #333;
+    border-radius: 50%;
+    box-shadow: 0 0 5px #000;
+}
+
+.light.red {
+    background: #ff0000;
+    box-shadow: 0 0 10px #ff0000;
+    animation: blink-fast 0.2s infinite alternate;
+}
+
+@keyframes blink-fast {
+    from {
+        opacity: 0.5;
+    }
+
+    to {
+        opacity: 1;
+        filter: brightness(2);
+    }
+}
+
+/* --- REWARD SHOP IMPACT MAXIMIZER --- */
+
+/* 1. Massive Shield Volumetrics */
+.shield-core-container {
+    width: 450px;
+    /* Bigger */
+    height: 450px;
+}
+
+.energy-ring {
+    box-shadow: 0 0 30px var(--primary-blue), inset 0 0 30px var(--primary-blue);
+}
+
+.shield-emblem {
+    font-size: 8rem;
+    /* Massive */
+    filter: drop-shadow(0 0 40px var(--primary-blue));
+}
+
+/* Sphere Effect (Dome) */
+#shield-core::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120%;
+    height: 120%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(0, 240, 255, 0.05) 50%,
+            transparent 70%);
+    box-shadow: inset 0 0 50px rgba(0, 240, 255, 0.2);
+    /* Rim light */
+    pointer-events: none;
+    z-index: 30;
+    mix-blend-mode: screen;
+}
+
+/* 2. Aggressive Perspective for Cards */
+.cards-cluster {
+    transform: rotateY(-15deg) translateX(-20px) translateZ(50px);
+    /* More wrap-around */
+}
+
+/* 3. Panel Glow Boost */
+.hud-panel {
+    background: rgba(13, 14, 23, 0.4);
+    /* More transparent */
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    box-shadow: 0 0 30px rgba(0, 240, 255, 0.1);
+}
+
+.console-panel {
+    background: linear-gradient(145deg, #111, #0a0b10);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}

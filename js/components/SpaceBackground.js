@@ -8,15 +8,15 @@ export class SpaceBackground {
         // Galaxy Parameters
         // Galaxy Parameters
         this.params = {
-            count: 50000, // Reduced slightly for clarity
-            size: 0.005, // Smaller stars for realism
-            radius: 5,
-            branches: 4, // More complex shape
+            count: 80000,
+            size: 0.005,
+            radius: 6,
+            branches: 3,
             spin: 1,
-            randomness: 0.5, // More scattered stars
+            randomness: 0.2,
             randomnessPower: 3,
-            insideColor: '#ff4d00', // Deep intense orange core
-            outsideColor: '#0a0a20' // Very dark blue/black outer rim
+            insideColor: '#00f0ff', // Cyan Core
+            outsideColor: '#1b00ff' // Deep Violet/Blue Rim
         };
     }
 
@@ -82,79 +82,106 @@ export class SpaceBackground {
     }
 
     generateGalaxy() {
-        // Disposition
+        // We will create a "Dual Nebula" effect
+        // Left side: Volumetric Orange/Red (The "Fire" nebula from image)
+        // Right side: Deep Blue/Cold (The "Ice" space from image)
+
         const geometry = new THREE.BufferGeometry();
-        const positions = new Float32Array(this.params.count * 3);
-        const colors = new Float32Array(this.params.count * 3);
+        const count = 10000; // High count for volume
+        const positions = new Float32Array(count * 3);
+        const colors = new Float32Array(count * 3);
+        const sizes = new Float32Array(count);
+        const randoms = new Float32Array(count * 3); // For movement
 
-        const colorInside = new THREE.Color(this.params.insideColor);
-        const colorOutside = new THREE.Color(this.params.outsideColor);
-
-        for (let i = 0; i < this.params.count; i++) {
+        for (let i = 0; i < count; i++) {
             const i3 = i * 3;
 
-            // Position
-            const radius = Math.random() * this.params.radius;
-            const spinAngle = radius * this.params.spin;
-            const branchAngle = (i % this.params.branches) / this.params.branches * Math.PI * 2;
+            // Positioning: Spread wide across the screen
+            // We want more density on the sides
 
-            const randomX = Math.pow(Math.random(), this.params.randomnessPower) * (Math.random() < 0.5 ? 1 : -1) * this.params.randomness * radius;
-            const randomY = Math.pow(Math.random(), this.params.randomnessPower) * (Math.random() < 0.5 ? 1 : -1) * this.params.randomness * radius;
-            const randomZ = Math.pow(Math.random(), this.params.randomnessPower) * (Math.random() < 0.5 ? 1 : -1) * this.params.randomness * radius;
+            // Random position in a wide box
+            const x = (Math.random() - 0.5) * 15;
+            const y = (Math.random() - 0.5) * 10;
+            const z = (Math.random() - 0.5) * 8;
 
-            positions[i3] = Math.cos(branchAngle + spinAngle) * radius + randomX;
-            positions[i3 + 1] = randomY; // Flat galaxy on Y axis
-            positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * radius + randomZ;
+            positions[i3] = x;
+            positions[i3 + 1] = y;
+            positions[i3 + 2] = z;
 
-            // Color
-            const mixedColor = colorInside.clone();
-            mixedColor.lerp(colorOutside, radius / this.params.radius);
+            // Randoms for animation (Brownian motion)
+            randoms[i3] = Math.random();
+            randoms[i3 + 1] = Math.random();
+            randoms[i3 + 2] = Math.random();
 
-            colors[i3] = mixedColor.r;
-            colors[i3 + 1] = mixedColor.g;
-            colors[i3 + 2] = mixedColor.b;
+            // Color Logic based on X position
+            const color = new THREE.Color();
+
+            if (x < -1) {
+                // LEFT SIDE (Orange/Red Nebula)
+                // Mix of Red, Orange, and some Purple
+                if (Math.random() > 0.5) {
+                    color.set('#ff4d00'); // Orange
+                } else {
+                    color.set('#a61c3c'); // Deep Red
+                }
+                // Fade out towards center
+            } else if (x > 1) {
+                // RIGHT SIDE (Blue/Cyan Nebula)
+                if (Math.random() > 0.5) {
+                    color.set('#00f0ff'); // Cyan
+                } else {
+                    color.set('#0055ff'); // Deep Blue
+                }
+            } else {
+                // CENTER (Mix/Transition - Darker)
+                color.set('#1b00ff');
+                color.multiplyScalar(0.5); // Darker in center
+            }
+
+            colors[i3] = color.r;
+            colors[i3 + 1] = color.g;
+            colors[i3 + 2] = color.b;
+
+            // Sizes: Varied for depth
+            sizes[i] = Math.random();
         }
 
         geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
         geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+        geometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 3));
 
-        // Material
+        // Material with custom shader-like behavior via size attenuation
         const material = new THREE.PointsMaterial({
-            size: this.params.size,
+            size: 0.05,
             sizeAttenuation: true,
             depthWrite: false,
             blending: THREE.AdditiveBlending,
-            vertexColors: true
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.8
         });
 
-        // Points
-        // Points
         this.galaxyPoints = new THREE.Points(geometry, material);
         this.scene.add(this.galaxyPoints);
 
-        // Add Background Stars (Distant Universe)
+        // Add distant stars
         this.addBackgroundStars();
     }
 
     addBackgroundStars() {
-        const bgStarsGeometry = new THREE.BufferGeometry();
-        const bgStarsCount = 2000;
-        const bgPositions = new Float32Array(bgStarsCount * 3);
+        const geometry = new THREE.BufferGeometry();
+        const count = 5000;
+        const positions = new Float32Array(count * 3);
 
-        for (let i = 0; i < bgStarsCount; i++) {
-            const i3 = i * 3;
-            // Scattered far away
-            const x = (Math.random() - 0.5) * 50;
-            const y = (Math.random() - 0.5) * 50;
-            const z = (Math.random() - 0.5) * 50;
-            bgPositions[i3] = x;
-            bgPositions[i3 + 1] = y;
-            bgPositions[i3 + 2] = z;
+        for (let i = 0; i < count; i++) {
+            positions[i * 3] = (Math.random() - 0.5) * 50;
+            positions[i * 3 + 1] = (Math.random() - 0.5) * 50;
+            positions[i * 3 + 2] = (Math.random() - 0.5) * 50 - 10; // Push back
         }
 
-        bgStarsGeometry.setAttribute('position', new THREE.BufferAttribute(bgPositions, 3));
-
-        const bgStarsMaterial = new THREE.PointsMaterial({
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const material = new THREE.PointsMaterial({
             size: 0.02,
             sizeAttenuation: true,
             color: '#ffffff',
@@ -162,8 +189,6 @@ export class SpaceBackground {
             opacity: 0.6,
             depthWrite: false
         });
-
-        const bgStars = new THREE.Points(bgStarsGeometry, bgStarsMaterial);
-        this.scene.add(bgStars);
+        this.scene.add(new THREE.Points(geometry, material));
     }
 }

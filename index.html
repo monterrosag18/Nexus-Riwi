@@ -43,10 +43,48 @@
 
         <!-- Floating Chat -->
         <div id="chat-widget"></div>
+
+        <!-- TRANSITION DOORS (Heavy Mechanical) -->
+        <div id="transition-doors">
+            <!-- Left Heavy Door -->
+            <div class="mech-door door-left">
+                <div class="door-plate"></div>
+                <div class="hazard-stripe"></div>
+                <div class="lock-mechanism"></div>
+            </div>
+
+            <!-- Right Heavy Door -->
+            <div class="mech-door door-right">
+                <div class="door-plate"></div>
+                <div class="hazard-stripe"></div>
+                <div class="lock-mechanism"></div>
+            </div>
+
+            <!-- Impact Flash -->
+            <div class="door-flash"></div>
+
+            <!-- Central Loading HUD -->
+            <div class="door-emblem">
+                <div class="loader-ring"></div>
+                <div class="loader-core"></div>
+                <div class="loading-text">LOADING SECTOR</div>
+                <div class="status-lights">
+                    <span class="light red"></span>
+                    <span class="light red"></span>
+                    <span class="light red"></span>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- App Entry -->
     <script type="module" src="./js/app.js"></script>
+
+    <!-- GSAP (Advanced Animations) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <!-- Vanilla Tilt (3D Hover Effects) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
 </body>
 
 </html>
