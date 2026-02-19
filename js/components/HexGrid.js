@@ -1,483 +1,351 @@
 import { store } from '../store.js';
-import createChallengeModal from './ChallengeModal.js';
+
+// --- MODULE SCOPE VARIABLES ---
+let scene, camera, renderer, composer, controls;
+let solarGroup, tacticalGroup; // Groups for toggling
+let animationId = null;
+let planets = [];
+let sunMesh, sunGlow, starfield;
+let raycaster, mouse; // For interaction
+let interactableHexes = []; // Store fill meshes for raycasting
+
+// Clan Colors (Hex)
+const COLORS = {
+    turing: 0x00f0ff,   // Cyan
+    tesla: 0xff2a2a,    // Red
+    mccarthy: 0x00ff88, // Green
+    neutral: 0x444444   // Grey
+};
 
 export default function renderMap() {
     const container = document.createElement('div');
-    container.className = 'view-content fade-in';
+    container.className = 'galactic-wrapper fade-in';
+    // Force Full Screen Breakout
+    Object.assign(container.style, {
+        position: 'fixed',
+        top: '0',
+        left: '0',
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: '#000000',
+        zIndex: '1' // Behind UI but above background
+    });
 
-    // Header (Enhanced HUD)
-    const header = document.createElement('div');
-    header.className = 'map-header enhanced-hud';
-    header.innerHTML = `
-        <div class="hud-left">
-            <h2 class="text-neon-blue">NEXUS MAP</h2>
-            <div class="hud-status"><i class="fa-solid fa-satellite-dish"></i> LIVE FEED</div>
+    container.innerHTML = `
+        <!-- VIEW LAYER: 3D CANVAS -->
+        <div id="view-3d-scene" style="position: absolute; inset: 0; z-index: 10;">
+            <canvas id="solar-canvas"></canvas>
         </div>
-        <div class="hud-stats">
-            <div class="stat-badge turing">
-                <i class="fa-solid fa-microchip"></i> 
-                <span class="badget-label">TURING</span>
-                <span class="badge-value">${store.state.clans.turing.points} XP</span>
+
+        <!-- LAYER 3: UI HUD -->
+        <div id="map-ui" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50;">
+            
+            <!-- CENTERED HEADER -->
+            <div class="map-header-centered" style="position: absolute; top: 40px; left: 50%; transform: translateX(-50%); text-align: center; pointer-events: auto;">
+                <div class="nexus-title-glitch" data-text="RIWI NEXUS">RIWI NEXUS</div>
+                <div class="nexus-subtitle">SYSTEM: <span class="status-ok">ONLINE</span></div>
             </div>
-            <div class="stat-badge tesla">
-                <i class="fa-solid fa-bolt"></i> 
-                <span class="badget-label">TESLA</span>
-                <span class="badge-value">${store.state.clans.tesla.points} XP</span>
-            </div>
-            <div class="stat-badge mccarthy">
-                <i class="fa-solid fa-brain"></i> 
-                <span class="badget-label">MCCARTHY</span>
-                <span class="badge-value">${store.state.clans.mccarthy.points} XP</span>
+
+            <!-- TACTICAL HUD (Always Visible) -->
+            <div id="tactical-hud" style="position: absolute; top: 150px; left: 20px; display: block;">
+                <!-- Content injected dynamically if needed, currently clean -->
             </div>
         </div>
     `;
-    container.appendChild(header);
 
-    // Grid Container
-    const perspectiveWrapper = document.createElement('div');
-    perspectiveWrapper.className = 'hex-perspective-wrapper';
-
-    const gridContainer = document.createElement('div');
-    gridContainer.className = 'hex-grid-container';
-
-    // Tooltip Element
-    const tooltip = document.createElement('div');
-    tooltip.id = 'hex-tooltip';
-    tooltip.className = 'hex-tooltip';
-    document.body.appendChild(tooltip); // Append to body for absolute positioning
-
-    // Attack Overlay (SVG)
-    const svgOverlay = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svgOverlay.classList.add('battle-overlay');
-    svgOverlay.style.position = 'absolute';
-    svgOverlay.style.top = '0';
-    svgOverlay.style.left = '0';
-    svgOverlay.style.width = '100%';
-    svgOverlay.style.height = '100%';
-    svgOverlay.style.pointerEvents = 'none';
-    svgOverlay.style.zIndex = '20';
-    svgOverlay.style.overflow = 'visible';
-    gridContainer.appendChild(svgOverlay);
-
-    // Safe Data Access
-    const state = store.getState();
-    const territories = state.territories || [];
-    const currentUser = state.currentUser;
-
-    if (territories.length === 0) {
-        gridContainer.innerHTML = '<p class="text-neon-red" style="text-align:center; margin-top: 2rem;">ERROR: SECTOR DATA CORRUPTED OR EMPTY</p>';
-    } else {
-        // Updated chunk pattern for 9 cols (Odd-r layout approximation)
-        // [9, 9] ensures consistent rows, CSS handles toggle offset
-        const rows = chunkArray(territories, [9]);
-        rows.forEach((rowItems, rowIndex) => {
-            const rowDiv = document.createElement('div');
-            rowDiv.className = `hex-row ${rowIndex % 2 === 0 ? 'even' : 'odd'}`;
-            rowItems.forEach(terr => {
-                const hex = createHexElement(terr);
-
-                if (terr.type !== 'void') {
-                    // Tooltip Interaction
-                    hex.addEventListener('mouseenter', (e) => {
-                        const rect = hex.getBoundingClientRect();
-                        tooltip.style.display = 'block';
-                        tooltip.innerHTML = `
-                            <div class="tooltip-header owner-${terr.owner}">
-                                <span class="tooltip-id">SECTOR #${terr.id}</span>
-                                <span class="tooltip-owner">${terr.owner.toUpperCase()}</span>
-                            </div>
-                            <div class="tooltip-body">
-                                <div class="tooltip-row">
-                                    <span class="label">BIOME:</span>
-                                    <span class="value" style="color:#fff">${terr.biome ? terr.biome.toUpperCase() : 'UNKNOWN'}</span>
-                                </div>
-                                <div class="tooltip-row">
-                                    <span class="label">TYPE:</span>
-                                    <span class="value">${terr.type.toUpperCase()}</span>
-                                </div>
-                                <div class="tooltip-row">
-                                    <span class="label">DIFF:</span>
-                                    <span class="value stars">${'★'.repeat(terr.difficulty)}</span>
-                                </div>
-                                <div class="tooltip-row">
-                                    <span class="label">STATUS:</span>
-                                    <span class="value status">${terr.owner === 'neutral' ? 'CONTESTABLE' : 'OCCUPIED'}</span>
-                                </div>
-                            </div>
-                        `;
-                    });
-
-                    hex.addEventListener('mouseleave', () => {
-                        tooltip.style.display = 'none';
-                    });
-
-                    hex.addEventListener('mousemove', (e) => {
-                        tooltip.style.left = e.pageX + 15 + 'px';
-                        tooltip.style.top = e.pageY + 15 + 'px';
-                    });
-                } else {
-                    // Disable interaction for void
-                    hex.style.pointerEvents = 'none';
-                }
-
-                rowDiv.appendChild(hex);
-            });
-            gridContainer.appendChild(rowDiv);
-        });
-    }
-
-    perspectiveWrapper.appendChild(gridContainer);
-    container.appendChild(perspectiveWrapper);
-
-    // 3D Tilt Effect
-    container.addEventListener('mousemove', (e) => {
-        const { offsetWidth: width, offsetHeight: height } = container;
-        const { offsetX: x, offsetY: y } = e;
-
-        const moveX = (x / width) - 0.5;
-        const moveY = (y / height) - 0.5;
-
-        // Max rotation deg
-        const deg = 5; // Subtle tilt
-
-        gridContainer.style.transform = `rotateY(${moveX * deg}deg) rotateX(${-moveY * deg}deg)`;
-    });
-
-    container.addEventListener('mouseleave', () => {
-        gridContainer.style.transform = `rotateY(0deg) rotateX(0deg)`;
-        tooltip.style.display = 'none'; // Ensure tooltip hides
-    });
-
-
-
-    // Interaction Logic
-    gridContainer.addEventListener('click', (e) => {
-        const hex = e.target.closest('.hex-item');
-        if (!hex) return;
-
-        const id = parseInt(hex.dataset.id);
-        const terr = territories.find(t => t.id === id);
-
-        if (!terr || !currentUser) return;
-
-        // Logic
-        if (terr.owner === currentUser.clan) {
-            alert(`This sector belongs to ${currentUser.clan.toUpperCase()}.\nStatus: SECURE`);
-        } else if (terr.owner === 'neutral') {
-            // Check Adjacency
-            const isAdjacent = store.checkAdjacency(id, currentUser.clan);
-
-            if (isAdjacent) {
-                // Open Modal
-                const modal = createChallengeModal(terr, (success) => {
-                    if (success) {
-                        const captured = store.conquerTerritory(id, currentUser.clan);
-                        if (captured) {
-                            // Re-render is automatic via store listener? 
-                            // Wait, we need to ensure View updates. 
-                            // The store.notify() calls listeners. 
-                            // We rely on the router/app to re-render or we can handle it here if we were using a framework.
-                            // For Vanilla JS, the store listener usually re-renders the whole view.
-                            // Let's assume App or Router handles store updates by re-rendering current view.
-                            // If not, we might need to manually trigger a refresh or let the notification system handle it.
-                        }
-                    }
-                });
-                document.body.appendChild(modal); // Append to body for overlay
-            } else {
-                alert('OUT OF RANGE.\nYou must expand from adjacent territories.');
-            }
-        } else {
-            alert(`Sector occupied by ${terr.owner.toUpperCase()}.\nCombat modules not yet online.`);
-        }
-    });
-
-    // Start Battle Simulation
-    startBattleSimulation(svgOverlay, territories);
-
-    // Live HUD Updates
-    const unsubscribe = store.subscribe((newState) => {
-        // Self-cleanup: content removed from DOM
-        if (!document.body.contains(container)) {
-            unsubscribe();
-            return;
-        }
-
-        const turing = container.querySelector('.stat-badge.turing .badge-value');
-        const tesla = container.querySelector('.stat-badge.tesla .badge-value');
-        const mccarthy = container.querySelector('.stat-badge.mccarthy .badge-value');
-
-        if (turing) turing.textContent = `${newState.clans.turing.points} XP`;
-        if (tesla) tesla.textContent = `${newState.clans.tesla.points} XP`;
-        if (mccarthy) mccarthy.textContent = `${newState.clans.mccarthy.points} XP`;
-    });
+    // 2. Initialize
+    setTimeout(() => {
+        initSolarSystem();
+    }, 0);
 
     return container;
 }
 
-function createHexElement(terr) {
-    const hex = document.createElement('div');
-    let classes = 'hex-item';
+// ------------------------------------------------------------------
+// 3D ENGINE
+// ------------------------------------------------------------------
+function initSolarSystem() {
+    const canvas = document.getElementById('solar-canvas');
+    if (!canvas || typeof THREE === 'undefined') return;
 
-    if (terr.type === 'void') {
-        classes += ' hex-void'; // New class for invisible/water hexes
-    } else {
-        if (terr.owner !== 'neutral') {
-            classes += ` owner-${terr.owner}`;
+    // Raycaster Init (Always On)
+    raycaster = new THREE.Raycaster();
+    mouse = new THREE.Vector2();
+    window.addEventListener('mousemove', onMouseMove, false);
+
+    // Scene
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x000000); // Black space
+
+    // Camera
+    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
+    camera.position.set(0, 100, 150); // Higher vantage point for map view
+
+    // 1.5 RENDERER (Restored)
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // renderer.toneMapping = THREE.ReinhardToneMapping; // REMOVED: Was washing out colors
+
+    // 2. BLOOM POST-PROCESSING (Robust Check)
+    try {
+        if (THREE.EffectComposer && THREE.RenderPass && THREE.UnrealBloomPass) {
+            const renderScene = new THREE.RenderPass(scene, camera);
+            composer = new THREE.EffectComposer(renderer);
+            composer.addPass(renderScene);
+
+            const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+            bloomPass.threshold = 0.1;
+            bloomPass.strength = 1.2;
+            bloomPass.radius = 0.5;
+            composer.addPass(bloomPass);
         } else {
-            classes += ` owner-neutral`;
+            throw new Error("Post-processing modules missing");
         }
-        // Add Biome Class
-        if (terr.biome) classes += ` biome-${terr.biome}`;
+    } catch (e) {
+        console.warn("Bloom disabled due to missing dependencies:", e);
+        composer = null; // Fallback to standard renderer
     }
 
-    hex.className = classes;
-    hex.dataset.id = terr.id;
-    // hex.title = ... removed tooltip replaced with rich tooltip
-
-    // If Void, return empty hex structure
-    if (terr.type === 'void') {
-        hex.innerHTML = '<div class="hex-inner void-inner"></div>';
-        return hex;
-    }
-
-    // Resource Icon (Type)
-    let typeIconClass = 'fa-cube';
-    if (terr.type === 'code') typeIconClass = 'fa-code';
-    if (terr.type === 'english') typeIconClass = 'fa-language';
-    if (terr.type === 'soft-skills') typeIconClass = 'fa-handshake';
-
-    // Biome Icon (Background hint) - REMOVED for clean premium look
-    // let biomeIcon = '';
-    // if (terr.biome === 'city') biomeIcon = '<i class="fa-solid fa-city biome-bg-icon"></i>';
-    // ...
-
-    // Clan Insignia (Owner) - Professional Icons on Shields
-    let insigniaHtml = '';
-
-    if (terr.owner === 'turing') {
-        insigniaHtml = `<i class="fa-solid fa-microchip clan-icon turing-icon"></i>`;
-    } else if (terr.owner === 'tesla') {
-        insigniaHtml = `<i class="fa-solid fa-bolt clan-icon tesla-icon"></i>`;
-    } else if (terr.owner === 'mccarthy') {
-        insigniaHtml = `<i class="fa-solid fa-brain clan-icon mccarthy-icon"></i>`;
-    } else {
-        // Neutral or Biome specific
-        // insigniaHtml = biomeIcon; // Clean neutral
-        insigniaHtml = '';
-    }
-
-    // HTML Structure
-    let contentHtml = '';
-
-    if (terr.owner === 'neutral') {
-        contentHtml = `
-            <div class="resource-badge neutral"><i class="fa-solid ${typeIconClass}"></i></div>
-            <span class="hex-id" style="opacity:0.3; font-size: 0.7rem;">#${terr.id}</span>
-        `;
-    } else {
-        contentHtml = `
-            <div class="clan-shield">${insigniaHtml}</div>
-            <div class="resource-badge"><i class="fa-solid ${typeIconClass}"></i></div>
-            <span class="hex-id">#${terr.id}</span>
-        `;
-    }
-
-    hex.innerHTML = `
-        <div class="hex-inner">
-            <div class="hex-content">
-                ${contentHtml}
-            </div>
-            <div class="hex-overlay"></div>
-        </div>
-    `;
-    return hex;
-}
-
-// --- Battle Simulation Logic ---
-
-function startBattleSimulation(svgLayer, territories) {
-    // Run an attack simulation every 0.8 seconds (Much faster)
-    setInterval(() => {
-        simulateAttack(svgLayer, territories);
-    }, 800);
-}
-
-function simulateAttack(svgLayer, territories) {
-    if (!document.body.contains(svgLayer)) return;
-
-    const aggressors = territories.filter(t => t.owner !== 'neutral');
-    if (aggressors.length === 0) return;
-
-    // Pick multiple attackers for chaos? No, lets keep one but fast.
-    const attacker = aggressors[Math.floor(Math.random() * aggressors.length)];
-    const attackerHex = document.querySelector(`.hex-item[data-id="${attacker.id}"]`);
-    if (!attackerHex) return;
-
-    // Find neighbors visually
-    const rect1 = attackerHex.getBoundingClientRect();
-    const centerX1 = rect1.left + rect1.width / 2;
-    const centerY1 = rect1.top + rect1.height / 2;
-
-    const allHexes = document.querySelectorAll('.hex-item');
-    let targetHex = null;
-
-    // 1. Find valid neighbors
-    const neighbors = [];
-    allHexes.forEach(hex => {
-        if (hex === attackerHex) return;
-        const rect2 = hex.getBoundingClientRect();
-        const centerX2 = rect2.left + rect2.width / 2;
-        const centerY2 = rect2.top + rect2.height / 2;
-        const dist = Math.hypot(centerX1 - centerX2, centerY1 - centerY2);
-
-        if (dist < 140 && dist > 10) { // Tuned distance
-            neighbors.push(hex);
+    // 3. CONTROLS
+    try {
+        if (THREE.OrbitControls) {
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.minDistance = 20;
+            controls.maxDistance = 600;
+        } else {
+            console.warn("OrbitControls missing - Navigation disabled");
         }
+    } catch (e) {
+        console.error("Controls error:", e);
+    }
+
+    // 4. LIGHTS
+    const ambientLight = new THREE.AmbientLight(0x444444);
+    scene.add(ambientLight);
+    const pointLight = new THREE.PointLight(0xffffff, 2.0); // Brighter key light
+    scene.add(pointLight);
+
+    // Texture Loader
+    const loader = new THREE.TextureLoader();
+    const basePath = './assets/textures/';
+
+    // 5. BACKGROUND STARS (Restored High-Res Texture)
+    createTextureStarfield();
+
+    // 6. BUILD LAYERS
+    solarGroup = new THREE.Group();
+    tacticalGroup = new THREE.Group();
+
+    scene.add(solarGroup);
+    scene.add(tacticalGroup);
+
+    // INITIAL BUILD - Only Sun and Grid, No Planets
+    buildTacticalGrid();
+
+    // Force Visible
+    tacticalGroup.visible = true;
+    solarGroup.visible = true;
+
+    // --- SUN Only ---
+    const sunGeo = new THREE.SphereGeometry(15, 64, 64); // Larger Sun for central dominance
+    const sunMat = new THREE.MeshBasicMaterial({ // Back to Basic for pure emission
+        map: loader.load(basePath + '8k_sun.jpg'),
+        color: 0xffaa00 // Tint
     });
+    sunMesh = new THREE.Mesh(sunGeo, sunMat);
+    solarGroup.add(sunMesh); // Add to solarGroup
 
-    if (neighbors.length > 0) {
-        // Pick a random neighbor
-        targetHex = neighbors[Math.floor(Math.random() * neighbors.length)];
+    // Sun Lensflare (Improved)
+    const flareMat = new THREE.SpriteMaterial({
+        map: loader.load(basePath + 'lensflare0.png'),
+        color: 0xffaa00,
+        transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending
+    });
+    sunGlow = new THREE.Sprite(flareMat);
+    sunGlow.scale.set(100, 100, 1); // Bigger glow
+    sunMesh.add(sunGlow);
+
+    // --- ANIM LOOP ---
+    const clock = new THREE.Clock();
+
+    function animate() {
+        if (!document.getElementById('solar-canvas')) return;
+
+        // Sun Rotation
+        if (sunMesh) sunMesh.rotation.y += 0.002;
+
+        // Interaction (Hover)
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(interactableHexes);
+
+        // Reset
+        interactableHexes.forEach(hex => {
+            hex.material.opacity = 0.1;
+            hex.material.emissiveIntensity = 0;
+            hex.scale.set(1, 1, 1);
+        });
+
+        // Highlight
+        if (intersects.length > 0) {
+            const hit = intersects[0].object;
+            hit.material.opacity = 0.6;
+            hit.scale.set(1.1, 1.1, 1.1);
+        }
+
+        if (controls) controls.update();
+
+        // Render Logic (Fallback if Composer fails)
+        if (composer) {
+            composer.render();
+        } else {
+            renderer.render(scene, camera);
+        }
+
+        animationId = requestAnimationFrame(animate);
     }
+    animate();
 
-    if (targetHex) {
-        drawAttackLine(svgLayer, attackerHex, targetHex, attacker.owner);
+    // Resize
+    window.addEventListener('resize', onWindowResize, false);
+}
 
-        // --- Living Map: Conquest Logic ---
-        // 50% Chance to successfully conquer if target is NEUTRAL or DIFFERENT CLAN
-        const targetId = parseInt(targetHex.dataset.id);
-        const targetTerr = territories.find(t => t.id === targetId);
+function onWindowResize() {
+    if (!camera || !renderer) return;
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    if (composer) composer.setSize(window.innerWidth, window.innerHeight);
+}
 
-        // Higher chance (0.5) for more dynamism
-        if (targetTerr && targetTerr.owner !== attacker.owner && Math.random() < 0.5) {
-            setTimeout(() => {
-                // Visual Update Only? NO! User wants real-time stats reflection.
-                // We MUST update the store to trigger the Graph update.
-                const success = store.conquerTerritory(targetId, attacker.owner);
+function onMouseMove(event) {
+    // Normalize mouse coords (-1 to +1)
+    const rect = renderer.domElement.getBoundingClientRect();
+    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+}
 
-                // Note: store.conquerTerritory updates the 'territories' array in state.
-                // Since 'targetTerr' is a reference to an object in that array (if not deep copied), 
-                // it might already be updated. But store.conquerTerritory handles it.
+// ------------------------------------------------------------------
+// MISSING FUNCTIONS RESTORED
+// ------------------------------------------------------------------
 
-                // Visual Flash & Shake logic continues...
-                // We keep local DOM manipulation for smooth animation without full re-render.
+function createTextureStarfield() {
+    const loader = new THREE.TextureLoader();
+    const starsGeo = new THREE.SphereGeometry(4000, 64, 64);
+    const starsMat = new THREE.MeshBasicMaterial({
+        map: loader.load('./assets/textures/8k_stars.jpg'),
+        side: THREE.BackSide
+    });
+    starfield = new THREE.Mesh(starsGeo, starsMat);
+    scene.add(starfield);
+}
 
-                const oldOwner = targetTerr.owner; // This might be new owner now if ref is shared
-                // Wait, if targetTerr is reference to store object, store.conquerTerritory updated it to new owner.
-                // So oldOwner needs to be grabbed BEFORE store call?
-                // Actually, let's grab it from DOM class to be safe/visual.
-                let visualOldOwner = 'neutral';
-                if (targetHex.classList.contains('owner-turing')) visualOldOwner = 'turing';
-                if (targetHex.classList.contains('owner-tesla')) visualOldOwner = 'tesla';
-                if (targetHex.classList.contains('owner-mccarthy')) visualOldOwner = 'mccarthy';
+// ------------------------------------------------------------------
+// REVISED TACTICAL GRID BUILDER
+// ------------------------------------------------------------------
+function buildTacticalGrid() {
+    interactableHexes = []; // Reset interaction array
 
-                // Update is handled by store for data, but we do visuals manually for effect
-                // targetTerr.owner = attacker.owner; // Store did this already
+    // 1. Generate Hex Grid (Larger Scale)
+    const hexRadius = 8; // Increased from 4
+    const hexWidth = Math.sqrt(3) * hexRadius;
+    const hexHeight = 2 * hexRadius;
 
-                // Visual Flash & Shake
-                targetHex.style.transition = 'all 0.1s';
-                targetHex.classList.add('sector-captured'); // New CSS class for impact
+    // Clan Standards (Shifted for larger map)
+    createClanStandard('turing', new THREE.Vector3(-60, 0, -40), COLORS.turing);
+    createClanStandard('tesla', new THREE.Vector3(60, 0, -40), COLORS.tesla);
+    createClanStandard('mccarthy', new THREE.Vector3(0, 0, 70), COLORS.mccarthy);
 
-                setTimeout(() => {
-                    // Remove old class
-                    targetHex.classList.remove(`owner-${visualOldOwner}`);
-                    targetHex.classList.remove('owner-neutral');
+    // Procedural Hexes
+    const ringSize = 7; // Increased from 4
+    for (let q = -ringSize; q <= ringSize; q++) {
+        for (let r = -ringSize; r <= ringSize; r++) {
+            if (Math.abs(q + r) <= ringSize) {
+                const x = hexWidth * (q + r / 2);
+                const z = hexHeight * (3 / 4) * r;
 
-                    // Add new class
-                    targetHex.classList.add(`owner-${attacker.owner}`);
+                // Exclude larger center zone for Sun safety
+                if (Math.sqrt(x * x + z * z) < 20) continue;
 
-                    // Update Icon Structure
-                    const content = targetHex.querySelector('.hex-content');
-                    if (content) {
-                        // Recalculate Icons
-                        let typeIconClass = 'fa-cube';
-                        if (targetTerr.type === 'code') typeIconClass = 'fa-code';
-                        if (targetTerr.type === 'english') typeIconClass = 'fa-language';
-                        if (targetTerr.type === 'soft-skills') typeIconClass = 'fa-handshake';
+                // Determine Owner
+                let color = COLORS.neutral;
+                if (x < -20 && z < 0) color = COLORS.turing;
+                else if (x > 20 && z < 0) color = COLORS.tesla;
+                else if (z > 20) color = COLORS.mccarthy;
 
-                        let insigniaHtml = '';
-                        if (targetTerr.owner === 'turing') {
-                            insigniaHtml = `<i class="fa-solid fa-microchip clan-icon turing-icon"></i>`;
-                        } else if (targetTerr.owner === 'tesla') {
-                            insigniaHtml = `<i class="fa-solid fa-bolt clan-icon tesla-icon"></i>`;
-                        } else if (targetTerr.owner === 'mccarthy') {
-                            insigniaHtml = `<i class="fa-solid fa-brain clan-icon mccarthy-icon"></i>`;
-                        }
-
-                        content.innerHTML = `
-                            <div class="clan-shield">${insigniaHtml}</div>
-                            <div class="resource-badge"><i class="fa-solid ${typeIconClass}"></i></div>
-                            <span class="hex-id">#${targetTerr.id}</span>
-                         `;
-                    }
-
-                    setTimeout(() => {
-                        targetHex.classList.remove('sector-captured');
-                        targetHex.style.transition = '';
-                    }, 500);
-
-                }, 150);
-
-            }, 600); // Wait for laser to hit
+                createHexagon(x, z, hexRadius * 0.95, color);
+            }
         }
     }
 }
 
-function drawAttackLine(svg, source, target, owner) {
-    // Coordinates relative to the grid container
-    // We need to account for the gridContainer's layout
-    // Best way: get relative position to the SVG
+function createHexagon(x, z, r, color) {
+    // 1. Line Loop (The glowing border)
+    const points = [];
+    for (let i = 0; i <= 6; i++) {
+        const angle = (i * Math.PI) / 3;
+        points.push(new THREE.Vector3(Math.cos(angle) * r, 0, Math.sin(angle) * r));
+    }
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    const material = new THREE.LineBasicMaterial({ color: color, linewidth: 2 });
+    const hex = new THREE.LineLoop(geometry, material);
+    hex.position.set(x, 0, z);
 
-    const svgRect = svg.getBoundingClientRect();
-    const sRect = source.getBoundingClientRect();
-    const tRect = target.getBoundingClientRect();
+    // 2. Interactable Fill (The clickable area)
+    const fillGeo = new THREE.CylinderGeometry(r * 0.9, r * 0.9, 0.5, 6); // Cylinder for volume
+    const fillMat = new THREE.MeshStandardMaterial({
+        color: color,
+        transparent: true,
+        opacity: 0.1,
+        emissive: color,
+        emissiveIntensity: 0
+    });
+    const fill = new THREE.Mesh(fillGeo, fillMat);
+    fill.position.set(x, 0, z);
 
-    const x1 = (sRect.left + sRect.width / 2) - svgRect.left;
-    const y1 = (sRect.top + sRect.height / 2) - svgRect.top;
-    const x2 = (tRect.left + tRect.width / 2) - svgRect.left;
-    const y2 = (tRect.top + tRect.height / 2) - svgRect.top;
+    // Store for raycaster
+    interactableHexes.push(fill);
 
-    // Create Line
-    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    line.setAttribute("x1", x1);
-    line.setAttribute("y1", y1);
-    line.setAttribute("x2", x2);
-    line.setAttribute("y2", y2);
-
-    // Color based on clan
-    let color = '#fff';
-    if (owner === 'turing') color = '#00f0ff'; // Blue
-    if (owner === 'tesla') color = '#ff2a6d'; // Red
-    if (owner === 'mccarthy') color = '#05ffa1'; // Green
-
-    line.setAttribute("stroke", color);
-    line.setAttribute("stroke-width", "3");
-    line.setAttribute("stroke-linecap", "round");
-    line.classList.add('attack-laser');
-
-    svg.appendChild(line);
-
-    // Impact Effect on Target
-    setTimeout(() => {
-        // Flash target
-        target.classList.add('under-attack');
-        setTimeout(() => target.classList.remove('under-attack'), 500);
-
-        // Remove line after ANIMATION
-        setTimeout(() => line.remove(), 1000);
-    }, 100); // Slight delay for line to appear
+    tacticalGroup.add(hex);
+    tacticalGroup.add(fill);
 }
 
-function chunkArray(array, pattern) {
-    const results = [];
-    let i = 0;
-    let p = 0;
-    while (i < array.length) {
-        const size = pattern[p % pattern.length];
-        results.push(array.slice(i, i + size));
-        i += size;
-        p++;
-    }
-    return results;
+function createClanStandard(name, pos, color) {
+    const group = new THREE.Group();
+    group.position.copy(pos);
+
+    // Base Ring
+    const ringGeo = new THREE.RingGeometry(6, 7, 32);
+    const ringMat = new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotation.x = Math.PI / 2;
+    group.add(ring);
+
+    // Pillar (Hologram Source)
+    const pillarGeo = new THREE.CylinderGeometry(0.5, 2, 8, 8);
+    const pillarMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.2 });
+    const pillar = new THREE.Mesh(pillarGeo, pillarMat);
+    pillar.position.y = 4;
+    group.add(pillar);
+
+    // Hologram Icon (Spinning Shape)
+    let iconGeo;
+    if (name === 'turing') iconGeo = new THREE.IcosahedronGeometry(3, 0); // Tech Ball
+    if (name === 'tesla') iconGeo = new THREE.OctahedronGeometry(3, 0); // Energy Crystal
+    if (name === 'mccarthy') iconGeo = new THREE.BoxGeometry(4, 4, 4);  // Logic Cube
+
+    const iconMat = new THREE.MeshBasicMaterial({ color: color, wireframe: true });
+    const icon = new THREE.Mesh(iconGeo, iconMat);
+    icon.position.y = 10;
+    icon.userData = { spin: true };
+    group.add(icon);
+
+    // Light
+    const light = new THREE.PointLight(color, 2, 20);
+    light.position.y = 5;
+    group.add(light);
+
+    tacticalGroup.add(group);
 }

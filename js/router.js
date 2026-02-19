@@ -3,7 +3,7 @@ import { store } from './store.js';
 // Import View Components
 import renderMap from './components/HexGrid.js';
 import renderLeaderboard from './components/Leaderboard.js';
-import renderShop from './components/RewardShop.js';
+import renderShop from './components/ShopCarousel.js'; // Updated to new 3D Carousel
 import renderLogin from './components/Login.js';
 
 const routes = {
