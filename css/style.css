@@ -4539,3 +4539,1117 @@ button:hover {
         opacity: 0.5;
     }
 }
+
+/* =========================================
+   ULTRA-REALISTIC SHOP UI (Cypher-Tech)
+   ========================================= */
+
+/* --- Full Screen Immersion --- */
+.cockpit-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    color: #fff;
+    font-family: 'Rajdhani', sans-serif;
+    perspective: 1000px;
+    z-index: 100;
+    pointer-events: none;
+    /* Base layer passes clicks */
+}
+
+/* Re-enable pointer events for interactive elements */
+.cockpit-wrapper>* {
+    pointer-events: auto;
+}
+
+.cockpit-wrapper .scan-lines,
+.cockpit-wrapper .holo-noise,
+.cockpit-wrapper #shop-scene-container {
+    pointer-events: none;
+    /* Visuals pass clicks */
+}
+
+/* --- 1. COCKPIT FRAME (The "Window") --- */
+.cockpit-frame {
+    position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0 150px rgba(0, 0, 0, 0.95);
+    z-index: 10;
+    pointer-events: none;
+}
+
+.frame-top,
+.frame-bottom {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: #050608;
+    border-bottom: 2px solid #00f0ff;
+    z-index: 11;
+}
+
+.frame-top {
+    top: 0;
+    clip-path: polygon(0 0, 100% 0, 90% 100%, 10% 100%);
+    background: linear-gradient(to bottom, #020204, #0a0c12);
+}
+
+.frame-bottom {
+    bottom: 0;
+    border-top: 2px solid #00f0ff;
+    border-bottom: none;
+    clip-path: polygon(10% 0, 90% 0, 100% 100%, 0 100%);
+    background: linear-gradient(to top, #020204, #0a0c12);
+}
+
+.frame-left,
+.frame-right {
+    position: absolute;
+    top: 60px;
+    bottom: 60px;
+    width: 80px;
+    background: #050608;
+    z-index: 11;
+    border-right: 2px solid rgba(0, 240, 255, 0.3);
+}
+
+.frame-left {
+    left: 0;
+    background: linear-gradient(to right, #020204, #0a0c12);
+    clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
+}
+
+.frame-right {
+    right: 0;
+    border-left: 2px solid rgba(0, 240, 255, 0.3);
+    border-right: none;
+    background: linear-gradient(to left, #020204, #0a0c12);
+    clip-path: polygon(0 0, 100% 0, 0 100%, 0 90%);
+}
+
+/* --- 2. HOLOGRAPHIC OVERLAYS --- */
+.scan-lines {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0.2));
+    background-size: 100% 4px;
+    z-index: 6;
+    pointer-events: none;
+    opacity: 0.15;
+    animation: scanMove 0.5s linear infinite;
+}
+
+@keyframes scanMove {
+    from {
+        background-position: 0 0;
+    }
+
+    to {
+        background-position: 0 4px;
+    }
+}
+
+.holo-noise {
+    position: absolute;
+    inset: 0;
+    opacity: 0.08;
+    z-index: 5;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.5'/%3E%3C/svg%3E");
+}
+
+/* --- 3. HUD LAYOUT --- */
+.reward-hub-container {
+    display: grid;
+    grid-template-columns: 350px 1fr 350px;
+    height: 100%;
+    padding: 80px 100px;
+    gap: 40px;
+    position: relative;
+    z-index: 20;
+}
+
+/* --- 4. CONSOLE PANELS (Side Elements) --- */
+.console-panel {
+    background: rgba(10, 12, 18, 0.7);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    padding: 2px;
+    /* For double border illusion if needed */
+    clip-path: polygon(20px 0, 100% 0,
+            100% calc(100% - 20px), calc(100% - 20px) 100%,
+            0 100%, 0 20px);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    margin-top: auto;
+    margin-bottom: auto;
+    height: 50vh;
+    position: relative;
+}
+
+.console-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.1);
+    z-index: -1;
+}
+
+.console-screen {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(0, 240, 255, 0.1);
+    flex: 1;
+    padding: 15px;
+    margin: 15px;
+    position: relative;
+    overflow: hidden;
+}
+
+.console-header {
+    font-size: 0.8rem;
+    color: var(--primary-blue);
+    letter-spacing: 3px;
+    border-bottom: 1px solid rgba(0, 240, 255, 0.3);
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+}
+
+.console-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.console-stat .label {
+    display: block;
+    font-size: 0.65rem;
+    color: #777;
+    margin-bottom: 5px;
+    letter-spacing: 1px;
+}
+
+.bar-container {
+    width: 100%;
+    height: 4px;
+    background: #222;
+    position: relative;
+}
+
+.bar-val {
+    height: 100%;
+    background: var(--primary-blue);
+    width: 50%;
+    box-shadow: 0 0 8px var(--primary-blue);
+}
+
+.blink-text {
+    animation: blink 1s infinite step-end;
+    color: var(--primary-red);
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.console-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    padding: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.phys-btn {
+    width: 40px;
+    height: 8px;
+    background: #333;
+    border-radius: 1px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.phys-btn:hover {
+    filter: brightness(1.5);
+}
+
+.phys-btn.red {
+    background: #800;
+    box-shadow: 0 0 5px #f00;
+}
+
+.phys-btn.yellow {
+    background: #880;
+    box-shadow: 0 0 5px #ff0;
+}
+
+.phys-btn.blue {
+    background: #008;
+    box-shadow: 0 0 5px #00f;
+}
+
+.phys-switch {
+    width: 20px;
+    height: 15px;
+    background: #222;
+    border: 1px solid #444;
+}
+
+/* --- 5. FLOATING HUD PANELS --- */
+.floating-ui {
+    background: rgba(5, 10, 16, 0.7);
+    border: 1px solid var(--primary-blue);
+    padding: 15px;
+    backdrop-filter: blur(5px);
+    margin-bottom: 20px;
+    position: relative;
+    clip-path: polygon(0 0, 100% 0, 100% 90%, 95% 100%, 0 100%);
+}
+
+.floating-ui::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 20px;
+    height: 20px;
+    border-bottom: 2px solid #fff;
+    border-right: 2px solid #fff;
+}
+
+.panel-header {
+    color: var(--primary-blue);
+    font-size: 1rem;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+    padding-bottom: 5px;
+    text-shadow: 0 0 5px var(--primary-blue);
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+    font-family: 'Courier New', monospace;
+}
+
+.stat-div {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 10px 0;
+}
+
+/* --- 6. CENTER STAGE (Main View) --- */
+.center-stage {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 20;
+}
+
+.hologram-title {
+    font-size: 2.5rem;
+    color: var(--primary-blue);
+    text-shadow: 0 0 15px var(--primary-blue);
+    letter-spacing: 8px;
+    margin-top: 40px;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 15px 40px;
+    border: 1px solid var(--primary-blue);
+    clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
+    position: relative;
+}
+
+.hologram-title::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    right: 5px;
+    bottom: 5px;
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    clip-path: inherit;
+    z-index: -1;
+}
+
+.core-footer {
+    width: 100%;
+    background: rgba(5, 8, 12, 0.9);
+    border-top: 2px solid var(--primary-blue);
+    padding: 25px;
+    text-align: center;
+    clip-path: polygon(10% 0, 90% 0, 100% 100%, 0 100%);
+}
+
+.territory-label {
+    color: #888;
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+}
+
+.points-available-bar {
+    width: 80%;
+    height: 25px;
+    background: #0a0b10;
+    margin: 0 auto 20px;
+    position: relative;
+    border: 1px solid #333;
+    overflow: hidden;
+}
+
+.points-available-bar .bar-fill {
+    height: 100%;
+    background: repeating-linear-gradient(45deg,
+            rgba(0, 240, 255, 0.2),
+            rgba(0, 240, 255, 0.2) 10px,
+            rgba(0, 240, 255, 0.4) 10px,
+            rgba(0, 240, 255, 0.4) 20px);
+    box-shadow: 0 0 15px var(--primary-blue);
+    position: relative;
+}
+
+.bar-text {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.9rem;
+    line-height: 23px;
+    color: #fff;
+    font-weight: bold;
+    text-shadow: 0 0 5px #000;
+    z-index: 2;
+}
+
+.confirm-redemption-btn {
+    background: transparent;
+    color: var(--primary-blue);
+    border: 1px solid var(--primary-blue);
+    padding: 12px 40px;
+    font-size: 1.1rem;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+}
+
+.confirm-redemption-btn:hover {
+    background: var(--primary-blue);
+    color: #000;
+    box-shadow: 0 0 30px var(--primary-blue);
+}
+
+/* --- 7. CARDS CLUSTER --- */
+.cards-cluster {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    justify-content: center;
+    perspective: 1000px;
+}
+
+.hud-card {
+    background: rgba(0, 240, 255, 0.03);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+}
+
+.hud-card:hover,
+.hud-card.active-card {
+    background: rgba(0, 240, 255, 0.15);
+    border-color: var(--primary-blue);
+    transform: translateX(-15px) scale(1.05);
+    /* Pop out */
+    box-shadow: 0 0 25px rgba(0, 240, 255, 0.2);
+}
+
+.hud-card.active-card {
+    border-right: 4px solid var(--primary-blue);
+}
+
+.card-glow {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.5s;
+}
+
+.hud-card:hover .card-glow {
+    left: 150%;
+    transition: left 0.5s;
+}
+
+.card-icon-area {
+    color: var(--primary-blue);
+    font-size: 1.8rem;
+    width: 50px;
+    text-align: center;
+}
+
+.card-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* --- 8. RADAR --- */
+.radar-circle {
+    width: 140px;
+    height: 140px;
+    border: 1px dashed rgba(0, 255, 0, 0.3);
+    border-radius: 50%;
+    position: relative;
+    background:
+        radial-gradient(circle, transparent 20%, rgba(0, 255, 0, 0.05) 80%),
+        linear-gradient(rgba(0, 255, 0, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 0, 0.1) 1px, transparent 1px);
+    background-size: 100% 100%, 20px 20px, 20px 20px;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* =========================================
+   HOLO-GRID SYSTEM (Shop 2.0)
+   ========================================= */
+
+.holo-grid-container {
+    perspective: 1200px;
+}
+
+.holo-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: 100%;
+}
+
+.col-center {
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+}
+
+/* --- PANELS (Glass + Tech Borders) --- */
+.holo-panel {
+    background: rgba(8, 12, 20, 0.7);
+    border: 1px solid rgba(0, 240, 255, 0.15);
+    backdrop-filter: blur(12px);
+    padding: 20px;
+    clip-path: polygon(15px 0, 100% 0,
+            100% calc(100% - 15px), calc(100% - 15px) 100%,
+            0 100%, 0 15px);
+    position: relative;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+}
+
+.holo-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 30px;
+    height: 30px;
+    border-top: 2px solid var(--primary-blue);
+    border-left: 2px solid var(--primary-blue);
+    opacity: 0.5;
+}
+
+.holo-panel::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 30px;
+    height: 30px;
+    border-bottom: 2px solid var(--primary-blue);
+    border-right: 2px solid var(--primary-blue);
+    opacity: 0.5;
+}
+
+.panel-header {
+    font-size: 0.8rem;
+    color: #666;
+    letter-spacing: 3px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+/* --- MINI PROFILE --- */
+.profile-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.avatar-frame {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #001133, #000);
+    border: 1px solid var(--primary-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--primary-blue);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+}
+
+.profile-info .name {
+    font-size: 1rem;
+    color: #fff;
+    font-weight: bold;
+}
+
+.profile-info .rank {
+    font-size: 0.7rem;
+    color: var(--primary-blue);
+    letter-spacing: 1px;
+}
+
+/* --- TABS --- */
+.holo-tabs {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.holo-tab {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #888;
+    padding: 10px;
+    font-family: 'Rajdhani';
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px);
+}
+
+.holo-tab.active,
+.holo-tab:hover {
+    background: rgba(0, 240, 255, 0.1);
+    color: #fff;
+    border-color: var(--primary-blue);
+}
+
+/* --- ITEM GRID LIST --- */
+.holo-list-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.holo-list-scroll::-webkit-scrollbar {
+    width: 4px;
+}
+
+.holo-list-scroll::-webkit-scrollbar-thumb {
+    background: #333;
+}
+
+.holo-item-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 5px;
+}
+
+.holo-item-row:hover {
+    background: rgba(0, 240, 255, 0.05);
+    padding-left: 20px;
+}
+
+.holo-item-row.selected {
+    background: linear-gradient(90deg, rgba(0, 240, 255, 0.15), transparent);
+    border-left: 4px solid var(--primary-blue);
+}
+
+.item-icon {
+    font-size: 1.2rem;
+    color: #555;
+    width: 30px;
+    text-align: center;
+}
+
+.holo-item-row.selected .item-icon {
+    color: var(--primary-blue);
+    text-shadow: 0 0 10px var(--primary-blue);
+}
+
+.item-details {
+    flex: 1;
+}
+
+.item-name {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #ddd;
+}
+
+.item-cost {
+    font-size: 0.75rem;
+    font-family: 'Courier New', monospace;
+    margin-top: 2px;
+}
+
+.item-status {
+    font-size: 0.6rem;
+    background: #111;
+    padding: 2px 6px;
+    border-radius: 2px;
+    color: #555;
+}
+
+.holo-item-row.selected .item-status {
+    background: var(--primary-blue);
+    color: #000;
+}
+
+/* --- CENTER HEADER --- */
+.hologram-header {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.item-title-large {
+    font-size: 2.5rem;
+    font-weight: 300;
+    letter-spacing: 5px;
+    margin: 0;
+    text-transform: uppercase;
+    text-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+}
+
+.item-subtitle {
+    font-size: 1rem;
+    color: var(--primary-blue);
+    letter-spacing: 8px;
+    margin-top: 5px;
+    opacity: 0.8;
+}
+
+/* --- ACTION BAR --- */
+.action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 20px 40px;
+    clip-path: polygon(5% 0, 95% 0, 100% 100%, 0 100%);
+}
+
+.action-btn {
+    background: var(--primary-blue);
+    border: none;
+    padding: 15px 40px;
+    color: #000;
+    font-family: 'Rajdhani';
+    font-weight: bold;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.action-btn:hover {
+    background: #fff;
+    box-shadow: 0 0 20px #fff;
+}
+
+.btn-glare {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 20px;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: skewX(-20deg);
+    transition: left 0.5s;
+}
+
+.action-btn:hover .btn-glare {
+    left: 150%;
+}
+
+.credit-readout {
+    text-align: right;
+}
+
+.credit-readout .label {
+    font-size: 0.7rem;
+    color: #888;
+}
+
+.credit-readout .value {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--primary-blue);
+}
+
+/* --- SPECS PANEL --- */
+.spec-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.spec-item {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 10px;
+    border-left: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.spec-label {
+    font-size: 0.6rem;
+    color: #888;
+    margin-bottom: 2px;
+}
+
+.spec-val {
+    font-size: 1rem;
+    color: #fff;
+    font-weight: bold;
+}
+
+.panel-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 20px 0;
+}
+
+.description-box {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: #aaa;
+    border-left: 2px solid var(--primary-blue);
+    padding-left: 15px;
+    margin-bottom: 20px;
+}
+
+.radar-widget {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    opacity: 0.7;
+}
+
+.radar-circle.small {
+    width: 40px;
+    height: 40px;
+}
+
+.radar-text {
+    font-size: 0.7rem;
+    color: var(--primary-blue);
+    letter-spacing: 1px;
+}
+
+/* UTILS */
+.text-neon-blue {
+    color: var(--primary-blue);
+    text-shadow: 0 0 5px var(--primary-blue);
+}
+
+.text-neon-green {
+    color: #0f0;
+    text-shadow: 0 0 5px #0f0;
+}
+
+.text-neon-yellow {
+    color: #ff0;
+    text-shadow: 0 0 5px #ff0;
+}
+
+.text-neon-red {
+    color: #f00;
+    text-shadow: 0 0 5px #f00;
+}
+
+/* --- ULTRA-FUTURISTIC LEADERBOARD v2 --- */
+#mini-leaderboard {
+    position: absolute;
+    top: 15vh;
+    left: 20px;
+    z-index: 100;
+    pointer-events: none;
+    /* Let clicks pass specific areas if needed */
+}
+
+.leaderboard-glass-panel {
+    pointer-events: auto;
+    background: rgba(12, 12, 18, 0.75);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    border-left: 2px solid var(--primary-cyan);
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.5),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 20px;
+    width: 300px;
+    font-family: 'Rajdhani', sans-serif;
+    transform-style: preserve-3d;
+    overflow: hidden;
+    position: relative;
+
+    /* Background grid texture */
+    background-image:
+        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+/* Scanline Overlay */
+.leaderboard-glass-panel::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.1) 50%);
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.3;
+}
+
+.leaderboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 12px;
+    position: relative;
+    z-index: 2;
+}
+
+.leaderboard-header i {
+    color: var(--primary-cyan);
+    margin-right: 8px;
+    filter: drop-shadow(0 0 5px var(--primary-cyan));
+}
+
+.live-indicator {
+    font-size: 0.65rem;
+    background: rgba(255, 0, 0, 0.2);
+    color: #ff4444;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.blink {
+    animation: blink 2s infinite;
+}
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+}
+
+.leaderboard-strip {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+    z-index: 2;
+    max-height: 400px;
+    /* Limit height */
+    overflow-y: auto;
+}
+
+.rank-card {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    animation: slideIn 0.5s ease-out backwards;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.rank-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(5px) scale(1.02);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Clan Specific Highlights */
+.rank-card.clan-turing {
+    border-right: 3px solid #00f0ff;
+}
+
+.rank-card.clan-tesla {
+    border-right: 3px solid #ff2a2a;
+}
+
+.rank-card.clan-mccarthy {
+    border-right: 3px solid #00ff88;
+}
+
+.rank-card.clan-lovelace {
+    border-right: 3px solid #aa00ff;
+}
+
+.rank-card.clan-neumann {
+    border-right: 3px solid #ff6600;
+}
+
+.rank-card.clan-turing:hover {
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+}
+
+.rank-card.clan-tesla:hover {
+    box-shadow: 0 0 15px rgba(255, 42, 42, 0.2);
+}
+
+.rank-position {
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.4);
+    width: 35px;
+    text-align: center;
+    font-family: 'Outfit', sans-serif;
+}
+
+.rank-card:nth-child(1) .rank-position {
+    color: #ffd700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    font-size: 1.4rem;
+}
+
+.rank-card:nth-child(2) .rank-position {
+    color: #c0c0c0;
+}
+
+.rank-card:nth-child(3) .rank-position {
+    color: #cd7f32;
+}
+
+.rank-info {
+    flex: 1;
+    padding-left: 8px;
+}
+
+.clan-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.clan-title {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #fff;
+    letter-spacing: 0.5px;
+}
+
+.clan-stats {
+    display: flex;
+    gap: 8px;
+}
+
+.stat-pill {
+    font-size: 0.7rem;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #ccc;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.stat-pill.points {
+    color: var(--primary-cyan);
+}
+
+.stat-pill.members {
+    color: #aaa;
+}
+
+.leaderboard-footer {
+    margin-top: 15px;
+    font-size: 0.65rem;
+    color: #555;
+    text-align: right;
+    letter-spacing: 1px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 8px;
+}

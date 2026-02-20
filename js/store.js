@@ -18,7 +18,9 @@ class Store {
             clans: {
                 turing: { name: 'Turing', color: 'var(--primary-blue)', points: 2606, members: 25 },
                 tesla: { name: 'Tesla', color: 'var(--primary-red)', points: 1932, members: 28 },
-                mccarthy: { name: 'McCarthy', color: 'var(--primary-green)', points: 1373, members: 22 }
+                mccarthy: { name: 'McCarthy', color: 'var(--primary-green)', points: 1373, members: 22 },
+                lovelace: { name: 'Lovelace', color: 'var(--primary-purple)', points: 1105, members: 18 },
+                neumann: { name: 'Neumann', color: 'var(--primary-orange)', points: 940, members: 15 }
             },
             // Initial Map State: mostly neutral
             territories: this.initializeMap(),

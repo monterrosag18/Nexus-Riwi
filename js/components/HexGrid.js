@@ -1,20 +1,24 @@
 import { store } from '../store.js';
+import { GalaxyBackground } from './GalaxyBackground.js';
+import { HoloBanner } from '../utils/HoloBanner.js';
 
 // --- MODULE SCOPE VARIABLES ---
 let scene, camera, renderer, composer, controls;
-let solarGroup, tacticalGroup; // Groups for toggling
+let galaxy; // New Background Controller
+let tacticalGroup; // Group for the Grid
 let animationId = null;
-let planets = [];
-let sunMesh, sunGlow, starfield;
 let raycaster, mouse; // For interaction
 let interactableHexes = []; // Store fill meshes for raycasting
+let clanBanners = []; // Store banners for animation
 
-// Clan Colors (Hex)
+// Clan Colors (Hex) - Tuned for Hologram Contrast (Darker = More Color in Additive)
 const COLORS = {
-    turing: 0x00f0ff,   // Cyan
-    tesla: 0xff2a2a,    // Red
-    mccarthy: 0x00ff88, // Green
-    neutral: 0x444444   // Grey
+    turing: 0x00c3ff,   // Deep Cyan
+    tesla: 0xff0000,    // Pure Red
+    mccarthy: 0x00ff44, // Matrix Green
+    lovelace: 0xaa00ff, // Deep Violet (Was too white)
+    neumann: 0xff6600,  // Safety Orange (Was too yellow/white)
+    neutral: 0x666666   // Medium Grey (Much brighter for visibility)
 };
 
 export default function renderMap() {
@@ -85,7 +89,6 @@ function initSolarSystem() {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    // renderer.toneMapping = THREE.ReinhardToneMapping; // REMOVED: Was washing out colors
 
     // 2. BLOOM POST-PROCESSING (Robust Check)
     try {
@@ -122,51 +125,26 @@ function initSolarSystem() {
         console.error("Controls error:", e);
     }
 
-    // 4. LIGHTS
+    // 4. LIGHTS (Scene Global Lights)
     const ambientLight = new THREE.AmbientLight(0x444444);
     scene.add(ambientLight);
     const pointLight = new THREE.PointLight(0xffffff, 2.0); // Brighter key light
     scene.add(pointLight);
 
-    // Texture Loader
-    const loader = new THREE.TextureLoader();
-    const basePath = './assets/textures/';
+    // 5. BUILD LAYERS
 
-    // 5. BACKGROUND STARS (Restored High-Res Texture)
-    createTextureStarfield();
+    // --> Layer A: Background (Stars & Sun) - Separated!
+    galaxy = new GalaxyBackground(scene);
 
-    // 6. BUILD LAYERS
-    solarGroup = new THREE.Group();
+    // --> Layer B: Tactical Grid
     tacticalGroup = new THREE.Group();
-
-    scene.add(solarGroup);
     scene.add(tacticalGroup);
 
-    // INITIAL BUILD - Only Sun and Grid, No Planets
+    // BUILD GRID
     buildTacticalGrid();
 
     // Force Visible
     tacticalGroup.visible = true;
-    solarGroup.visible = true;
-
-    // --- SUN Only ---
-    const sunGeo = new THREE.SphereGeometry(15, 64, 64); // Larger Sun for central dominance
-    const sunMat = new THREE.MeshBasicMaterial({ // Back to Basic for pure emission
-        map: loader.load(basePath + '8k_sun.jpg'),
-        color: 0xffaa00 // Tint
-    });
-    sunMesh = new THREE.Mesh(sunGeo, sunMat);
-    solarGroup.add(sunMesh); // Add to solarGroup
-
-    // Sun Lensflare (Improved)
-    const flareMat = new THREE.SpriteMaterial({
-        map: loader.load(basePath + 'lensflare0.png'),
-        color: 0xffaa00,
-        transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending
-    });
-    sunGlow = new THREE.Sprite(flareMat);
-    sunGlow.scale.set(100, 100, 1); // Bigger glow
-    sunMesh.add(sunGlow);
 
     // --- ANIM LOOP ---
     const clock = new THREE.Clock();
@@ -174,8 +152,13 @@ function initSolarSystem() {
     function animate() {
         if (!document.getElementById('solar-canvas')) return;
 
-        // Sun Rotation
-        if (sunMesh) sunMesh.rotation.y += 0.002;
+        // Update Background (Sun rotation, etc)
+        if (galaxy) galaxy.update();
+
+        // Update Holo Banners
+        if (clanBanners && clanBanners.length > 0) {
+            clanBanners.forEach(banner => banner.update(clock.getElapsedTime()));
+        }
 
         // Interaction (Hover)
         raycaster.setFromCamera(mouse, camera);
@@ -228,60 +211,83 @@ function onMouseMove(event) {
 }
 
 // ------------------------------------------------------------------
-// MISSING FUNCTIONS RESTORED
-// ------------------------------------------------------------------
-
-function createTextureStarfield() {
-    const loader = new THREE.TextureLoader();
-    const starsGeo = new THREE.SphereGeometry(4000, 64, 64);
-    const starsMat = new THREE.MeshBasicMaterial({
-        map: loader.load('./assets/textures/8k_stars.jpg'),
-        side: THREE.BackSide
-    });
-    starfield = new THREE.Mesh(starsGeo, starsMat);
-    scene.add(starfield);
-}
-
-// ------------------------------------------------------------------
 // REVISED TACTICAL GRID BUILDER
 // ------------------------------------------------------------------
 function buildTacticalGrid() {
     interactableHexes = []; // Reset interaction array
+    clanBanners = [];       // Reset banners (Important!)
 
-    // 1. Generate Hex Grid (Larger Scale)
-    const hexRadius = 8; // Increased from 4
+    // Clear previous items if any (though logic usually rebuilds scene, let's be safe)
+    // In a full app we'd clear tacticalGroup.children. Here we assume clean start or reload.
+    while (tacticalGroup.children.length > 0) {
+        tacticalGroup.remove(tacticalGroup.children[0]);
+    }
+
+    // 1. Grid Parameters
+    const hexRadius = 8;
     const hexWidth = Math.sqrt(3) * hexRadius;
     const hexHeight = 2 * hexRadius;
 
-    // Clan Standards (Shifted for larger map)
-    createClanStandard('turing', new THREE.Vector3(-60, 0, -40), COLORS.turing);
-    createClanStandard('tesla', new THREE.Vector3(60, 0, -40), COLORS.tesla);
-    createClanStandard('mccarthy', new THREE.Vector3(0, 0, 70), COLORS.mccarthy);
+    // 2. DEFINE CLANS & POSITIONS (Pentagon Layout)
+    // Radius of the circle where banners sit - Pushed to extreme corners
+    const mapRadius = 105;
+    const clans = [
+        { id: 'TURING', color: COLORS.turing, angle: 0, icon: '\uf2db' }, // Microchip
+        { id: 'MCCARTHY', color: COLORS.mccarthy, angle: 72, icon: '\uf544' }, // Robot
+        { id: 'LOVELACE', color: COLORS.lovelace, angle: 144, icon: '\uf121' }, // Code
+        { id: 'TESLA', color: COLORS.tesla, angle: 216, icon: '\uf0e7' }, // Bolt
+        { id: 'NEUMANN', color: COLORS.neumann, angle: 288, icon: '\uf0c3' }  // Flask (Science)
+    ];
 
-    // Procedural Hexes
-    const ringSize = 7; // Increased from 4
+    // Create Banners
+    const bannerPositions = []; // Store to check hex proximity later
+
+    clans.forEach(clan => {
+        // Convert Polar to Cartesian
+        const rad = (clan.angle * Math.PI) / 180;
+        const x = Math.cos(rad) * mapRadius;
+        const z = Math.sin(rad) * mapRadius;
+        const pos = new THREE.Vector3(x, 0, z);
+
+        createClanStandard(clan.id, pos, clan.color, clan.icon);
+        bannerPositions.push({ vec: pos, color: clan.color });
+    });
+
+    // 3. GENERATE HEXAGONS
+    const ringSize = 11; // Expanded map size to ensure ground under corners
     for (let q = -ringSize; q <= ringSize; q++) {
         for (let r = -ringSize; r <= ringSize; r++) {
             if (Math.abs(q + r) <= ringSize) {
                 const x = hexWidth * (q + r / 2);
                 const z = hexHeight * (3 / 4) * r;
 
-                // Exclude larger center zone for Sun safety
-                if (Math.sqrt(x * x + z * z) < 20) continue;
+                // Center Exclusion (Sun Safety)
+                if (Math.sqrt(x * x + z * z) < 25) continue;
 
-                // Determine Owner
-                let color = COLORS.neutral;
-                if (x < -20 && z < 0) color = COLORS.turing;
-                else if (x > 20 && z < 0) color = COLORS.tesla;
-                else if (z > 20) color = COLORS.mccarthy;
+                // COLOR LOGIC: Check distance to any banner
+                let hexColor = COLORS.neutral;
+                let isTerritory = false;
 
-                createHexagon(x, z, hexRadius * 0.95, color);
+                for (let i = 0; i < bannerPositions.length; i++) {
+                    const bannerPos = bannerPositions[i].vec;
+                    const dist = Math.sqrt((x - bannerPos.x) ** 2 + (z - bannerPos.z) ** 2);
+
+                    // Territory Radius: Tightened to < 18 to capture ~3 hexes (Center + 2 neighbors)
+                    if (dist < 18) {
+                        hexColor = bannerPositions[i].color;
+                        isTerritory = true;
+                        break; // Found owner
+                    }
+                }
+
+                // Create Hex
+                createHexagon(x, z, hexRadius * 0.95, hexColor, isTerritory);
             }
         }
     }
 }
 
-function createHexagon(x, z, r, color) {
+function createHexagon(x, z, r, color, isTerritory) {
     // 1. Line Loop (The glowing border)
     const points = [];
     for (let i = 0; i <= 6; i++) {
@@ -289,18 +295,26 @@ function createHexagon(x, z, r, color) {
         points.push(new THREE.Vector3(Math.cos(angle) * r, 0, Math.sin(angle) * r));
     }
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
-    const material = new THREE.LineBasicMaterial({ color: color, linewidth: 2 });
-    const hex = new THREE.LineLoop(geometry, material);
+
+    // Territory lines are thicker/brighter
+    const lineMat = new THREE.LineBasicMaterial({
+        color: color,
+        linewidth: isTerritory ? 3 : 1,
+        transparent: true,
+        opacity: isTerritory ? 1.0 : 0.4 // Slightly brighter lines (was 0.3)
+    });
+    const hex = new THREE.LineLoop(geometry, lineMat);
     hex.position.set(x, 0, z);
 
-    // 2. Interactable Fill (The clickable area)
-    const fillGeo = new THREE.CylinderGeometry(r * 0.9, r * 0.9, 0.5, 6); // Cylinder for volume
+    // 2. Interactable Fill
+    // Territory hexes have a slight glow fill
+    const fillGeo = new THREE.CylinderGeometry(r * 0.9, r * 0.9, 0.5, 6);
     const fillMat = new THREE.MeshStandardMaterial({
         color: color,
         transparent: true,
-        opacity: 0.1,
+        opacity: isTerritory ? 0.3 : 0.12, // More visible neutral fill (was 0.05)
         emissive: color,
-        emissiveIntensity: 0
+        emissiveIntensity: isTerritory ? 0.4 : 0
     });
     const fill = new THREE.Mesh(fillGeo, fillMat);
     fill.position.set(x, 0, z);
@@ -312,40 +326,14 @@ function createHexagon(x, z, r, color) {
     tacticalGroup.add(fill);
 }
 
-function createClanStandard(name, pos, color) {
-    const group = new THREE.Group();
-    group.position.copy(pos);
+function createClanStandard(name, pos, color, icon) {
+    // NEW IMPLEMENTATION: Use HoloBanner Class
+    const banner = new HoloBanner(scene, pos, color, name, icon);
 
-    // Base Ring
-    const ringGeo = new THREE.RingGeometry(6, 7, 32);
-    const ringMat = new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide });
-    const ring = new THREE.Mesh(ringGeo, ringMat);
-    ring.rotation.x = Math.PI / 2;
-    group.add(ring);
+    // Rotate banners to face center (0,0,0) roughly
+    if (banner.mesh) {
+        banner.mesh.lookAt(0, 0, 0);
+    }
 
-    // Pillar (Hologram Source)
-    const pillarGeo = new THREE.CylinderGeometry(0.5, 2, 8, 8);
-    const pillarMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.2 });
-    const pillar = new THREE.Mesh(pillarGeo, pillarMat);
-    pillar.position.y = 4;
-    group.add(pillar);
-
-    // Hologram Icon (Spinning Shape)
-    let iconGeo;
-    if (name === 'turing') iconGeo = new THREE.IcosahedronGeometry(3, 0); // Tech Ball
-    if (name === 'tesla') iconGeo = new THREE.OctahedronGeometry(3, 0); // Energy Crystal
-    if (name === 'mccarthy') iconGeo = new THREE.BoxGeometry(4, 4, 4);  // Logic Cube
-
-    const iconMat = new THREE.MeshBasicMaterial({ color: color, wireframe: true });
-    const icon = new THREE.Mesh(iconGeo, iconMat);
-    icon.position.y = 10;
-    icon.userData = { spin: true };
-    group.add(icon);
-
-    // Light
-    const light = new THREE.PointLight(color, 2, 20);
-    light.position.y = 5;
-    group.add(light);
-
-    tacticalGroup.add(group);
+    clanBanners.push(banner);
 }
