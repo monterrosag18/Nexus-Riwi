@@ -20,7 +20,7 @@ export default function renderLogin() {
         <!-- Intro Video Modal overlay -->
         <div id="introVideoModal" class="absolute inset-0 z-[9999] bg-black flex items-center justify-center transition-opacity duration-500">
             <div class="relative w-full max-w-5xl mx-auto px-4 group">
-                <video id="introVideo" src="/video/inicio.mp4" autoplay preload="auto" playsinline muted controls class="w-full h-auto max-h-[85vh] rounded-lg shadow-[0_0_50px_rgba(0,240,255,0.4)] border border-primary/30 object-cover"></video>
+                <video id="introVideo" src="../assets/video/login.mp4" autoplay preload="auto" playsinline muted controls class="w-full h-auto max-h-[85vh] rounded-lg shadow-[0_0_50px_rgba(0,240,255,0.4)] border border-primary/30 object-cover"></video>
                 <button id="closeVideoBtn" class="absolute top-2 right-6 p-2 text-white hover:text-primary transition-colors cursor-pointer z-10 bg-black/80 rounded-full border border-white/30 backdrop-blur-sm">
                     <span class="material-symbols-outlined">close</span>
                 </button>
@@ -31,6 +31,7 @@ export default function renderLogin() {
           <svg id="circuit" style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;"></svg>
           <div class="w-[90%] sm:w-[80%] md:w-[60%] lg:w-[400px] p-6 sm:p-10 rounded-2xl login-card z-10 mx-auto" style="max-width: 500px;">
             <div class="flex justify-center mb-2">
+            
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#00f0ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 5px #00f0ff);">
                   <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
                   <polyline points="2 17 12 22 22 17"></polyline>
