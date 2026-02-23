@@ -1,4 +1,5 @@
 import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
+import { FuturisticTower } from './FuturisticTower.js';
 
 export class GalaxyBackground {
     constructor(scene) {
@@ -6,8 +7,9 @@ export class GalaxyBackground {
         this.group = new THREE.Group();
         this.scene.add(this.group);
 
-        this.sunMesh = null;
-        this.sunGlow = null;
+        this.tower = null;
+        this.ambientLight = null;
+        this.directionalLight = null;
         this.starfield = null;
 
         this.init();
@@ -27,30 +29,26 @@ export class GalaxyBackground {
         this.starfield = new THREE.Mesh(starsGeo, starsMat);
         this.group.add(this.starfield);
 
-        // 2. THE SUN
-        const sunGeo = new THREE.SphereGeometry(15, 64, 64); // Large Sun
-        const sunMat = new THREE.MeshBasicMaterial({
-            map: loader.load(basePath + '8k_sun.jpg'),
-            color: 0xffaa00
-        });
-        this.sunMesh = new THREE.Mesh(sunGeo, sunMat);
-        this.group.add(this.sunMesh);
+        // 2. TOWER LIGHTING
+        this.ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        this.group.add(this.ambientLight);
 
-        // 3. SUN GLOW (Lensflare)
-        const flareMat = new THREE.SpriteMaterial({
-            map: loader.load(basePath + 'lensflare0.png'),
-            color: 0xffaa00,
-            transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending
-        });
-        this.sunGlow = new THREE.Sprite(flareMat);
-        this.sunGlow.scale.set(100, 100, 1);
-        this.sunMesh.add(this.sunGlow);
+        this.directionalLight = new THREE.DirectionalLight(0x00ffff, 1.0);
+        this.directionalLight.position.set(50, 50, 100);
+        this.group.add(this.directionalLight);
+
+        // 3. THE TOWER (Centered in the HexGrid void)
+        this.tower = new FuturisticTower();
+        this.tower.group.position.set(0, -5, 0); // Positioned inside the center hole (y=-5 places base correctly)
+        this.tower.group.scale.set(0.6, 0.6, 0.6); // Scale adjusted to look massive but fit the camera comfortably
+        this.group.add(this.tower.group);
     }
 
     update() {
-        // Rotate Sun
-        if (this.sunMesh) {
-            this.sunMesh.rotation.y += 0.002;
+        // Update Tower
+        if (this.tower) {
+            this.tower.group.rotation.y += 0.002;
+            this.tower.update(Date.now() / 1000);
         }
         // Slowly rotate stars for dynamism
         if (this.starfield) {

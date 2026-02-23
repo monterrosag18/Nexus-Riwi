@@ -267,7 +267,9 @@ class Store {
         this.state.currentUser = null;
         localStorage.removeItem('riwi_user');
         this.notify();
-        window.location.hash = '#login';
+        // Force a hard reload to kill the heavy 3D Three.js canvas loop 
+        window.location.href = window.location.origin + window.location.pathname + '#login';
+        window.location.reload();
     }
 
     setView(viewName) {

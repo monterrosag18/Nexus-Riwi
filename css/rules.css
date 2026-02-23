@@ -1,0 +1,128 @@
+/* ======================== RULES MANUAL (GLITCH EFFECTS) ========================================= */
+:root {
+    --slice-0: inset(50% 50% 50% 50%);
+    --slice-1: inset(80% -6px 0 0);
+    --slice-2: inset(50% -6px 30% 0);
+    --slice-3: inset(10% -6px 85% 0);
+    --slice-4: inset(40% -6px 43% 0);
+    --slice-5: inset(80% -6px 5% 0);
+}
+
+.glitch-card {
+    background: #000;
+    border: 2px solid #ff0000;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    transform-style: preserve-3d;
+    will-change: transform;
+    transition: transform 0.5s cubic-bezier(0.23, 1, 0.320, 1), filter 0.3s ease, opacity 0.3s ease;
+    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0), inset 0 0 0 2px rgba(255, 0, 0, 0);
+}
+
+.glitch-card.active-glitch-border {
+    animation: glitch-border-pulse 0.6s steps(3, end);
+}
+
+@keyframes glitch-border-pulse {
+    0% {
+        box-shadow: 0 0 10px rgba(255, 0, 0, 0.8), inset 0 0 10px rgba(255, 0, 0, 0.3);
+        border-color: #ffffff;
+    }
+
+    25% {
+        box-shadow: -3px -3px 0 rgba(115, 0, 255, 0.8), inset 0 0 10px rgba(0, 243, 255, 0.2);
+        border-color: #ff0000;
+    }
+
+    50% {
+        box-shadow: 3px 3px 0 rgba(162, 0, 255, 0.8), inset 0 0 10px rgba(255, 0, 150, 0.2);
+        border-color: #6a6a6a;
+    }
+
+    75% {
+        box-shadow: -2px 2px 0 rgba(255, 0, 51, 0.8), inset 0 0 10px rgba(0, 243, 255, 0.2);
+        border-color: #ff0000;
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0), inset 0 0 0 2px rgba(255, 0, 0, 0);
+        border-color: #ff0000;
+    }
+}
+
+.glitch-card.dimmed {
+    filter: blur(5px) brightness(0.6);
+    opacity: 0.4;
+}
+
+.glitch-card.active-hover {
+    filter: brightness(1.15);
+    opacity: 1;
+    z-index: 20;
+}
+
+.glitch-card::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(45deg, transparent 3%, #000 5%);
+    text-shadow: -3px -3px 0px red;
+    clip-path: var(--slice-0);
+    z-index: 10;
+    pointer-events: none;
+}
+
+.glitch-title {
+    position: relative;
+    display: inline-block;
+}
+
+.glitch-title::before {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    text-shadow: -3px -3px 0px #ff0000, 3px 3px 0px #00e6f6;
+    clip-path: var(--slice-0);
+    pointer-events: none;
+}
+
+.glitch-title.active-glitch::before {
+    animation: glitch-anim 0.6s steps(3, end);
+}
+
+@keyframes glitch-anim {
+    0% {
+        clip-path: var(--slice-1);
+        transform: translate(-10px, -5px);
+    }
+
+    20% {
+        clip-path: var(--slice-3);
+        transform: translate(5px, 5px);
+    }
+
+    40% {
+        clip-path: var(--slice-2);
+        transform: translate(-5px, 5px);
+    }
+
+    60% {
+        clip-path: var(--slice-4);
+        transform: translate(5px, -5px);
+    }
+
+    80% {
+        clip-path: var(--slice-5);
+        transform: translate(10px, -5px);
+    }
+
+    100% {
+        clip-path: var(--slice-1);
+        transform: translate(0);
+    }
+}

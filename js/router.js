@@ -141,15 +141,24 @@ function updateUIState(hash) {
     const sidebar = document.getElementById('sidebar');
     const topBar = document.getElementById('top-bar');
     const chatWidget = document.getElementById('chat-widget');
+    const viewContainer = document.getElementById('view-container');
 
     if (hash === 'login') {
         if (sidebar) sidebar.style.display = 'none';
         if (topBar) topBar.style.display = 'none';
         if (chatWidget) chatWidget.style.display = 'none';
+        if (viewContainer) {
+            viewContainer.style.padding = '0';
+            viewContainer.style.overflow = 'hidden';
+        }
     } else {
         if (sidebar) sidebar.style.display = 'flex';
         if (topBar) topBar.style.display = 'flex';
         if (chatWidget) chatWidget.style.display = 'block';
+        if (viewContainer) {
+            viewContainer.style.padding = '';
+            viewContainer.style.overflow = '';
+        }
     }
 
     updateSidebarActiveState(hash);

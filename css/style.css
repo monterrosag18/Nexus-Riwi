@@ -1,3 +1,7 @@
+@import url('./login.css');
+@import url('./rules.css');
+@import url('./rank.css');
+
 :root {
     /* Color Palette - Cyberpunk / Sci-Fi */
     --bg-dark: #0a0b14;

@@ -6,12 +6,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Riwi Nexus | Gamificando la Excelencia</title>
 
-    <!-- Google Fonts -->
+    <!-- Google Fonts & Material Symbols -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Outfit:wght@300;400;700&display=swap"
         rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+
+    <!-- Tailwind Configuration (Preflight Disabled to prevent global CSS conflicts) -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            corePlugins: { preflight: false },
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: { primary: "#ec5b13", "neon-cyan": "#00f3ff", "neon-magenta": "#ff00ff", "background-dark": "#050505" },
+                    fontFamily: { display: ["Public Sans", "sans-serif"] },
+                    animation: {
+                        glitch: "glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite",
+                        vibrate: "vibrate 0.3s linear infinite",
+                        flicker: "flicker 2s linear infinite"
+                    },
+                    keyframes: {
+                        glitch: {
+                            "0%": { transform: "translate(0)" },
+                            "20%": { transform: "translate(-2px, 2px)" },
+                            "40%": { transform: "translate(-2px, -2px)" },
+                            "60%": { transform: "translate(2px, 2px)" },
+                            "80%": { transform: "translate(2px, -2px)" },
+                            "100%": { transform: "translate(0)" }
+                        },
+                        vibrate: {
+                            "0%, 100%": { transform: "translate(0)" },
+                            "25%": { transform: "translate(1px, -1px)" },
+                            "50%": { transform: "translate(-1px, 1px)" },
+                            "75%": { transform: "translate(1px, 1px)" }
+                        },
+                        flicker: {
+                            "0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100%": { opacity: "1", "text-shadow": "0 0 5px rgba(236,91,19,0.5)" },
+                            "20%, 21.999%, 63%, 63.999%, 65%, 69.999%": { opacity: "0.4", "text-shadow": "none" }
+                        }
+                    }
+                }
+            }
+        };
+    </script>
 
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">

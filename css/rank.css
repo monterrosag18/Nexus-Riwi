@@ -1,0 +1,38 @@
+/* RANKING CUSTOM SCROLLBAR & GLOWS */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #08090f;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #1f2937;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #00f0ff;
+}
+
+.text-glow {
+    text-shadow: 0 0 5px rgba(0, 240, 255, 0.7);
+}
+
+.border-glow-container {
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.2), inset 0 0 20px rgba(0, 240, 255, 0.05);
+}
+
+.shadow-neon {
+    box-shadow: 0 0 10px rgba(236, 91, 19, 0.5);
+}
+
+.shadow-neon-blue {
+    box-shadow: 0 0 10px rgba(41, 121, 255, 0.5);
+}
+
+.shadow-neon-magenta {
+    text-shadow: 0 0 10px rgba(255, 0, 255, 0.8);
+}
