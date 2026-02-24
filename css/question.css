@@ -1,0 +1,215 @@
+/* =========================================================================
+   NEXUS RIWI - CYBERPUNK QUESTION MODAL V1.0
+   ========================================================================= */
+
+#active-question-modal {
+    font-family: 'Orbitron', 'Courier New', Courier, monospace;
+}
+
+.cyber-question-panel {
+    width: 90%;
+    max-width: 600px;
+    background: linear-gradient(135deg, rgba(5, 8, 20, 0.95), rgba(2, 2, 5, 0.98));
+    border: 1px solid rgba(0, 240, 255, 0.15);
+    border-top: 2px solid var(--theme-color, #00f0ff);
+    border-bottom: 2px solid var(--theme-color, #6a00ff);
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), inset 0 0 30px rgba(0, 240, 255, 0.05);
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+}
+
+/* scanlines bg */
+.cyber-question-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(0deg,
+            transparent,
+            transparent 2px,
+            rgba(0, 240, 255, 0.03) 2px,
+            rgba(0, 240, 255, 0.03) 4px);
+    z-index: 0;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 25px;
+    background: rgba(0, 0, 0, 0.5);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    z-index: 2;
+}
+
+.glitch-text {
+    color: #ff3366;
+    font-weight: bold;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(255, 51, 102, 0.5);
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.close-btn:hover {
+    color: #fff;
+    text-shadow: 0 0 10px #fff;
+}
+
+.panel-body {
+    padding: 30px 25px;
+    position: relative;
+    z-index: 2;
+}
+
+.target-info {
+    font-size: 0.85rem;
+    color: #00f0ff;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 25px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed rgba(0, 240, 255, 0.2);
+}
+
+.the-question {
+    color: #fff;
+    font-size: 1.3rem;
+    margin-bottom: 30px;
+    line-height: 1.4;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+}
+
+.options-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.cyber-option-btn {
+    background: rgba(0, 10, 25, 0.6);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    border-left: 3px solid #00f0ff;
+    padding: 15px 20px;
+    color: #ddd;
+    text-align: left;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+.opt-prefix {
+    color: #00f0ff;
+    margin-right: 15px;
+    font-weight: bold;
+}
+
+.cyber-option-btn:hover {
+    background: rgba(0, 240, 255, 0.1);
+    border-color: #00f0ff;
+    color: #fff;
+    transform: translateX(5px);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+}
+
+/* Success / Fail states */
+.cyber-option-btn.correct-choice {
+    background: rgba(0, 255, 68, 0.15);
+    border-color: #00ff44;
+    border-left-color: #00ff44;
+    color: #fff;
+    box-shadow: 0 0 20px rgba(0, 255, 68, 0.4);
+}
+
+.cyber-option-btn.correct-choice .opt-prefix {
+    color: #00ff44;
+}
+
+.cyber-option-btn.wrong-choice {
+    background: rgba(255, 0, 0, 0.15);
+    border-color: #ff0000;
+    border-left-color: #ff0000;
+    color: #fff;
+}
+
+.cyber-option-btn.wrong-choice .opt-prefix {
+    color: #ff0000;
+}
+
+
+.panel-footer {
+    padding: 15px 25px;
+    background: rgba(0, 0, 0, 0.8);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.hacking-progress {
+    width: 60%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    width: 100%;
+    height: 100%;
+    background: #00f0ff;
+    animation: hackScan 2s linear infinite;
+    transform-origin: left;
+}
+
+@keyframes hackScan {
+    0% {
+        transform: scaleX(0);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scaleX(1);
+        opacity: 1;
+    }
+
+    51% {
+        opacity: 0;
+    }
+
+    100% {
+        transform: scaleX(1);
+        opacity: 0;
+    }
+}
+
+.status-msg {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.blink {
+    animation: textBlink 1s step-end infinite;
+}
+
+@keyframes textBlink {
+    50% {
+        opacity: 0;
+    }
+}

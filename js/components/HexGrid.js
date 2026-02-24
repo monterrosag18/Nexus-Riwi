@@ -1,6 +1,8 @@
 import { store } from '../store.js';
 import { GalaxyBackground } from './GalaxyBackground.js';
 import { HoloBanner } from '../utils/HoloBanner.js';
+import createQuestionModal from './QuestionModal.js';
+import renderMiniLeaderboard from './MiniLeaderboard.js';
 
 // --- MODULE SCOPE VARIABLES ---
 let scene, camera, renderer, composer, controls;
@@ -51,13 +53,17 @@ export default function renderMap() {
             </div>
 
             <!-- TACTICAL HUD (Always Visible) -->
-            <div id="tactical-hud" style="position: absolute; top: 150px; left: 20px; display: block;">
-                <!-- Content injected dynamically if needed, currently clean -->
+            <div id="tactical-hud" style="position: absolute; top: 15px; right: 15px; display: block; pointer-events: auto;">
+                <!-- HUD INJECTED DYNAMICALLY -->
             </div>
         </div>
     `;
 
-    // 2. Initialize
+    // 1. Inject Mini Leaderboard
+    const hud = container.querySelector('#tactical-hud');
+    hud.appendChild(renderMiniLeaderboard());
+
+    // 2. Initialize 3D Engine
     setTimeout(() => {
         initSolarSystem();
     }, 0);
@@ -76,6 +82,7 @@ function initSolarSystem() {
     raycaster = new THREE.Raycaster();
     mouse = new THREE.Vector2();
     window.addEventListener('mousemove', onMouseMove, false);
+    window.addEventListener('click', onMouseClick, false);
 
     // Scene
     scene = new THREE.Scene();
@@ -210,84 +217,175 @@ function onMouseMove(event) {
     mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 }
 
+function onMouseClick(event) {
+    if (!camera || !scene) return;
+
+    // Prevent clicking through other UI elements
+    if (event.target.tagName !== 'CANVAS') return;
+
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(interactableHexes);
+
+    if (intersects.length > 0) {
+        const hit = intersects[0].object;
+        const hexData = hit.userData;
+
+        // Let's do a simple check. If it's your own territory, do nothing.
+        const userState = store.getState().currentUser;
+        if (!userState || !userState.clan) return;
+
+        const clanId = userState.clan.toUpperCase();
+        const targetOwner = hexData.owner ? hexData.owner.toUpperCase() : null;
+
+        if (targetOwner === clanId) {
+            console.log("Already owned by your clan.");
+            return;
+        }
+
+        // --- NEW: ADJACENCY RULE (Must be attached to your territory) ---
+        let isAdjacent = false;
+        const clickPos = hit.position;
+        const hexRadius = 8;
+        const maxAdjacencyDist = hexRadius * 2.1; // ~16.8 geometric distance
+
+        // Find all hexes owned by this clan
+        for (let i = 0; i < interactableHexes.length; i++) {
+            const h = interactableHexes[i];
+            const hOwner = h.userData.owner ? h.userData.owner.toUpperCase() : null;
+            if (hOwner === clanId) {
+                const dist = Math.sqrt((clickPos.x - h.position.x) ** 2 + (clickPos.z - h.position.z) ** 2);
+                if (dist < maxAdjacencyDist) {
+                    isAdjacent = true;
+                    break;
+                }
+            }
+        }
+
+        if (!isAdjacent) {
+            console.warn("OUT OF RANGE! You can only attack territories connected to your clan's network.");
+            // Optional: Add a simple UI flash or toast here if needed
+            hit.material.emissiveIntensity = 0.5;
+            hit.material.emissive.setHex(0xff0000); // Blink Red
+            setTimeout(() => {
+                hit.material.emissiveIntensity = hexData.isTerritory ? 0.4 : 0;
+                hit.material.emissive.setHex(hexData.baseColor);
+            }, 300);
+            return;
+        }
+        // ----------------------------------------------------------------
+
+        // Trigger visual "Under Attack"
+        hit.material.emissiveIntensity = 1.0;
+        hit.userData.isUnderAttack = true;
+
+        // Launch the Question Modal
+        const modal = createQuestionModal(hexData, hit);
+        document.body.appendChild(modal);
+    }
+}
+
 // ------------------------------------------------------------------
 // REVISED TACTICAL GRID BUILDER
 // ------------------------------------------------------------------
 function buildTacticalGrid() {
-    interactableHexes = []; // Reset interaction array
-    clanBanners = [];       // Reset banners (Important!)
+    interactableHexes = [];
+    clanBanners = [];
 
-    // Clear previous items if any (though logic usually rebuilds scene, let's be safe)
-    // In a full app we'd clear tacticalGroup.children. Here we assume clean start or reload.
     while (tacticalGroup.children.length > 0) {
         tacticalGroup.remove(tacticalGroup.children[0]);
     }
+
+    const state = store.getState();
+    const territories = state.territories;
+    const clans = state.clans;
+
+    if (!territories || territories.length === 0) return;
 
     // 1. Grid Parameters
     const hexRadius = 8;
     const hexWidth = Math.sqrt(3) * hexRadius;
     const hexHeight = 2 * hexRadius;
 
-    // 2. DEFINE CLANS & POSITIONS (Pentagon Layout)
-    // Radius of the circle where banners sit - Pushed to extreme corners
-    const mapRadius = 105;
-    const clans = [
-        { id: 'TURING', color: COLORS.turing, angle: 0, icon: '\uf2db' }, // Microchip
-        { id: 'MCCARTHY', color: COLORS.mccarthy, angle: 72, icon: '\uf544' }, // Robot
-        { id: 'LOVELACE', color: COLORS.lovelace, angle: 144, icon: '\uf121' }, // Code
-        { id: 'TESLA', color: COLORS.tesla, angle: 216, icon: '\uf0e7' }, // Bolt
-        { id: 'NEUMANN', color: COLORS.neumann, angle: 288, icon: '\uf0c3' }  // Flask (Science)
-    ];
+    // 2. DEFINE CLANS & POSITIONS (Radial Layout)
+    const clanIds = Object.keys(clans);
+    const totalClans = clanIds.length;
 
-    // Create Banners
-    const bannerPositions = []; // Store to check hex proximity later
+    // Scale map radius based on number of clans so it doesn't get crowded
+    const mapRadius = Math.max(90, totalClans * 20);
 
-    clans.forEach(clan => {
-        // Convert Polar to Cartesian
-        const rad = (clan.angle * Math.PI) / 180;
+    // Create Banners in a perfect circle
+    const bannerDistributions = {}; // Map clanId to its orbital center
+
+    clanIds.forEach((id, index) => {
+        const angle = (360 / totalClans) * index;
+        const rad = (angle * Math.PI) / 180;
         const x = Math.cos(rad) * mapRadius;
         const z = Math.sin(rad) * mapRadius;
         const pos = new THREE.Vector3(x, 0, z);
 
-        createClanStandard(clan.id, pos, clan.color, clan.icon);
-        bannerPositions.push({ vec: pos, color: clan.color });
+        const clanData = clans[id];
+        // Ensure icon exists, fallback if not
+        const icon = clanData.icon || '\uf544';
+
+        createClanStandard(clanData.name, pos, clanData.color, icon);
+        bannerDistributions[id] = { vec: pos, color: clanData.color, assigned: 0 };
     });
 
     // 3. GENERATE HEXAGONS
-    const ringSize = 11; // Expanded map size to ensure ground under corners
+    // We will generate a hexagonal grid map large enough to cover the banners
+    const ringSize = Math.ceil(mapRadius / hexWidth) + 3;
+    const allHexes = [];
+
+    // Step A: Collect all valid grid coordinates
     for (let q = -ringSize; q <= ringSize; q++) {
         for (let r = -ringSize; r <= ringSize; r++) {
             if (Math.abs(q + r) <= ringSize) {
                 const x = hexWidth * (q + r / 2);
                 const z = hexHeight * (3 / 4) * r;
 
-                // Center Exclusion (Sun Safety)
+                // Center Exclusion (Tower Safety)
                 if (Math.sqrt(x * x + z * z) < 25) continue;
 
-                // COLOR LOGIC: Check distance to any banner
-                let hexColor = COLORS.neutral;
-                let isTerritory = false;
-
-                for (let i = 0; i < bannerPositions.length; i++) {
-                    const bannerPos = bannerPositions[i].vec;
-                    const dist = Math.sqrt((x - bannerPos.x) ** 2 + (z - bannerPos.z) ** 2);
-
-                    // Territory Radius: Tightened to < 18 to capture ~3 hexes (Center + 2 neighbors)
-                    if (dist < 18) {
-                        hexColor = bannerPositions[i].color;
-                        isTerritory = true;
-                        break; // Found owner
-                    }
-                }
-
-                // Create Hex
-                createHexagon(x, z, hexRadius * 0.95, hexColor, isTerritory);
+                allHexes.push({ x, z, owner: null, color: COLORS.neutral });
             }
         }
     }
+
+    // Step B: mathematically assign EXACTLY 5 hexes to each clan based on proximity
+    Object.keys(bannerDistributions).forEach(clanId => {
+        const banner = bannerDistributions[clanId];
+
+        // Sort all neutral hexes by distance to this banner
+        const availableHexes = allHexes.filter(h => h.owner === null);
+        availableHexes.sort((a, b) => {
+            const distA = Math.sqrt((a.x - banner.vec.x) ** 2 + (a.z - banner.vec.z) ** 2);
+            const distB = Math.sqrt((b.x - banner.vec.x) ** 2 + (b.z - banner.vec.z) ** 2);
+            return distA - distB;
+        });
+
+        // Claim the 5 closest to form a perfect cluster under the banner
+        const closest5 = availableHexes.slice(0, 5);
+        closest5.forEach(hex => {
+            hex.owner = clanId;
+            hex.color = banner.color;
+        });
+    });
+
+    // Step C: Render them
+    allHexes.forEach((hex, i) => {
+        // Strip out excess neutral hexes that are too far into deep space
+        if (hex.owner === null) {
+            // Keep a nice padding ring, but delete extremes to save render budget
+            const distFromCenter = Math.sqrt(hex.x * hex.x + hex.z * hex.z);
+            if (distFromCenter > mapRadius * 1.1) return;
+        }
+
+        const isTerritory = hex.owner !== null;
+        createHexagon(hex.x, hex.z, hexRadius * 0.95, hex.color, isTerritory, hex.owner);
+    });
 }
 
-function createHexagon(x, z, r, color, isTerritory) {
+function createHexagon(x, z, r, color, isTerritory, ownerId) {
     // 1. Line Loop (The glowing border)
     const points = [];
     for (let i = 0; i <= 6; i++) {
@@ -318,6 +416,14 @@ function createHexagon(x, z, r, color, isTerritory) {
     });
     const fill = new THREE.Mesh(fillGeo, fillMat);
     fill.position.set(x, 0, z);
+
+    // Bind metadata for Raycaster and logic
+    fill.userData = {
+        isTerritory: isTerritory,
+        owner: ownerId,
+        baseColor: color,
+        isUnderAttack: false
+    };
 
     // Store for raycaster
     interactableHexes.push(fill);

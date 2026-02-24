@@ -3578,12 +3578,6 @@ button:hover {
     /* Force on top of everything */
 }
 
-/* Hide Live Ranking as requested */
-#mini-leaderboard,
-.mini-leaderboard-panel {
-    display: none !important;
-}
-
 .projector-base::after {
     content: '';
     position: absolute;

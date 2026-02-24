@@ -3,57 +3,50 @@
  */
 class Store {
     constructor() {
-        // Load user from localStorage
         let savedUser = null;
         try {
             const stored = localStorage.getItem('riwi_user');
-            if (stored) savedUser = JSON.parse(stored);
+            if (stored) {
+                savedUser = JSON.parse(stored);
+                if (typeof savedUser.credits === 'undefined') savedUser.credits = 2000;
+            }
         } catch (e) {
             console.error('Error loading user', e);
+        }
+
+        // Bridge to Admin Dashboard DB
+        let clansDB;
+        try {
+            const rawClans = localStorage.getItem('riwi_clans_db');
+            if (rawClans) {
+                clansDB = JSON.parse(rawClans);
+            } else {
+                // Initial Default
+                clansDB = {
+                    turing: { name: 'Turing', color: '#2D9CDB', points: 2606, members: 25, icon: '\uf2db' },
+                    tesla: { name: 'Tesla', color: '#EB5757', points: 1932, members: 28, icon: '\uf0e7' },
+                    mccarthy: { name: 'McCarthy', color: '#27AE60', points: 1373, members: 22, icon: '\uf544' },
+                    lovelace: { name: 'Lovelace', color: '#9B51E0', points: 1105, members: 18, icon: '\uf121' },
+                    neumann: { name: 'Neumann', color: '#F2C94C', points: 940, members: 15, icon: '\uf0c3' }
+                };
+                localStorage.setItem('riwi_clans_db', JSON.stringify(clansDB));
+            }
+        } catch (e) {
+            clansDB = {
+                turing: { name: 'Turing', color: '#2D9CDB', points: 0, members: 0, icon: '\uf2db' }
+            };
         }
 
         this.state = {
             currentView: savedUser ? 'map' : 'login',
             currentUser: savedUser,
-            clans: {
-                turing: { name: 'Turing', color: 'var(--primary-blue)', points: 2606, members: 25 },
-                tesla: { name: 'Tesla', color: 'var(--primary-red)', points: 1932, members: 28 },
-                mccarthy: { name: 'McCarthy', color: 'var(--primary-green)', points: 1373, members: 22 },
-                lovelace: { name: 'Lovelace', color: 'var(--primary-purple)', points: 1105, members: 18 },
-                neumann: { name: 'Neumann', color: 'var(--primary-orange)', points: 940, members: 15 }
-            },
-            // Initial Map State: mostly neutral
-            territories: this.initializeMap(),
+            clans: clansDB,
+            territories: [],
         };
         this.listeners = [];
-    }
 
-    initializeMap() {
-        const total = 50;
-        const territories = [];
-
-        // Define starting bases (indices)
-        const bases = {
-            turing: [0, 1, 8, 9],
-            tesla: [4, 5, 13, 14],
-            mccarthy: [40, 41, 48, 49] // Bottom corners logic approx
-        };
-
-        for (let i = 0; i < total; i++) {
-            let owner = 'neutral';
-            if (bases.turing.includes(i)) owner = 'turing';
-            if (bases.tesla.includes(i)) owner = 'tesla';
-            if (bases.mccarthy.includes(i)) owner = 'mccarthy';
-
-            territories.push({
-                id: i,
-                owner: owner,
-                type: this.getRandomType(),
-                difficulty: Math.floor(Math.random() * 3) + 1, // 1-3 stars
-                question: this.getMockQuestion()
-            });
-        }
-        return territories;
+        // Build the dynamic map now that state is defined
+        this.state.territories = this.initializeMap();
     }
 
     getRandomType() {
@@ -84,77 +77,100 @@ class Store {
                 { q: "You missed a deadline. Best reaction?", options: ["Blame the internet", "Own it and communicate new timeline", "Hide until finished"], correct: 1 },
                 { q: "Effective communication involves...", options: ["Speaking constantly", "Active listening", "Using big words"], correct: 1 },
                 { q: "How to handle constructive criticism?", options: ["Get defensive", "Listen and improve", "Ignore it"], correct: 1 },
-                { q: "Best way to lead a team?", options: ["Dictate all tasks", "Support and empower members", "Do everything yourself"], correct: 1 }
+                { q: "What is 'empathy'?", options: ["Feeling sorry for someone", "Understanding someone else's feelings", "Ignoring emotions"], correct: 1 }
             ]
         };
-
-        const category = questions[type] || questions['code'];
-        return category[Math.floor(Math.random() * category.length)];
+        const pool = questions[type] || questions['code'];
+        return pool[Math.floor(Math.random() * pool.length)];
     }
 
-    initializeMap() {
+    // --- DYNAMIC CLAN & MAP MANAGEMENT --- //
+
+    regenerateMapDynamic() {
+        const clanIds = Object.keys(this.state.clans);
+        const totalClans = clanIds.length;
+
+        // Let HexGrid compute the geometric allocation.
+        // We just need to give it a pool of unassigned territories to work with.
+
+        const baseHexesPerClan = 5;
+        const totalBaseHexes = totalClans * baseHexesPerClan;
+        // The outer ring needs to grow significantly as more factions pile in
+        const totalBufferHexes = Math.max(30, totalClans * 10);
+        const targetHexCount = totalBaseHexes + totalBufferHexes;
+
         const territories = [];
 
-        // Initialize 63 hexes (Solid Map, No Voids) 9 cols x 7 rows
-        const cols = 9;
-
-        // const rows = 7; // Height (Implicit)
-
-        for (let i = 0; i < 63; i++) { // 7 rows * 9 cols = 63
-            let owner = 'neutral';
-
-            // Assign Main Bases (Fixed Positions)
-            if (i === 0) owner = 'turing';      // Top-Left (Code)
-            if (i === 4) owner = 'tesla';       // Top-Center (English)
-            if (i === 8) owner = 'mccarthy';    // Top-Right (Skills)
-            // Spread them out more? 
-            // Let's put them in the middle of their zones
-            if (i === 10) owner = 'turing';     // Left Col 1, Row 1
-            if (i === 13) owner = 'tesla';      // Mid Col 4, Row 1
-            if (i === 16) owner = 'mccarthy';   // Right Col 7, Row 1
-
-            /* --- Zoned Generation Logic (Solid) --- */
-            // Left (Cols 0-2): Code / Syntax Valley
-            // Middle (Cols 3-5): English / Lingua Nexus
-            // Right (Cols 6-8): Soft Skills / Mind Peaks
-
-            const col = i % cols;
-            let type = 'code';
+        // Generate Pool
+        for (let i = 0; i < targetHexCount; i++) {
+            let type = this.getRandomType();
             let biome = 'city';
-
-            if (col <= 2) {
-                type = 'code';
-                biome = 'city'; // Cyber City
-            } else if (col <= 5) {
-                type = 'english';
-                biome = 'library'; // Knowledge Sanctum
-            } else {
-                type = 'soft-skills';
-                biome = 'park'; // Harmony Gardens
-            }
+            if (type === 'code') biome = 'city';
+            else if (type === 'english') biome = 'library';
+            else biome = 'park';
 
             territories.push({
                 id: i,
-                owner: owner,
+                owner: 'neutral', // HexGrid will forcefully seize the 5 closest to banners later
                 type: type,
                 biome: biome,
-                difficulty: Math.floor(Math.random() * 3) + 1, // 1-3 stars
+                difficulty: Math.floor(Math.random() * 3) + 1,
                 question: this.getMockQuestion(type)
             });
         }
-        return territories;
+
+        this.state.territories = territories;
+
+        // Ensure math lines up for points based on HexGrid's forced 5
+        clanIds.forEach(id => {
+            if (this.state.clans[id]) {
+                const legacyMembers = this.state.clans[id].members || 0;
+                // Preserve stats if regenerating, just reset map specific points
+                this.state.clans[id].points = baseHexesPerClan * 50;
+            }
+        });
+
+        // Clear flag if it was set by admin dashboard
+        localStorage.removeItem('riwi_force_regen');
+
+        this.notify();
+    }
+
+    addClan(name, color) {
+        let id = name.toLowerCase().replace(/\s+/g, '');
+        if (id && !this.state.clans[id]) {
+            this.state.clans[id] = {
+                name: name,
+                color: color,
+                points: 0,
+                members: 0
+            };
+            this.notify();
+        }
+    }
+
+    removeClan(id) {
+        if (this.state.clans[id]) {
+            delete this.state.clans[id];
+
+            // Orphan any territories owned by them
+            this.state.territories.forEach(t => {
+                if (t.owner === id) t.owner = 'neutral';
+            });
+            this.notify();
+        }
+    }
+
+    initializeMap() {
+        // Obsolete static generator. Forward to dynamic.
+        if (!this.state.territories || this.state.territories.length === 0) {
+            this.regenerateMapDynamic();
+        }
+        return this.state.territories;
     }
 
     // Check if a target hex ID is adjacent to any hex owned by the clan
     checkAdjacency(targetId, clan) {
-        // Mock grid adjacency logic. 
-        // For a simple list, we'll assume row-based proximity or use a proper hex math if needed.
-        // For MVP: simple +/- 1 and row offset simulation.
-        // A better approach for 1D array hex grid:
-        // Neighbors are typically: i-1, i+1, i-width, i-width+1, i+width, i+width-1 (depending on even/odd rows)
-
-        // Simplified: User can click any neutral hex for now to test, 
-        // OR we implement strict neighbors. Let's do strict neighbors for quality.
         const neighbors = this.getNeighbors(targetId);
         const ownedIds = this.state.territories
             .filter(t => t.owner === clan)
@@ -164,33 +180,23 @@ class Store {
     }
 
     getNeighbors(index) {
-        // Assuming chunk pattern [9, 8] repeated.
-        // This is complex to calculate perfectly without a fixed grid Class.
-        // Let's approximate: a neighbor is within +/- 1 OR +/- 8/9 distance.
-        // This is a "fuzzy" adjacency for MVP speed.
         const width = 9;
         const candidates = [
             index - 1, index + 1,
             index - width, index - width + 1, index - width - 1,
             index + width, index + width + 1, index + width - 1
         ];
-        // Filter out of bounds
-        return candidates.filter(c => c >= 0 && c < 50);
+        return candidates.filter(c => c >= 0 && c < 100); // Expanded boundary
     }
 
     conquerTerritory(id, clan) {
         const terr = this.state.territories.find(t => t.id == id);
         if (terr && terr.owner !== clan) {
-            // Logic for points: 
-            // If stealing from another clan, maybe reduce their points?
-            // For now, just add points to conqueror.
             if (terr.owner !== 'neutral') {
-                // Stealing!
-                this.addPoints(terr.owner, -20); // Penalty for losing?
+                this.addPoints(terr.owner, -20);
             }
-
             terr.owner = clan;
-            this.addPoints(clan, 50); // XP for conquest
+            this.addPoints(clan, 50);
             this.notify();
             return true;
         }
@@ -203,7 +209,6 @@ class Store {
 
     subscribe(listener) {
         this.listeners.push(listener);
-        // Return unsubscribe function
         return () => {
             this.listeners = this.listeners.filter(l => l !== listener);
         };
@@ -214,7 +219,6 @@ class Store {
     }
 
     // Actions
-    // Auth: Register a new recruit
     registerUser(username, clan) {
         const users = this.getRegisteredUsers();
         if (users.find(u => u.name.toLowerCase() === username.toLowerCase())) {
@@ -225,18 +229,16 @@ class Store {
             name: username,
             clan: clan,
             points: 0,
+            credits: 2000,
             joinedAt: new Date().toISOString()
         };
 
         users.push(newUser);
         localStorage.setItem('riwi_users_db', JSON.stringify(users));
-
-        // Auto login
         this.setUser(newUser);
         return { success: true };
     }
 
-    // Auth: Login existing agent
     loginUser(username) {
         const users = this.getRegisteredUsers();
         const user = users.find(u => u.name.toLowerCase() === username.toLowerCase());
@@ -267,7 +269,6 @@ class Store {
         this.state.currentUser = null;
         localStorage.removeItem('riwi_user');
         this.notify();
-        // Force a hard reload to kill the heavy 3D Three.js canvas loop 
         window.location.href = window.location.origin + window.location.pathname + '#login';
         window.location.reload();
     }
@@ -284,6 +285,37 @@ class Store {
             this.state.clans[clanId].points += amount;
             this.notify();
         }
+    }
+
+    // --- TACTICAL MARKET ECONOMY --- //
+
+    purchaseItem(cost) {
+        if (this.state.currentUser && this.state.currentUser.credits >= cost) {
+            this.state.currentUser.credits -= cost;
+            this.setUser(this.state.currentUser);
+            return true;
+        }
+        return false;
+    }
+
+    executeTacticalStrike(targetClanId, stolenAmount) {
+        if (!this.state.currentUser) return { success: false, message: 'NO OPERATOR ACTIVE' };
+        if (!this.state.clans[targetClanId]) return { success: false, message: 'INVALID TARGET SECTOR' };
+
+        const myClanId = this.state.currentUser.clan;
+        const actualStolen = Math.min(this.state.clans[targetClanId].points, stolenAmount);
+
+        this.state.clans[targetClanId].points -= actualStolen;
+
+        if (this.state.clans[myClanId]) {
+            this.state.clans[myClanId].points += actualStolen;
+        }
+
+        this.state.currentUser.credits += 500;
+        this.setUser(this.state.currentUser);
+
+        this.notify();
+        return { success: true, actualStolen };
     }
 }
 

@@ -2,65 +2,51 @@ import { store } from '../store.js';
 
 export default function renderMiniLeaderboard() {
     const container = document.createElement('div');
-    container.id = 'mini-leaderboard';
-    container.className = 'mini-leaderboard-panel';
+    container.id = 'mini-leaderboard-container';
 
-    function update() {
+    function renderBoard() {
         const state = store.getState();
-        const clans = Object.values(state.clans).sort((a, b) => b.points - a.points);
+        const clans = state.clans;
+
+        // Convert object to array and sort by points descending
+        const sortedClans = Object.keys(clans).map(key => {
+            return {
+                id: key,
+                ...clans[key]
+            };
+        }).sort((a, b) => b.points - a.points);
 
         container.innerHTML = `
-            <div class="leaderboard-glass-panel" 
-                 data-tilt data-tilt-max="5" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.2"
-                 data-augmented-ui="tr-clip bl-clip border">
-                
-                <div class="leaderboard-header glow-text">
-                    <div class="header-icon"><i class="fa-solid fa-satellite-dish"></i></div>
-                    <div class="header-title">NEXUS RANKING</div>
-                    <div class="live-indicator"><span class="blink">●</span> LIVE</div>
+            <div class="mini-ld-header">
+                <div class="mini-ld-title">
+                    <i class="fa-solid fa-ranking-star"></i> NEXUS RANKING
                 </div>
-
-                <div class="leaderboard-strip custom-scrollbar">
-                    ${clans.map((clan, index) => `
-                        <div class="rank-card clan-${clan.name.toLowerCase()}" 
-                             style="animation-delay: ${index * 0.1}s"
-                             data-augmented-ui="tl-clip br-clip border">
-                            
-                            <div class="rank-position">
-                                <span>${index + 1}</span>
-                            </div>
-                            
-                            <div class="rank-info">
-                                <div class="clan-row">
-                                    <span class="clan-title">${clan.name.toUpperCase()}</span>
-                                    ${index === 0 ? '<i class="fa-solid fa-crown text-neon-yellow"></i>' : ''}
-                                </div>
-                                <div class="clan-stats">
-                                    <span class="stat-pill points"><i class="fa-solid fa-bolt"></i> ${clan.points.toLocaleString()}</span>
-                                    <span class="stat-pill members"><i class="fa-solid fa-user-astronaut"></i> ${clan.members}</span>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-
-                <div class="leaderboard-footer">
-                    SYSTEM_STATUS: <span class="text-neon-green">OPTIMAL</span>
-                </div>
+                <div class="mini-ld-live">LIVE</div>
             </div>
+            <ul class="mini-ld-list">
+                ${sortedClans.map((clan, index) => `
+                    <li class="mini-ld-item" data-clan="${clan.id}">
+                        <span class="mini-ld-rank">#${index + 1}</span>
+                        <span class="mini-ld-name">${clan.name}</span>
+                        <span class="mini-ld-points">${clan.points.toLocaleString()}</span>
+                    </li>
+                `).join('')}
+            </ul>
         `;
-
-        // Re-init Tilt if library exists
-        if (typeof VanillaTilt !== 'undefined') {
-            VanillaTilt.init(container.querySelector('.leaderboard-glass-panel'));
-        }
     }
 
-    // Initial render
-    update();
+    renderBoard();
 
-    // Subscribe to changes
-    store.subscribe(update);
+    // Subscribe to store changes so it updates live
+    // store.subscribe returns a function we can use to unsubscribe if the DOM is destroyed
+    const unsubscribe = store.subscribe(renderBoard);
+
+    // Provide a way to cleanup if manually removed
+    container.destroy = () => {
+        if (typeof unsubscribe === 'function') {
+            unsubscribe();
+        }
+    };
 
     return container;
 }

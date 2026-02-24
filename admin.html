@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwi Nexus - Admin Override</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom Cyberpunk Admin Styles -->
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body>
+
+    <div class="admin-grid-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="admin-sidebar">
+            <div class="brand">
+                <i class="fa-solid fa-shield-halved"></i>
+                <h2>NEXUS CORE</h2>
+            </div>
+
+            <nav class="admin-nav">
+                <a href="#roster" class="active"><i class="fa-solid fa-users-gear"></i> Faction Roster</a>
+                <a href="#create"><i class="fa-solid fa-plus"></i> Initialize Clan</a>
+                <a href="index.html" class="danger-zone"><i class="fa-solid fa-door-open"></i> Return to Nexus</a>
+            </nav>
+
+            <div class="system-status">
+                <span>SYSTEM STATUS</span>
+                <div class="status-indicator">ONLINE</div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="admin-main">
+            <header class="admin-header">
+                <h1>FACTION OVERRIDE PROTOCOL</h1>
+                <button id="btn-force-regenerate" class="action-button critical">
+                    <i class="fa-solid fa-rotate"></i> FORCE GRID REGEN
+                </button>
+            </header>
+
+            <div class="dashboard-content">
+
+                <!-- Active Factions List -->
+                <section id="roster-view" class="admin-panel">
+                    <div class="panel-header">
+                        <h3><i class="fa-solid fa-server"></i> Active Roster</h3>
+                    </div>
+                    <div class="faction-grid" id="faction-grid-container">
+                        <!-- Faction Cards dynamically injected here -->
+                    </div>
+                </section>
+
+                <!-- Create Faction Form -->
+                <section id="create-view" class="admin-panel create-panel">
+                    <div class="panel-header">
+                        <h3><i class="fa-solid fa-folder-plus"></i> Initialize New Designation</h3>
+                    </div>
+
+                    <form id="create-clan-form">
+                        <div class="form-group">
+                            <label for="clan-name">CLAN DESIGNATION</label>
+                            <input type="text" id="clan-name" placeholder="e.g. OMEGA" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>SIGNATURE HEX COLOR</label>
+                                <div class="color-picker-grid" id="color-picker">
+                                    <!-- Neon Blues / Teals -->
+                                    <div class="color-swatch" style="background: #00F0FF;" data-color="#00F0FF"></div>
+                                    <div class="color-swatch" style="background: #0088FF;" data-color="#0088FF"></div>
+                                    <div class="color-swatch" style="background: #2D9CDB;" data-color="#2D9CDB"></div>
+                                    <div class="color-swatch" style="background: #00BFFF;" data-color="#00BFFF"></div>
+                                    <div class="color-swatch" style="background: #00FFCC;" data-color="#00FFCC"></div>
+                                    <div class="color-swatch" style="background: #20B2AA;" data-color="#20B2AA"></div>
+
+                                    <!-- Greens -->
+                                    <div class="color-swatch" style="background: #00FF00;" data-color="#00FF00"></div>
+                                    <div class="color-swatch" style="background: #39FF14;" data-color="#39FF14"></div>
+                                    <div class="color-swatch" style="background: #27AE60;" data-color="#27AE60"></div>
+                                    <div class="color-swatch" style="background: #ADFF2F;" data-color="#ADFF2F"></div>
+
+                                    <!-- Purples / Pinks -->
+                                    <div class="color-swatch" style="background: #9D00FF;" data-color="#9D00FF"></div>
+                                    <div class="color-swatch" style="background: #FF00FF;" data-color="#FF00FF"></div>
+                                    <div class="color-swatch" style="background: #9B51E0;" data-color="#9B51E0"></div>
+                                    <div class="color-swatch" style="background: #E83E8C;" data-color="#E83E8C"></div>
+                                    <div class="color-swatch" style="background: #FF1493;" data-color="#FF1493"></div>
+
+                                    <!-- Reds / Oranges / Yellows -->
+                                    <div class="color-swatch" style="background: #FF0000;" data-color="#FF0000"></div>
+                                    <div class="color-swatch" style="background: #EB5757;" data-color="#EB5757"></div>
+                                    <div class="color-swatch" style="background: #FF4500;" data-color="#FF4500"></div>
+                                    <div class="color-swatch" style="background: #FF8C00;" data-color="#FF8C00"></div>
+                                    <div class="color-swatch" style="background: #F2C94C;" data-color="#F2C94C"></div>
+                                    <div class="color-swatch" style="background: #FFFF00;" data-color="#FFFF00"></div>
+
+                                    <!-- Grays / Whites -->
+                                    <div class="color-swatch" style="background: #FFFFFF;" data-color="#FFFFFF"></div>
+                                    <div class="color-swatch" style="background: #B0C4DE;" data-color="#B0C4DE"></div>
+                                </div>
+                                <input type="hidden" id="clan-color" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="clan-icon">SYSTEM ICON</label>
+                                <select id="clan-icon" required>
+                                    <option value="\uf521" data-icon="fa-solid fa-crown">👑 Crown</option>
+                                    <option value="\uf6d5" data-icon="fa-solid fa-dragon">🐉 Dragon</option>
+                                    <option value="\uf54c" data-icon="fa-solid fa-skull">💀 Skull</option>
+                                    <option value="\uf3ed" data-icon="fa-solid fa-shield-halved">🛡️ Shield</option>
+                                    <option value="\uf3a5" data-icon="fa-solid fa-gem">💎 Diamond</option>
+                                    <option value="\uf06d" data-icon="fa-solid fa-fire">🔥 Fire</option>
+                                    <option value="\uf0e7" data-icon="fa-solid fa-bolt">⚡ Lightning</option>
+                                    <option value="\uf5fc" data-icon="fa-solid fa-jedi">⚔️ Crossed Swords</option>
+                                    <option value="\uf441" data-icon="fa-solid fa-chess-knight">♞ Knight</option>
+                                    <option value="\uf70c" data-icon="fa-solid fa-meteor">☄️ Meteor</option>
+                                    <option value="\uf70b" data-icon="fa-solid fa-ring">💍 Artifact</option>
+                                    <option value="\uf185" data-icon="fa-solid fa-sun">☀️ Solar</option>
+                                    <option value="\uf186" data-icon="fa-solid fa-moon">🌙 Lunar</option>
+                                    <option value="\uf005" data-icon="fa-solid fa-star">⭐ Star</option>
+                                    <option value="\uf06e" data-icon="fa-solid fa-eye">👁️ Oracle</option>
+                                    <option value="\uf5a6" data-icon="fa-solid fa-monument">🏛️ Pantheon</option>
+                                    <option value="\uf504" data-icon="fa-solid fa-user-ninja">🥷 Assassin</option>
+                                    <option value="\uf4fb" data-icon="fa-solid fa-user-astronaut">👨‍🚀 Vanguard
+                                    </option>
+                                    <option value="\uf24e" data-icon="fa-solid fa-scale-balanced">⚖️ Justice</option>
+                                    <option value="\uf1e2" data-icon="fa-solid fa-bomb">💣 Detonator</option>
+                                    <option value="\uf0c3" data-icon="fa-solid fa-flask">🧪 Alchemy</option>
+                                    <option value="\uf21e" data-icon="fa-solid fa-heartbeat">💓 Lifeblood</option>
+                                    <option value="\uf5d2" data-icon="fa-solid fa-atom">⚛️ Quantum</option>
+                                    <option value="\uf0eb" data-icon="fa-solid fa-lightbulb">💡 Illumination</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="action-button confirm">
+                            <i class="fa-solid fa-upload"></i> INJECT TO MATRIX
+                        </button>
+                    </form>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- The independent dashboard logic -->
+    <script src="js/admin-app.js"></script>
+</body>
+
+</html>

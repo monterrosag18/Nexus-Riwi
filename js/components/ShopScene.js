@@ -119,24 +119,80 @@ export class ShopScene {
     }
 
     buildHologram() {
-        // Placeholder Item (Sphere) - will be replaced by specific items
-        const geometry = new THREE.IcosahedronGeometry(20, 2); // Low poly look handled by shader
+        this.holoContainer = new THREE.Group();
+        this.holoContainer.position.y = 10;
+        this.scene.add(this.holoContainer);
 
-        // USE OUR NEW HOLOGRAPHIC SHADER
-        this.holoMaterial = createHologramMaterial(0x00f0ff);
+        this.reflectionContainer = new THREE.Group();
+        this.reflectionContainer.scale.y = -1;
+        this.reflectionContainer.position.y = -70;
+        this.scene.add(this.reflectionContainer);
 
+        // Initial load
+        this.setItem('shield');
+    }
+
+    setItem(itemType) {
+        // Clean up old meshes
+        while (this.holoContainer.children.length > 0) {
+            this.holoContainer.remove(this.holoContainer.children[0]);
+        }
+        while (this.reflectionContainer.children.length > 0) {
+            this.reflectionContainer.remove(this.reflectionContainer.children[0]);
+        }
+
+        let geometry;
+        let color = 0x00f0ff; // Default cyan
+
+        switch (itemType) {
+            case 'shield':
+                geometry = new THREE.IcosahedronGeometry(20, 2);
+                color = 0x00f0ff; // Cyan
+                break;
+            case 'siphon':
+                geometry = new THREE.TorusKnotGeometry(12, 3, 100, 16);
+                color = 0xff0055; // Cyberpunk Red
+                break;
+            case 'overclock':
+                geometry = new THREE.OctahedronGeometry(18, 0);
+                color = 0xffaa00; // Warning Orange
+                break;
+            case 'cloak':
+                geometry = new THREE.TetrahedronGeometry(20, 2);
+                color = 0xaa00ff; // Stealth Purple
+                break;
+            case 'scanner':
+                geometry = new THREE.RingGeometry(10, 20, 32);
+                color = 0x00ff88; // Matrix Green
+                break;
+            default:
+                geometry = new THREE.BoxGeometry(20, 20, 20);
+                color = 0x00f0ff;
+        }
+
+        this.holoMaterial = createHologramMaterial(color);
         this.hologram = new THREE.Mesh(geometry, this.holoMaterial);
-        this.hologram.position.y = 10;
-        this.scene.add(this.hologram);
+        this.holoContainer.add(this.hologram);
 
-        // --- REALISM ADDITION: GROUND REFLECTION (Fake) ---
         this.reflection = this.hologram.clone();
-        this.reflection.scale.y = -1; // Invert
-        this.reflection.position.y = -70; // Position below floor (-30 base - 40 gap)
         this.reflection.material = this.holoMaterial.clone();
-        this.reflection.material.uniforms.opacity.value = 0.15; // Faint
-        this.reflection.material.uniforms.glitchStrength.value = 0.5; // More glitchy in reflection
-        this.scene.add(this.reflection);
+        this.reflection.material.uniforms.opacity.value = 0.15;
+        this.reflection.material.uniforms.glitchStrength.value = 0.5;
+        this.reflectionContainer.add(this.reflection);
+
+        // Dramatic Impact FX (Sub-bass rumble camera shake)
+        if (typeof window.gsap !== 'undefined') {
+            window.gsap.fromTo(this.camera.position,
+                { y: 35 },
+                { y: 30, duration: 0.6, ease: "bounce.out" }
+            );
+
+            // Flash ambient light
+            const ambientLight = this.scene.children.find(c => c instanceof THREE.AmbientLight);
+            if (ambientLight) {
+                window.gsap.fromTo(ambientLight, { intensity: 5.0 }, { intensity: 2.0, duration: 0.8 });
+            }
+        }
     }
 
     animate() {
@@ -158,7 +214,9 @@ export class ShopScene {
         if (this.hologram) {
             this.hologram.rotation.y += 0.005;
             this.hologram.rotation.z = Math.sin(time * 0.3) * 0.05;
-            this.hologram.position.y = 10 + Math.sin(time * 0.8) * 3;
+        }
+        if (this.holoContainer) {
+            this.holoContainer.position.y = 10 + Math.sin(time * 0.8) * 3;
         }
 
         // 4. Animate Base Rings
