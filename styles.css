@@ -1,0 +1,115 @@
+*{
+    margin: 0;
+    padding: 0;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+body{
+    background-color: rgb(0, 0, 0);
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: absolute;
+    z-index: 100;
+}
+
+.left-side{
+    background-color:transparent;
+    color: rgb(254, 254, 254);
+    margin: 100px;
+    padding: 10px;
+    border: solid white;
+    width: 400px;
+    margin-top: 220px;
+    margin-left: 100px;
+
+    
+}
+
+canvas{
+    position: absolute;
+    z-index: -1;
+    width: 100%;
+    size: 100%;
+}
+
+.inpuw{
+    /* background-color: aqua; */
+}
+
+.left-side-potions img{
+    width: 130px;
+    height: 100px;
+    
+}
+
+
+/* From Uiverse.io by ashwin_5681 */ 
+.card {
+  width: 100%;
+  height: 100%;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  color: white;
+  text-align: center;
+}
+
+.card p {
+  font-size: 14px;
+  color: white;
+}
+
+.slider {
+  width: 100%;
+  height: var(--height);
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, #000 10% 90%, transparent);
+}
+.slider .list {
+  display: flex;
+  width: 100%;
+  min-width: calc(var(--width) * var(--quantity));
+  position: relative;
+}
+.slider .list .item {
+  width: var(--width);
+  height: var(--height);
+  position: absolute;
+  left: 100%;
+  animation: autoRun 10s linear infinite;
+  transition: filter 0.5s;
+  animation-delay: calc(
+    (10s / var(--quantity)) * (var(--position) - 1) - 10s
+  ) !important;
+}
+.slider .list .item img {
+  width: 100%;
+}
+@keyframes autoRun {
+  from {
+    left: 100%;
+  }
+  to {
+    left: calc(var(--width) * -1);
+  }
+}
+.slider:hover .item {
+  animation-play-state: paused !important;
+  filter: grayscale(1);
+}
+.slider .item:hover {
+  filter: grayscale(0);
+}
+.slider[reverse="true"] .item {
+  animation: reversePlay 10s linear infinite;
+}
+@keyframes reversePlay {
+  from {
+    left: calc(var(--width) * -1);
+  }
+  to {
+    left: 100%;
+  }
+}
