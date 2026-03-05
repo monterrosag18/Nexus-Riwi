@@ -12,7 +12,7 @@ canvas.height = window.innerHeight;
 const stars = [];
 
 // Cantidad de estrellas
-const STAR_COUNT = 4000;
+const STAR_COUNT = 100;
 
 // Crear las estrellas
 for (let i = 0; i < STAR_COUNT; i++) {
@@ -24,7 +24,7 @@ for (let i = 0; i < STAR_COUNT; i++) {
     y: Math.random() * canvas.height,
 
     // Tamaño de la estrella (radio)
-    radius: Math.random() * 1.5,
+    radius: Math.random() * 2,
 
     // Nivel de transparencia (0 = invisible, 1 = totalmente visible)
     alpha: Math.random(),
