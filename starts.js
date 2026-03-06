@@ -76,3 +76,27 @@ window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 });
+
+const inner = document.getElementById("inner");
+
+let angulo = 0;
+let rapido = 5.0;
+let lento = 1.0;
+let pausado = false;
+
+function girar (){
+  if (pausado == false){   
+  angulo+=rapido;
+  rapido -= lento;
+  lento - angulo;
+  inner.style.transform = `perspective(1000px)  rotateX(-1deg) rotateY(${angulo}deg)`
+if (angulo >= 360 ){
+    angulo = 0
+  }  
+  
+  }
+  requestAnimationFrame(girar);
+}
+
+girar() 
+  
