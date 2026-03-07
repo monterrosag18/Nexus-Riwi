@@ -39,6 +39,7 @@ canvas{
     z-index: 1;
     width: 100%;
     size: 100%;
+    height: 100%;
 }
 
 .inpuw{

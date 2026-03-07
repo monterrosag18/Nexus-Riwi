@@ -12,7 +12,7 @@ canvas.height = window.innerHeight;
 const stars = [];
 
 // Cantidad de estrellas
-const STAR_COUNT = 100;
+const STAR_COUNT = 500;
 
 // Crear las estrellas
 for (let i = 0; i < STAR_COUNT; i++) {
@@ -24,7 +24,7 @@ for (let i = 0; i < STAR_COUNT; i++) {
     y: Math.random() * canvas.height,
 
     // Tamaño de la estrella (radio)
-    radius: Math.random() * 2,
+    radius: Math.random() * 1.5,
 
     // Nivel de transparencia (0 = invisible, 1 = totalmente visible)
     alpha: Math.random(),
@@ -81,19 +81,49 @@ const inner = document.getElementById("inner");
 
 let angulo = 0;
 let rapido = 5.0;
-let lento = 1.0;
+//let lento = 1.0;
 let pausado = false;
+let seguir = true;
+let anguloFinal = 0;
 
 function girar (){
   if (pausado == false){   
   angulo+=rapido;
-  rapido -= lento;
-  lento - angulo;
-  inner.style.transform = `perspective(1000px)  rotateX(-1deg) rotateY(${angulo}deg)`
+  rapido -= 0.01;
+  //lento - angulo;
 if (angulo >= 360 ){
     angulo = 0
   }  
+
+  if (anguloFinal >= 360) anguloFinal -= 360
+
+  if (rapido <=0){
+    rapido = 0
+
+  if (calculado == false) {
+    anguloFinal = Math.round(angulo / 36) * 36 + 28;
+    calculado = true
+  }
+
+if (Math.abs(angulo - anguloFinal) < 0.5)
+    angulo = anguloFinal
+
+
+   if (angulo < anguloFinal) {
+    angulo += 0.5
+  } else {
+    angulo -= 0.5
+  }
+
   
+
+  }
+  
+  
+
+
+  inner.style.transform = `perspective(1000px)  rotateX(-1deg) rotateY(${angulo}deg)`
+
   }
   requestAnimationFrame(girar);
 }
