@@ -71,7 +71,7 @@ canvas{
 }
 
 .slider {
-  width: 30%;
+  width: 32%;
   height: var(--height);
   overflow: hidden;
   gap: 10px;
@@ -116,7 +116,7 @@ From Uiverse.io by ilkhoeri
   position: absolute;
   width: var(--w);
   height: var(--h);
-  top: 33%;
+  top: 40%;
   left: calc(50% - (var(--w) / 2) - 2.5px);
   z-index: 2;
   transform-style: preserve-3d;
@@ -178,4 +178,16 @@ From Uiverse.io by ilkhoeri
   background-color: #5fc9d5b4;
   top: 0;
   left: 0;
+}
+
+.boton {
+  text-decoration: none;
+  color: #ffffff;
+  background-color: #953333;
+  width: 40%;
+  margin-left: 100px;
+}
+
+.boton:hover{
+  background: rgb(101, 177, 177);
 }

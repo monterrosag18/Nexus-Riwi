@@ -85,6 +85,8 @@ let rapido = 5.0;
 let pausado = false;
 let seguir = true;
 let anguloFinal = 0;
+let calculado = false;
+let llegue  = false;
 
 function girar (){
   if (pausado == false){   
@@ -92,27 +94,30 @@ function girar (){
   rapido -= 0.01;
   //lento - angulo;
 if (angulo >= 360 ){
-    angulo = 0
+    angulo = 0;
   }  
 
-  if (anguloFinal >= 360) anguloFinal -= 360
+  if (anguloFinal >= 360)
+     anguloFinal -= 360;
 
   if (rapido <=0){
-    rapido = 0
+    rapido = 0;
 
   if (calculado == false) {
-    anguloFinal = Math.round(angulo / 36) * 36 + 28;
-    calculado = true
+    anguloFinal = Math.round(angulo / 36) * 36 + 5;
+    calculado = true;
   }
 
-if (Math.abs(angulo - anguloFinal) < 0.5)
-    angulo = anguloFinal
+if (Math.abs (angulo - anguloFinal) < 0.5){
+    angulo = anguloFinal;
+    llegue = true;
+}
 
-
+if (llegue == false)
    if (angulo < anguloFinal) {
-    angulo += 0.5
+    angulo += 0.5;
   } else {
-    angulo -= 0.5
+    angulo -= 0.5;
   }
 
   
@@ -124,9 +129,8 @@ if (Math.abs(angulo - anguloFinal) < 0.5)
 
   inner.style.transform = `perspective(1000px)  rotateX(-1deg) rotateY(${angulo}deg)`
 
-  }
-  requestAnimationFrame(girar);
-}
 
+  requestAnimationFrame(girar);
+  }
+}
 girar() 
-  
