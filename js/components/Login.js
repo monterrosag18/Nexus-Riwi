@@ -1,17 +1,19 @@
-import { store } from '../store.js';
+import { store } from "../store.js";
 
 export default function renderLogin() {
-  const container = document.createElement('div');
-  container.className = 'container-fluid fade-in';
-  container.style.padding = '0';
-  container.style.margin = '0';
-  container.style.height = '100vh';
-  container.style.width = '100vw';
-  container.style.overflow = 'hidden';
+  const container = document.createElement("div");
+  container.className = "container-fluid fade-in";
+  container.style.padding = "0";
+  container.style.margin = "0";
+  container.style.height = "100vh";
+  container.style.width = "100vw";
+  container.style.overflow = "hidden";
 
   // Ensure GSAP is loaded for circuit animation
   if (!window.gsap) {
-    console.warn("GSAP is not loaded globally. Circuit animation may not work.");
+    console.warn(
+      "GSAP is not loaded globally. Circuit animation may not work.",
+    );
   }
 
   container.innerHTML = `
@@ -38,10 +40,9 @@ export default function renderLogin() {
                   <polyline points="2 12 12 17 22 12"></polyline>
                 </svg>
             </div>
-            <h1 class="auth-brand" style="text-transform: lowercase; font-size: 2.5rem; letter-spacing: 2px;">
-                <span style="color: #00f0ff;">&lt;/</span><span class="text-white">riwi</span><span style="color: #00f0ff;">&gt;</span>
-                <span style="font-size: 1.2rem; vertical-align: middle; margin-left: 10px; color: #6a00ff; letter-spacing: 4px; text-transform: uppercase;">NEXUS</span>
-            </h1>
+            <div class="tag" id="tag">
+              <span class="cursor" id="cursor"></span>
+             </div>
 
             <form id="loginForm" method="post" action="">
               <div class="mb-3">
@@ -124,11 +125,11 @@ export default function renderLogin() {
   // Event Handlers & Animation Logic
   // ---------------------------------------------------------
   const bindEvents = () => {
-    const loginCard = container.querySelector('.login-card');
-    const form = container.querySelector('#loginForm');
-    const btnRegisterMode = container.querySelector('#btnRegisterMode');
-    const btnBackToLogin = container.querySelector('#btnBackToLogin');
-    const errorMsg = container.querySelector('.form-error');
+    const loginCard = container.querySelector(".login-card");
+    const form = container.querySelector("#loginForm");
+    const btnRegisterMode = container.querySelector("#btnRegisterMode");
+    const btnBackToLogin = container.querySelector("#btnBackToLogin");
+    const errorMsg = container.querySelector(".form-error");
 
     // Toggle Modes
     btnRegisterMode?.addEventListener("click", () => {
@@ -151,14 +152,14 @@ export default function renderLogin() {
         e.preventDefault();
         errorMsg.textContent = "";
 
-        const usernameInput = container.querySelector('#username').value.trim();
+        const usernameInput = container.querySelector("#username").value.trim();
         if (!usernameInput) {
           errorMsg.textContent = "CODENAME REQUIRED";
           return;
         }
 
         if (isRegisterMode()) {
-          const clan = container.querySelector('#clanSelect').value;
+          const clan = container.querySelector("#clanSelect").value;
           if (!clan) {
             errorMsg.textContent = "ALLEGIANCE REQUIRED";
             return;
@@ -167,26 +168,34 @@ export default function renderLogin() {
           try {
             const result = store.registerUser(usernameInput, clan);
             if (result.success) {
-              window.location.hash = '#map';
+              window.location.hash = "#map";
             } else {
               errorMsg.textContent = `ERROR: ${result.message}`;
-              gsap.fromTo(loginCard, { x: -10 }, { x: 10, duration: 0.1, yoyo: true, repeat: 3 });
+              gsap.fromTo(
+                loginCard,
+                { x: -10 },
+                { x: 10, duration: 0.1, yoyo: true, repeat: 3 },
+              );
             }
           } catch (err) {
-            errorMsg.textContent = 'SYSTEM ERROR';
+            errorMsg.textContent = "SYSTEM ERROR";
           }
         } else {
           // Login Mode
           try {
             const result = store.loginUser(usernameInput);
             if (result.success) {
-              window.location.hash = '#map';
+              window.location.hash = "#map";
             } else {
               errorMsg.textContent = `ERROR: ${result.message}`;
-              gsap.fromTo(loginCard, { x: -10 }, { x: 10, duration: 0.1, yoyo: true, repeat: 3 });
+              gsap.fromTo(
+                loginCard,
+                { x: -10 },
+                { x: 10, duration: 0.1, yoyo: true, repeat: 3 },
+              );
             }
           } catch (err) {
-            errorMsg.textContent = 'SYSTEM ERROR';
+            errorMsg.textContent = "SYSTEM ERROR";
           }
         }
       });
@@ -197,7 +206,13 @@ export default function renderLogin() {
       window.addEventListener("mousemove", (e) => {
         const x = (e.clientX / window.innerWidth - 0.5) * 12;
         const y = (e.clientY / window.innerHeight - 0.5) * 12;
-        gsap.to(loginCard, { x, y, duration: 0.35, ease: "power2.out", overwrite: "auto" });
+        gsap.to(loginCard, {
+          x,
+          y,
+          duration: 0.35,
+          ease: "power2.out",
+          overwrite: "auto",
+        });
       });
     }
 
@@ -206,14 +221,14 @@ export default function renderLogin() {
     // -------------------------
     // Video Modal Logic
     // -------------------------
-    const videoModal = container.querySelector('#introVideoModal');
-    const video = container.querySelector('#introVideo');
-    const closeBtn = container.querySelector('#closeVideoBtn');
+    const videoModal = container.querySelector("#introVideoModal");
+    const video = container.querySelector("#introVideo");
+    const closeBtn = container.querySelector("#closeVideoBtn");
 
     const closeVideoModal = () => {
       if (!videoModal) return;
-      videoModal.classList.add('opacity-0');
-      videoModal.style.pointerEvents = 'none';
+      videoModal.classList.add("opacity-0");
+      videoModal.style.pointerEvents = "none";
       setTimeout(() => {
         video.pause();
         videoModal.remove();
@@ -224,15 +239,49 @@ export default function renderLogin() {
 
     // Video always plays on load as requested by user
     if (videoModal && video) {
-      video.play().catch(e => {
-        console.warn('Autoplay prevented:', e);
+      video.play().catch((e) => {
+        console.warn("Autoplay prevented:", e);
       });
 
-      video.addEventListener('ended', closeVideoModal);
-      if (closeBtn) closeBtn.addEventListener('click', closeVideoModal);
+      video.addEventListener("ended", closeVideoModal);
+      if (closeBtn) closeBtn.addEventListener("click", closeVideoModal);
     } else {
       generateCircuit();
     }
+
+    // Typewriter Effect for the "</riwi>" tag in the login header
+const fullText = "</Riwi> Nexus";
+const tag = document.getElementById("tag");
+const cursor = document.getElementById("cursor");
+const charDelay = 120;
+const pauseAfter = 2000;
+
+let index = 0;
+let chars = [];
+
+function typeNext() {
+  if (index < fullText.length) {
+    const span = document.createElement("span");
+    span.className = "char";
+    span.textContent = fullText[index];
+    tag.insertBefore(span, cursor);
+    chars.push(span);
+    index++;
+    setTimeout(typeNext, charDelay);
+  } else {
+    setTimeout(reset, pauseAfter);
+  }
+}
+
+function reset() {
+  chars.forEach((c) => c.remove());
+  chars = [];
+  index = 0;
+  setTimeout(typeNext, 400);
+}
+
+setTimeout(typeNext, 600);
+
   };
 
   const generateCircuit = () => {
@@ -254,7 +303,10 @@ export default function renderLogin() {
       const y = Math.random() * height;
       nodes.push({ x, y });
 
-      const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      const circle = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "circle",
+      );
       circle.setAttribute("cx", x);
       circle.setAttribute("cy", y);
       circle.setAttribute("r", 3);
@@ -270,12 +322,18 @@ export default function renderLogin() {
 
       const pathData = `M ${start.x} ${start.y} L ${midX} ${midY} L ${end.x} ${end.y}`;
 
-      const pathGlow = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      const pathGlow = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "path",
+      );
       pathGlow.setAttribute("d", pathData);
       pathGlow.setAttribute("class", "line");
       svg.appendChild(pathGlow);
 
-      const pathCore = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      const pathCore = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "path",
+      );
       pathCore.setAttribute("d", pathData);
       pathCore.setAttribute("class", "line-core");
       svg.appendChild(pathCore);
