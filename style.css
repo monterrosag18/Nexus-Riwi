@@ -1,0 +1,389 @@
+    :root {
+    --slice-0: inset(50% 50% 50% 50%);
+    --slice-1: inset(80% -6px 0 0);
+    --slice-2: inset(50% -6px 30% 0);
+    --slice-3: inset(10% -6px 85% 0);
+    --slice-4: inset(40% -6px 43% 0);
+    --slice-5: inset(80% -6px 5% 0);
+    }
+
+    /* CARDS GRID WITH 3D PERSPECTIVE */
+    /* .grid {
+    perspective: 500px;
+    } */
+
+    /* CARD BASE */
+    .glitch-card {
+    background: #000;
+    border: 2px solid #ff0000;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    transform-style: preserve-3d;
+    will-change: transform;
+    transition: transform 0.5s cubic-bezier(0.23, 1, 0.320, 1), filter 0.3s ease, opacity 0.3s ease;
+    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0), inset 0 0 0 2px rgba(255, 0, 0, 0);
+    }
+
+    /* GLITCH BORDER ANIMATION */
+    .glitch-card.active-glitch-border {
+    animation: glitch-border-pulse 0.6s steps(3, end);
+    }
+
+    @keyframes glitch-border-pulse {
+    0% { 
+        box-shadow: 0 0 10px rgba(255, 0, 0, 0.8), inset 0 0 10px rgba(255, 0, 0, 0.3);
+        border-color: #ffffff;
+    }
+    25% { 
+        box-shadow: -3px -3px 0 rgba(115, 0, 255, 0.8), inset 0 0 10px rgba(0, 243, 255, 0.2);
+        border-color: #ff0000;
+    }
+    50% { 
+        box-shadow: 3px 3px 0 rgba(162, 0, 255, 0.8), inset 0 0 10px rgba(255, 0, 150, 0.2);
+        border-color: #6a6a6a;
+    }
+    75% { 
+        box-shadow: -2px 2px 0 rgba(255, 0, 51, 0.8), inset 0 0 10px rgba(0, 243, 255, 0.2);
+        border-color: #ff0000;
+    }
+    100% { 
+        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0), inset 0 0 0 2px rgba(255, 0, 0, 0);
+        border-color: #ff0000;
+    }
+    }
+
+    /* CARD DIMMING EFFECT */
+    .glitch-card.dimmed {
+    filter: blur(5px) brightness(0.6);
+    opacity: 0.4;
+    }
+
+    .glitch-card.active-hover {
+    filter: brightness(1.15);
+    opacity: 1;
+    z-index: 20;
+    }
+
+    /* WARNING LABEL */
+    /* .warning {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: red;
+    color: white;
+    font-size: 10px;
+    padding: 4px 10px;
+    transform: rotate(-45deg) translate(15px, -5px);
+    } */
+
+    /* HEADER */
+    /* .card-header {
+    padding: 16px;
+    border-bottom: 1px solid rgba(255,0,0,.3);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    }
+
+    .card-header h3 {
+    font-size: 1rem;
+    text-transform: uppercase;
+    }
+
+    /* IMAGE */
+    .card-image {
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+    }
+
+    .card-image img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    } */
+
+    /* TEXT */
+    /* .glitch-card p {
+    padding: 16px;
+    text-align: center;
+    border-top: 1px solid rgba(255,0,0,.3);
+    } */
+
+    /* GLITCH EFFECT */
+    .glitch-card::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(45deg, transparent 3%, #000 5%);
+    text-shadow: -3px -3px 0px red;
+    clip-path: var(--slice-0);
+    z-index: 10;
+    pointer-events: none;
+    }
+
+    /* .glitch-card:hover::after {
+    animation: glitch-anim 1s steps(2,end);
+    } */
+
+    /* GLITCH TITLE EFFECT */
+    .glitch-title {
+    position: relative;
+    display: inline-block;
+    }
+
+    .glitch-title::before {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    text-shadow: -3px -3px 0px #ff0000, 3px 3px 0px #00e6f6;
+    clip-path: var(--slice-0);
+    pointer-events: none;
+    }
+
+    .glitch-title.active-glitch::before {
+    animation: glitch-anim 0.6s steps(3, end);
+    }
+
+    @keyframes glitch-anim {
+    0% { clip-path: var(--slice-1); transform: translate(-10px, -5px); }
+    20% { clip-path: var(--slice-3); transform: translate(5px, 5px); }
+    40% { clip-path: var(--slice-2); transform: translate(-5px, 5px); }
+    60% { clip-path: var(--slice-4); transform: translate(5px, -5px); }
+    80% { clip-path: var(--slice-5); transform: translate(10px, -5px); }
+    100% { clip-path: var(--slice-1); transform: translate(0); }
+    }
+
+    /* ========================================
+    COMIC CARD STYLE - DARK THEME ADAPTED (NO UTILIZADO)
+    ======================================== */
+    /* .comic-card {
+    --card-dark: #0a0a0a;
+    --primary-accent: #ec5b13;
+    --secondary-accent: #ff0066;
+    --cyan-accent: #00f3ff;
+    --border-color: #ff0000;
+    --border-stroke: 0.12em;
+    --dot-color: rgba(255, 0, 0, 0.15);
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--card-dark);
+    border: var(--border-stroke) solid var(--border-color);
+    border-radius: 0.3em;
+    padding: 0.8em;
+    box-shadow: 0.4em 0.4em 0 var(--primary-accent);
+    transition:
+        transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.2s ease;
+    transform-origin: bottom left;
+    }
+
+    .comic-card:hover {
+    transform: translateY(-0.5em) rotate(-2deg);
+    box-shadow: 0.6em 0.6em 0 0.1em var(--cyan-accent);
+    }
+
+    .comic-card .card-header {
+    display: flex !important;
+    align-items: center;
+    margin-bottom: 0.6em;
+    border: none !important;
+    padding: 0 !important;
+    gap: 0.8em;
+    }
+
+    .comic-card .icon-container {
+    width: 2.8em;
+    height: 2.8em;
+    border-radius: 50%;
+    background: linear-gradient(45deg, var(--primary-accent), var(--cyan-accent));
+    border: var(--border-stroke) solid var(--border-color);
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    }
+
+    .comic-card:hover .icon-container {
+    transform: scale(1.15);
+    }
+
+    .comic-card .card-header h3 {
+    margin: 0;
+    font-size: 1em;
+    font-weight: 700;
+    color: #fff;
+    background-color: var(--primary-accent);
+    padding: 0.3em 0.6em;
+    clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    }
+
+    .comic-card .card-image {
+    width: 100%;
+    height: 7.5em;
+    border-radius: 0.15em;
+    border: var(--border-stroke) solid var(--border-color);
+    overflow: hidden;
+    background-color: var(--secondary-accent);
+    background-image: radial-gradient(
+        circle,
+        var(--dot-color) 0.04em,
+        transparent 0.04em
+    );
+    background-size: 0.4em 0.4em;
+    transition: transform 0.3s ease;
+    margin: 0 !important;
+    }
+
+    .comic-card:hover .card-image {
+    transform: skewX(-3deg) scale(1.02);
+    }
+
+    .comic-card .card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    }
+
+    .comic-card p {
+    position: relative;
+    margin: 0.6em 0;
+    padding: 0.5em 0.6em;
+    background-color: var(--card-dark);
+    border: var(--border-stroke) solid var(--border-color);
+    border-radius: 0.4em;
+    font-size: 0.8em;
+    line-height: 1.4;
+    color: #fff;
+    border-top: none !important;
+    text-align: left !important;
+    }
+
+    .comic-card p::after {
+    content: "";
+    position: absolute;
+    bottom: -0.5em;
+    left: 1.2em;
+    width: 0;
+    height: 0;
+    border: 0.4em solid var(--border-color);
+    border-color: var(--border-color) transparent transparent transparent;
+    }
+
+    .comic-card p::before {
+    content: "";
+    position: absolute;
+    bottom: -0.3em;
+    left: 1.3em;
+    width: 0;
+    height: 0;
+    border: 0.3em solid var(--card-dark);
+    border-color: var(--card-dark) transparent transparent transparent;
+    }
+
+    /* Comic card action buttons */
+    /* .comic-card .action-buttons {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 0.6em;
+    gap: 0.4em;
+    }
+
+    .comic-card .action-button {
+    background-color: var(--primary-accent);
+    border: var(--border-stroke) solid var(--border-color);
+    padding: 0.4em;
+    cursor: pointer;
+    border-radius: 0.3em;
+    box-shadow: 0.15em 0.15em 0 var(--border-color);
+    transition:
+        transform 0.1s ease,
+        box-shadow 0.1s ease,
+        background-color 0.2s ease;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    }
+
+    .comic-card .action-button:hover {
+    background-color: var(--cyan-accent);
+    }
+
+    .comic-card .action-button:active {
+    transform: translate(0.15em, 0.15em);
+    box-shadow: none;
+    } */
+
+    /* ========================================
+    CARD GRADIENT BORDER STYLE
+    ======================================== */
+    .card {
+    width: 330px;
+    height: 370px;
+    padding: 20px;
+    color: white;
+    background: linear-gradient(#0a0a0a, #0a0a0a) padding-box,
+        linear-gradient(145deg, transparent 35%, #00f3ff, #1a1a2e) border-box;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    transform-origin: top bottom;
+    transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    .card .main-content {
+    flex: 1;
+    }
+
+    .card .header span:first-child {
+    font-weight: 600;
+    color: #717171;
+    margin-right: 4px;
+    }
+
+    .card .heading {
+    font-size: 24px;
+    margin: 24px 0 16px;
+    font-weight: 600;
+    }
+
+    .card .categories {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    }
+
+    .card .categories span {
+    background-color: #ec5b13;
+    padding: 4px 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 12px;
+    border-radius: 50em;
+    border: 1px solid #ff6b2b;
+    }
+
+    .card .footer {
+    font-weight: 600;
+    color: #717171;
+    margin-right: 4px;
+    }
+
+    .card:hover {
+    rotate: -6deg;
+    box-shadow: 0 20px 40px rgba(0, 243, 255, 0.2), 0 0 20px rgba(236, 91, 19, 0.15);
+    border-gradient: linear-gradient(145deg, transparent 35%, #00ffff, #ff0099);
+    }
