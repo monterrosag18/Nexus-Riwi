@@ -105,18 +105,19 @@ From Uiverse.io by ilkhoeri
   overflow: hidden;
   position: absolute;
   z-index: 1;
+  -webkit-mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);
 }
 
 .inner {
-  --w: 120px;
-  --h: 160px;
+  --w: 80px;
+  --h: 60px;
   --translateZ: calc((var(--w) + var(--h)) + 0px);
   --rotateX: -4deg;
   --perspective: 1000px;
   position: absolute;
   width: var(--w);
   height: var(--h);
-  top: 40%;
+  top: 32%;
   left: calc(50% - (var(--w) / 2) - 2.5px);
   z-index: 2;
   transform-style: preserve-3d;
@@ -180,14 +181,25 @@ From Uiverse.io by ilkhoeri
   left: 0;
 }
 
+.opress{
+  position: relative;
+  z-index: 10;
+  left: 170px;
+  top: 90px;
+}
+
 .boton {
   text-decoration: none;
   color: #ffffff;
   background-color: #953333;
-  width: 40%;
+  width: 30%;
+  height: 40px;
+  font-size: large;
   margin-left: 100px;
 }
 
 .boton:hover{
-  background: rgb(101, 177, 177);
+  background-color: rgb(101, 177, 177);
+  transition: 1s; 
+  transform: scale(1.1);
 }

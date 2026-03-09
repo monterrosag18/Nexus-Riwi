@@ -80,7 +80,7 @@ window.addEventListener("resize", () => {
 const inner = document.getElementById("inner");
 
 let angulo = 0;
-let rapido = 5.0;
+let rapido = 0;
 //let lento = 1.0;
 let pausado = false;
 let seguir = true;
@@ -134,3 +134,14 @@ if (llegue == false)
   }
 }
 girar() 
+
+
+const touch = document.getElementById("touch")
+touch.addEventListener("click",function touch(){
+    rapido = 5.0;
+    llegue = false;
+    calculado = false;
+    angulo = 0;
+    
+  })
+
