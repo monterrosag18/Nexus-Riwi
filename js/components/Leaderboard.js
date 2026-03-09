@@ -88,7 +88,8 @@ export default function renderLeaderboard() {
         </tr>
     `;
 
-    // Clan rows with data-clan attribute
+    // Clan rows as divs with CSS grid for guaranteed alignment
+    const CLAN_GRID = '80px 1fr 130px 150px';
     const clanRowsHTML = clans.map((clan, index) => {
         const styles = getClanStyles(clan.name);
         const rankColors = [
@@ -98,29 +99,20 @@ export default function renderLeaderboard() {
         ];
         const isTop3 = index < 3;
         const rankClass = isTop3 ? rankColors[index] : 'text-gray-500 border-transparent';
-
-        return `
-            <tr data-clan="${clan.name.toLowerCase()}" class="clan-row cursor-pointer hover:bg-primary/5 transition-all group/row border-l-2 border-transparent select-none">
-                <td class="py-4 pl-6 pr-2 text-center">
-                    <div class="w-8 h-8 mx-auto flex items-center justify-center border text-sm font-bold ${rankClass}">${index + 1}</div>
-                </td>
-                <td class="py-4 px-4">
-                    <div class="flex items-center space-x-3">
-                        <div class="p-1.5 bg-gray-900 border border-gray-700">
-                            <span class="material-symbols-outlined ${styles.colorClass} text-sm">${styles.icon}</span>
-                        </div>
-                        <span class="font-bold ${isTop3 ? 'text-white text-lg' : 'text-gray-300'} tracking-wide">${clan.name.toUpperCase()}</span>
-                    </div>
-                </td>
-                <td class="py-4 px-4 text-center text-gray-400 font-mono">${clan.members}</td>
-                <td class="py-4 px-4 pr-6 text-right">
-                    <div class="flex items-center justify-end space-x-2">
-                        <span class="font-bold ${styles.colorClass} ${isTop3 ? 'text-lg' : ''} font-mono tracking-wider ${styles.glowClass}">${clan.points.toLocaleString()}</span>
-                        <span class="material-symbols-outlined text-gray-700 text-sm group-hover/row:text-gray-400 transition-colors">chevron_right</span>
-                    </div>
-                </td>
-            </tr>
-        `;
+        return '<div data-clan="' + clan.name.toLowerCase() + '" class="clan-row cursor-pointer transition-all border-l-2 border-transparent select-none border-b border-gray-800 hover:bg-white/5" style="display:grid;grid-template-columns:' + CLAN_GRID + ';align-items:center;">'
+            + '<div style="padding:14px 8px 14px 24px;display:flex;justify-content:center;">'
+            +   '<div class="w-8 h-8 flex items-center justify-center border text-sm font-bold font-mono ' + rankClass + '">' + (index+1) + '</div>'
+            + '</div>'
+            + '<div style="padding:14px 16px;display:flex;align-items:center;gap:12px;overflow:hidden;">'
+            +   '<div class="p-1.5 bg-gray-900 border border-gray-700 flex-shrink-0"><span class="material-symbols-outlined ' + styles.colorClass + ' text-sm">' + styles.icon + '</span></div>'
+            +   '<span class="font-bold font-display tracking-wide ' + (isTop3 ? 'text-white text-lg' : 'text-gray-300') + '" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + clan.name.toUpperCase() + '</span>'
+            + '</div>'
+            + '<div style="padding:14px 16px;text-align:center;" class="text-gray-400 font-mono text-sm">' + clan.members + '</div>'
+            + '<div style="padding:14px 24px 14px 16px;text-align:right;display:flex;align-items:center;justify-content:flex-end;gap:8px;">'
+            +   '<span class="font-bold font-mono tracking-wider ' + styles.colorClass + ' ' + (isTop3 ? 'text-lg' : 'text-sm') + ' ' + styles.glowClass + '">' + clan.points.toLocaleString() + '</span>'
+            +   '<span class="material-symbols-outlined text-sm" style="color:#374151;">chevron_right</span>'
+            + '</div>'
+            + '</div>';
     }).join('');
 
     container.innerHTML = `
@@ -170,20 +162,16 @@ export default function renderLeaderboard() {
                             <span class="text-[10px] font-mono text-primary/40 tracking-widest uppercase border border-primary/20 px-2 py-1">Tap row to filter ↓</span>
                         </div>
                         
-                        <div class="overflow-x-auto flex-1">
-                            <table class="w-full text-left border-collapse">
-                                <thead>
-                                    <tr class="text-xs font-mono uppercase text-primary/70 border-b border-primary/20 bg-gray-900">
-                                        <th class="py-4 pl-6 pr-2 font-medium w-16 text-center">Rank</th>
-                                        <th class="py-4 px-4 font-medium">Faction</th>
-                                        <th class="py-4 px-4 font-medium text-center">Operatives</th>
-                                        <th class="py-4 px-4 pr-6 font-medium text-right text-primary">Influence</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="clan-tbody" class="text-sm font-display divide-y divide-gray-800">
-                                    ${clanRowsHTML}
-                                </tbody>
-                            </table>
+                        <div class="flex-1">
+                            <div class="text-xs font-mono uppercase text-primary/70 border-b border-primary/20 bg-gray-900" style="display:grid;grid-template-columns:80px 1fr 130px 150px;align-items:center;">
+                                <div style="padding:14px 8px 14px 24px;text-align:center;">Rank</div>
+                                <div style="padding:14px 16px;">Faction</div>
+                                <div style="padding:14px 16px;text-align:center;">Operatives</div>
+                                <div style="padding:14px 24px 14px 16px;text-align:right;color:var(--primary,#00f0ff);">Influence</div>
+                            </div>
+                            <div id="clan-tbody">
+                                ${clanRowsHTML}
+                            </div>
                         </div>
                     </section>
 
