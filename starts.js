@@ -149,7 +149,7 @@ girar()
 
 
 const touch = document.getElementById("touch")
-touch.addEventListener("click",function touch(){
+touch.addEventListener("click",function(){
     rapido = 5.0;
     llegue = false;
     calculado = false;
