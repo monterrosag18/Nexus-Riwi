@@ -40,6 +40,7 @@ canvas{
     width: 100%;
     size: 100%;
     height: 100%;
+    pointer-events: none;
 }
 
 .inpuw{
@@ -97,22 +98,25 @@ From Uiverse.io by ilkhoeri
 .wrapper {
   width: 100%;
   height: 100%;
-  position: relative;
+  /* pointer-events: none; */
   text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  perspective: 1000px;
+  /* overflow: hidden; */
   position: absolute;
   z-index: 1;
+  pointer-events: none;
+  transform-style: preserve-3d;
   -webkit-mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);
 }
 
 .inner {
-  --w: 80px;
-  --h: 60px;
+  --w: 120px;
+  --h: 160px;
   --translateZ: calc((var(--w) + var(--h)) + 0px);
-  --rotateX: -4deg;
+  --rotateX: -15deg;
   --perspective: 1000px;
   position: absolute;
   width: var(--w);
@@ -135,10 +139,10 @@ From Uiverse.io by ilkhoeri
   position: absolute;
   border: 2px solid rgba(var(--color-card));
   border-radius: 12px;
-  /* overflow: hidden; */
-  inset: 0;
+  width: 120px;
+  height: 160px;
   transform: rotateY(calc((360deg / var(--quantity)) * var(--index)))
-    translateZ(var(--translateZ));
+  translateZ(300px);
     transform-style: preserve-3d;
 }
 
@@ -176,9 +180,12 @@ From Uiverse.io by ilkhoeri
   transform: rotateY(180deg) ;
   width: 100%;
   height: 100%;
-  background-color: #5fc9d5b4;
+  background-color: #70d8e3b4;
   top: 0;
   left: 0;
+  overflow: hidden;
+  object-fit: cover;
+  opacity: 0;
 }
 
 .opress{
@@ -186,6 +193,7 @@ From Uiverse.io by ilkhoeri
   z-index: 10;
   left: 170px;
   top: 90px;
+  /* pointer-events: none; */
 }
 
 .boton {

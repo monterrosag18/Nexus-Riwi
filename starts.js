@@ -78,7 +78,10 @@ window.addEventListener("resize", () => {
 });
 
 const inner = document.getElementById("inner");
+const winner = document.querySelectorAll(".card");
 
+
+let cartaGanadora = 0;
 let angulo = 0;
 let rapido = 0;
 //let lento = 1.0;
@@ -96,7 +99,7 @@ function girar (){
 if (angulo >= 360 ){
     angulo = 0;
   }  
-
+requestAnimationFrame(girar);
   if (anguloFinal >= 360)
      anguloFinal -= 360;
 
@@ -106,7 +109,13 @@ if (angulo >= 360 ){
   if (calculado == false) {
     anguloFinal = Math.round(angulo / 36) * 36 + 5;
     calculado = true;
+    cartaGanadora = anguloFinal / 36;
+    winner[cartaGanadora].addEventListener("click",function click(){
+      winner[cartaGanadora].querySelector(".reverse").style.opacity = 1;
+
+    })
   }
+  
 
 if (Math.abs (angulo - anguloFinal) < 0.5){
     angulo = anguloFinal;
@@ -130,8 +139,11 @@ if (llegue == false)
   inner.style.transform = `perspective(1000px)  rotateX(-1deg) rotateY(${angulo}deg)`
 
 
-  requestAnimationFrame(girar);
+  
   }
+  requestAnimationFrame(girar);
+  if (anguloFinal >= 360)
+     anguloFinal -= 360;
 }
 girar() 
 
