@@ -76,6 +76,8 @@ export default function renderLogin() {
                         <option value="turing" style="color: black;">TURING</option>
                         <option value="tesla" style="color: black;">TESLA</option>
                         <option value="mccarthy" style="color: black;">McCARTHY</option>
+                        <option value="thompson" style="color: black;">THOMPSON</option>
+                        <option value="halmiton" style="color: black;">HALMITON</option>
                    </select>
                 </div>
               </div>

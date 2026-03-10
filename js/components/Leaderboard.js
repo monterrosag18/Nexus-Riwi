@@ -12,9 +12,7 @@ export default function renderLeaderboard() {
     const clans = Object.values(state.clans).sort((a, b) => b.points - a.points);
     const currentUser = state.currentUser || { name: 'GUEST', clan: 'undefined' };
     const allUsers = store.getRegisteredUsers().sort((a, b) => (b.points || 0) - (a.points || 0));
-
-    // Filter state — null = todos
-    let activeClanFilter = null;
+    const userClanKey = (currentUser.clan || '').toLowerCase();
 
     // Helpers
     const getClanStyles = (clanName) => {
@@ -79,7 +77,7 @@ export default function renderLeaderboard() {
         `;
     };
 
-    const emptyState = (msg = 'No operatives registered yet') => `
+    const emptyState = (msg = 'No hay operativos registrados') => `
         <tr>
             <td colspan="4" class="py-16 text-center">
                 <span class="material-symbols-outlined text-4xl text-gray-700 block mb-3">person_off</span>
@@ -88,7 +86,7 @@ export default function renderLeaderboard() {
         </tr>
     `;
 
-    // Clan rows as divs with CSS grid for guaranteed alignment
+    // Clan rows
     const CLAN_GRID = '80px 1fr 130px 150px';
     const clanRowsHTML = clans.map((clan, index) => {
         const styles = getClanStyles(clan.name);
@@ -99,7 +97,8 @@ export default function renderLeaderboard() {
         ];
         const isTop3 = index < 3;
         const rankClass = isTop3 ? rankColors[index] : 'text-gray-500 border-transparent';
-        return '<div data-clan="' + clan.name.toLowerCase() + '" class="clan-row cursor-pointer transition-all border-l-2 border-transparent select-none border-b border-gray-800 hover:bg-white/5" style="display:grid;grid-template-columns:' + CLAN_GRID + ';align-items:center;">'
+        const isOwnClan = clan.name.toLowerCase() === userClanKey;
+        return '<div data-clan="' + clan.name.toLowerCase() + '" class="clan-row transition-all border-l-2 border-transparent select-none border-b border-gray-800" style="display:grid;grid-template-columns:' + CLAN_GRID + ';align-items:center;cursor:' + (isOwnClan ? 'pointer' : 'not-allowed') + ';opacity:' + (isOwnClan ? '1' : '0.35') + ';filter:' + (isOwnClan ? 'none' : 'grayscale(0.6)') + ';background-color:' + (isOwnClan ? styles.accentColor : '') + ';border-left-color:' + (isOwnClan ? styles.borderHex + '55' : 'transparent') + ';">'
             + '<div style="padding:14px 8px 14px 24px;display:flex;justify-content:center;">'
             +   '<div class="w-8 h-8 flex items-center justify-center border text-sm font-bold font-mono ' + rankClass + '">' + (index+1) + '</div>'
             + '</div>'
@@ -110,7 +109,7 @@ export default function renderLeaderboard() {
             + '<div style="padding:14px 16px;text-align:center;" class="text-gray-400 font-mono text-sm">' + clan.members + '</div>'
             + '<div style="padding:14px 24px 14px 16px;text-align:right;display:flex;align-items:center;justify-content:flex-end;gap:8px;">'
             +   '<span class="font-bold font-mono tracking-wider ' + styles.colorClass + ' ' + (isTop3 ? 'text-lg' : 'text-sm') + ' ' + styles.glowClass + '">' + clan.points.toLocaleString() + '</span>'
-            +   '<span class="material-symbols-outlined text-sm" style="color:#374151;">chevron_right</span>'
+            +   '<span class="material-symbols-outlined text-sm" style="color:#374151;">' + (isOwnClan ? 'chevron_right' : 'lock') + '</span>'
             + '</div>'
             + '</div>';
     }).join('');
@@ -134,8 +133,8 @@ export default function renderLeaderboard() {
                 </div>
             </header>
 
-            <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 mb-8 pb-24">
-                <div class="flex flex-col sm:flex-row sm:items-end justify-between border-l-2 border-primary pl-4 py-1">
+            <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mb-8 pb-24">
+                <div class="flex flex-col sm:flex-row sm:items-end justify-between border-l-2 border-primary pl-4 py-1 mb-8">
                     <div class="space-y-1">
                         <div class="flex items-center space-x-2 text-primary">
                             <span class="material-symbols-outlined text-sm animate-pulse">wifi_tethering</span>
@@ -146,189 +145,124 @@ export default function renderLeaderboard() {
                     <p class="text-xs text-gray-500 font-mono mt-2 sm:mt-0">CYCLE: 42.1 // SECTOR: GLOBAL</p>
                 </div>
 
-                <div class="grid grid-cols-1 gap-8">
-                    <!-- CLAN RANKING -->
-                    <section class="bg-gray-900/80 backdrop-blur border border-primary/30 relative group h-full flex flex-col" style="box-shadow: 0 0 10px rgba(0, 240, 255, 0.2), inset 0 0 20px rgba(0, 240, 255, 0.05);">
-                        <div class="absolute top-0 left-0 w-full h-[1px] bg-primary/50 shadow-neon"></div>
-                        <div class="absolute bottom-0 left-0 w-full h-[1px] bg-primary/50 shadow-neon"></div>
-                        <div class="absolute top-0 left-0 h-full w-[1px] bg-primary/50 shadow-neon"></div>
-                        <div class="absolute top-0 right-0 h-full w-[1px] bg-primary/50 shadow-neon"></div>
-                        
-                        <div class="p-5 border-b border-primary/20 bg-gradient-to-r from-primary/10 to-transparent flex justify-between items-center">
-                            <h3 class="font-display font-bold text-xl uppercase tracking-wider text-white flex items-center">
-                                <span class="material-symbols-outlined text-primary mr-3 shadow-neon rounded-sm p-1 bg-primary/10">groups</span>
-                                Ranking Clans
-                            </h3>
-                            <span class="text-[10px] font-mono text-primary/40 tracking-widest uppercase border border-primary/20 px-2 py-1">Tap row to filter ↓</span>
+                <!-- PANEL 1: CLAN RANKING -->
+                <section id="clan-panel" class="bg-gray-900/80 backdrop-blur border border-primary/30 relative flex flex-col" style="box-shadow: 0 0 10px rgba(0, 240, 255, 0.2), inset 0 0 20px rgba(0, 240, 255, 0.05);">
+                    <div class="absolute top-0 left-0 w-full h-[1px] bg-primary/50"></div>
+                    <div class="absolute bottom-0 left-0 w-full h-[1px] bg-primary/50"></div>
+                    <div class="absolute top-0 left-0 h-full w-[1px] bg-primary/50"></div>
+                    <div class="absolute top-0 right-0 h-full w-[1px] bg-primary/50"></div>
+                    <div class="p-5 border-b border-primary/20 bg-gradient-to-r from-primary/10 to-transparent flex justify-between items-center">
+                        <h3 class="font-display font-bold text-xl uppercase tracking-wider text-white flex items-center">
+                            <span class="material-symbols-outlined text-primary mr-3 rounded-sm p-1 bg-primary/10">groups</span>
+                            Ranking Clans
+                        </h3>
+                        <span class="text-[10px] font-mono text-primary/40 tracking-widest uppercase border border-primary/20 px-2 py-1">Selecciona tu clan ↓</span>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-xs font-mono uppercase text-primary/70 border-b border-primary/20 bg-gray-900" style="display:grid;grid-template-columns:${CLAN_GRID};align-items:center;">
+                            <div style="padding:14px 8px 14px 24px;text-align:center;">Rank</div>
+                            <div style="padding:14px 16px;">Faction</div>
+                            <div style="padding:14px 16px;text-align:center;">Operativos</div>
+                            <div style="padding:14px 24px 14px 16px;text-align:right;color:var(--primary,#00f0ff);">Influencia</div>
                         </div>
-                        
-                        <div class="flex-1">
-                            <div class="text-xs font-mono uppercase text-primary/70 border-b border-primary/20 bg-gray-900" style="display:grid;grid-template-columns:80px 1fr 130px 150px;align-items:center;">
-                                <div style="padding:14px 8px 14px 24px;text-align:center;">Rank</div>
-                                <div style="padding:14px 16px;">Faction</div>
-                                <div style="padding:14px 16px;text-align:center;">Operatives</div>
-                                <div style="padding:14px 24px 14px 16px;text-align:right;color:var(--primary,#00f0ff);">Influence</div>
-                            </div>
-                            <div id="clan-tbody">
-                                ${clanRowsHTML}
-                            </div>
-                        </div>
-                    </section>
+                        <div id="clan-tbody">${clanRowsHTML}</div>
+                    </div>
+                </section>
 
-                    <!-- OPERATIVES RANKING — Dynamic + filterable -->
-                    <section id="coders-section" class="bg-gray-900/80 backdrop-blur border border-blue-500/30 relative h-full flex flex-col mt-4 transition-all duration-300" style="box-shadow: 0 0 15px rgba(41,121,255,0.15);">
-                        <div id="coders-top-line"    class="absolute top-0 left-0 w-full h-[1px] bg-blue-500/50"></div>
-                        <div id="coders-bottom-line" class="absolute bottom-0 left-0 w-full h-[1px] bg-blue-500/50"></div>
-                        <div id="coders-left-line"   class="absolute top-0 left-0 h-full w-[1px] bg-blue-500/50"></div>
-                        <div id="coders-right-line"  class="absolute top-0 right-0 h-full w-[1px] bg-blue-500/50"></div>
-                        
-                        <div class="p-5 border-b border-blue-500/20 bg-gradient-to-r from-transparent to-blue-500/10 flex justify-between items-center">
-                            <h3 class="font-display font-bold text-xl uppercase tracking-wider text-white flex items-center">
-                                <span class="material-symbols-outlined text-blue-500 mr-3 p-1 bg-blue-500/10" id="coders-icon">terminal</span>
-                                <span id="coders-title">Ranking Coders</span>
-                                <span id="coders-count" class="ml-3 text-xs font-mono text-blue-500/60 border border-blue-500/20 px-2 py-0.5">${allUsers.length} OPS</span>
-                            </h3>
-                            <button id="clear-filter-btn" class="hidden items-center gap-1 text-xs font-mono border px-3 py-1.5 transition-all uppercase tracking-wider hover:opacity-80">
-                                <span class="material-symbols-outlined text-sm leading-none">close</span>
-                                Ver todos
-                            </button>
-                        </div>
-                        
-                        <div class="overflow-x-auto flex-1 relative">
-                            <table class="w-full text-left border-collapse">
-                                <thead class="sticky top-0 z-10">
-                                    <tr id="coders-thead-row" class="text-xs font-mono uppercase text-blue-500/70 border-b border-blue-500/20 bg-gray-900">
-                                        <th class="py-4 pl-6 pr-2 font-medium w-16 text-center">Rank</th>
-                                        <th class="py-4 px-4 font-medium">Operative</th>
-                                        <th class="py-4 px-4 font-medium text-center">Clan</th>
-                                        <th class="py-4 px-4 pr-6 font-medium text-right text-blue-500">Pts</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="coders-tbody" class="text-sm font-display divide-y divide-gray-800">
-                                    ${allUsers.length > 0
-                                        ? allUsers.map((u, i) => renderUserRow(u, i)).join('')
-                                        : emptyState()
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
-                </div>
+                <!-- PANEL 2: OPERATIVES — oculto por defecto -->
+                <section id="coders-section" style="display:none;" class="bg-gray-900/80 backdrop-blur border border-blue-500/30 relative flex-col transition-all duration-300" style="box-shadow: 0 0 15px rgba(41,121,255,0.15);">
+                    <div id="coders-top-line"    class="absolute top-0 left-0 w-full h-[1px] bg-blue-500/50"></div>
+                    <div id="coders-bottom-line" class="absolute bottom-0 left-0 w-full h-[1px] bg-blue-500/50"></div>
+                    <div id="coders-left-line"   class="absolute top-0 left-0 h-full w-[1px] bg-blue-500/50"></div>
+                    <div id="coders-right-line"  class="absolute top-0 right-0 h-full w-[1px] bg-blue-500/50"></div>
+                    <div class="p-5 border-b border-blue-500/20 bg-gradient-to-r from-transparent to-blue-500/10 flex justify-between items-center">
+                        <h3 class="font-display font-bold text-xl uppercase tracking-wider text-white flex items-center">
+                            <span class="material-symbols-outlined text-blue-500 mr-3 p-1 bg-blue-500/10" id="coders-icon">terminal</span>
+                            <span id="coders-title">Ranking Coders</span>
+                            <span id="coders-count" class="ml-3 text-xs font-mono text-blue-500/60 border border-blue-500/20 px-2 py-0.5">0 OPS</span>
+                        </h3>
+                        <button id="back-btn" class="flex items-center gap-1 text-xs font-mono border border-gray-600 px-3 py-1.5 text-gray-300 transition-all uppercase tracking-wider hover:opacity-80">
+                            <span class="material-symbols-outlined text-sm leading-none">arrow_back</span>
+                            Volver
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto flex-1 relative">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="sticky top-0 z-10">
+                                <tr id="coders-thead-row" class="text-xs font-mono uppercase text-blue-500/70 border-b border-blue-500/20 bg-gray-900">
+                                    <th class="py-4 pl-6 pr-2 font-medium w-16 text-center">Rank</th>
+                                    <th class="py-4 px-4 font-medium">Operativo</th>
+                                    <th class="py-4 px-4 font-medium text-center">Clan</th>
+                                    <th class="py-4 px-4 pr-6 font-medium text-right text-blue-500">Pts</th>
+                                </tr>
+                            </thead>
+                            <tbody id="coders-tbody" class="text-sm font-display divide-y divide-gray-800"></tbody>
+                        </table>
+                    </div>
+                </section>
+
             </main>
         </div>
     `;
 
-    // ── Interactivity ────────────────────────────────────────────────────────
-
-    const codersSection   = container.querySelector('#coders-section');
-    const codersTbody     = container.querySelector('#coders-tbody');
-    const codersTitle     = container.querySelector('#coders-title');
-    const codersCount     = container.querySelector('#coders-count');
-    const codersIcon      = container.querySelector('#coders-icon');
-    const clearBtn        = container.querySelector('#clear-filter-btn');
-    const clanTbody       = container.querySelector('#clan-tbody');
-    const theadRow        = container.querySelector('#coders-thead-row');
-
-    const borderLines = ['#coders-top-line','#coders-bottom-line','#coders-left-line','#coders-right-line']
+    // ── Referencias ──────────────────────────────────────────────────────────
+    const clanPanel     = container.querySelector('#clan-panel');
+    const codersSection = container.querySelector('#coders-section');
+    const codersTbody   = container.querySelector('#coders-tbody');
+    const codersTitle   = container.querySelector('#coders-title');
+    const codersCount   = container.querySelector('#coders-count');
+    const codersIcon    = container.querySelector('#coders-icon');
+    const theadRow      = container.querySelector('#coders-thead-row');
+    const backBtn       = container.querySelector('#back-btn');
+    const borderLines   = ['#coders-top-line','#coders-bottom-line','#coders-left-line','#coders-right-line']
         .map(id => container.querySelector(id));
 
-    const setLineColors = (hex) => {
-        borderLines.forEach(el => { if (el) el.style.background = hex; });
-    };
+    const setLineColors = (hex) => borderLines.forEach(el => { if (el) el.style.background = hex; });
 
-    const highlightClanRow = (clanKey) => {
-        clanTbody.querySelectorAll('.clan-row').forEach(row => {
-            const active = row.dataset.clan === clanKey;
-            const s = getClanStyles(row.dataset.clan);
-            row.style.borderLeftColor = active ? s.borderHex : 'transparent';
-            row.style.backgroundColor = active ? s.accentColor : '';
-        });
-    };
-
-    const resetClanRows = () => {
-        clanTbody.querySelectorAll('.clan-row').forEach(row => {
-            row.style.borderLeftColor = 'transparent';
-            row.style.backgroundColor = '';
-        });
-    };
-
-    const applyFilter = (clanKey) => {
+    // Mostrar panel de operativos y ocultar clanes
+    const showCoders = (clanKey) => {
         const s = getClanStyles(clanKey);
         const filtered = allUsers.filter(u => (u.clan || '').toLowerCase() === clanKey);
+        const label = clanKey.charAt(0).toUpperCase() + clanKey.slice(1);
 
-        // Coders table
+        // Poblar tabla
         codersTbody.innerHTML = filtered.length > 0
             ? filtered.map((u, i) => renderUserRow(u, i)).join('')
-            : emptyState(`No operatives in ${clanKey.toUpperCase()} yet`);
+            : emptyState(`No hay operativos en ${label} aún`);
 
-        // Header
-        const label = clanKey.charAt(0).toUpperCase() + clanKey.slice(1);
-        codersTitle.textContent = `${label} Coders`;
+        // Actualizar header
+        codersTitle.textContent = `${label} — Operativos`;
         codersCount.textContent = `${filtered.length} OPS`;
         codersCount.style.color       = s.borderHex;
         codersCount.style.borderColor = s.borderHex + '55';
         codersIcon.style.color        = s.borderHex;
-
-        // Section border + glow
         codersSection.style.borderColor = s.borderHex + '70';
         codersSection.style.boxShadow   = `0 0 20px ${s.accentColor}`;
-        setLineColors(s.borderHex + '80');
-
-        // Thead accent
         theadRow.style.color = s.borderHex + 'aa';
+        setLineColors(s.borderHex + '80');
+        backBtn.style.color       = s.borderHex;
+        backBtn.style.borderColor = s.borderHex + '60';
 
-        // Clear button
-        clearBtn.style.color       = s.borderHex;
-        clearBtn.style.borderColor = s.borderHex + '60';
-        clearBtn.classList.remove('hidden');
-        clearBtn.classList.add('flex');
-
-        // Highlight row
-        highlightClanRow(clanKey);
-
-        // Scroll
-        codersSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        // Swap panels
+        clanPanel.style.display    = 'none';
+        codersSection.style.display = 'flex';
     };
 
-    const clearFilter = () => {
-        activeClanFilter = null;
-
-        codersTbody.innerHTML = allUsers.length > 0
-            ? allUsers.map((u, i) => renderUserRow(u, i)).join('')
-            : emptyState();
-
-        codersTitle.textContent = 'Ranking Coders';
-        codersCount.textContent = `${allUsers.length} OPS`;
-        codersCount.style.color       = '';
-        codersCount.style.borderColor = '';
-        codersIcon.style.color        = '';
-
-        codersSection.style.borderColor = '';
-        codersSection.style.boxShadow   = '0 0 15px rgba(41,121,255,0.15)';
-        setLineColors('');
-
-        theadRow.style.color = '';
-
-        clearBtn.classList.add('hidden');
-        clearBtn.classList.remove('flex');
-
-        resetClanRows();
+    // Volver al panel de clanes
+    const showClans = () => {
+        codersSection.style.display = 'none';
+        clanPanel.style.display     = 'flex';
     };
 
-    // Bind clan row clicks
-    clanTbody.querySelectorAll('.clan-row').forEach(row => {
-        row.addEventListener('click', () => {
-            const clanKey = row.dataset.clan;
-            if (activeClanFilter === clanKey) {
-                clearFilter(); // toggle off
-            } else {
-                activeClanFilter = clanKey;
-                applyFilter(clanKey);
-            }
-        });
+    // Bind clan rows — solo el clan propio es clickeable
+    container.querySelector('#clan-tbody').querySelectorAll('.clan-row').forEach(row => {
+        const clanKey = row.dataset.clan;
+        if (clanKey === userClanKey) {
+            row.addEventListener('click', () => showCoders(clanKey));
+        }
     });
 
-    clearBtn.addEventListener('click', clearFilter);
+    backBtn.addEventListener('click', showClans);
 
     return container;
 }

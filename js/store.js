@@ -13,7 +13,7 @@ class Store {
         }
 
         this.state = {
-            currentView: savedUser ? 'map' : 'login',
+            currentView: savedUser ? 'leaderboard' : 'login',
             currentUser: savedUser,
             clans: {
                 turing: { name: 'Turing', color: 'var(--primary-blue)', points: 2606, members: 25 },
