@@ -188,11 +188,13 @@ export class ShopScene {
         }
 
         // 4. Animate Base Rings
-        this.techRings.forEach(ring => {
-            ring.rotation.z += ring.userData.speed * 0.005 * ring.userData.axis;
-            // Wobble
-            ring.rotation.x = (Math.PI / 2) + Math.sin(time * ring.userData.speed) * 0.05;
-        });
+        if (this.techRings) {
+            this.techRings.forEach(ring => {
+                ring.rotation.z += ring.userData.speed * 0.005 * ring.userData.axis;
+                // Wobble
+                ring.rotation.x = (Math.PI / 2) + Math.sin(time * ring.userData.speed) * 0.05;
+            });
+        }
 
         // 5. Particles Rotate
         if (this.particles) {
