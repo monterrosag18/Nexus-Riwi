@@ -42,6 +42,8 @@ export default function renderShop() {
     let activeItem = SHOP_ITEMS[0];
     let shopSceneInstance = null;
     let unsubscribe = null;
+    let spinState = 'GIRAR'; // 'GIRAR' -> 'SPINNING' -> 'COMPRAR'
+    let spinInterval = null;
 
     function renderDOM() {
         const state = store.getState();
@@ -117,8 +119,8 @@ export default function renderShop() {
                     </div>
                     
                     <div class="action-bar" style="position: relative; z-index: 20; pointer-events: auto;">
-                        <button id="btn-purchase" class="action-btn primary" ${credits < activeItem.cost ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>
-                            <span class="btn-text">PURCHASE MODULE</span>
+                        <button id="btn-purchase" class="action-btn primary" ${credits < activeItem.cost && spinState === 'COMPRAR' ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''} style="${spinState === 'SPINNING' ? 'border-color:#ffaa00;color:#ffaa00;box-shadow:0 0 30px rgba(255,170,0,0.6);' : ''}">
+                            <span class="btn-text">${spinState === 'SPINNING' ? 'PARAR' : (spinState === 'COMPRAR' ? 'COMPRAR MÓDULO' : 'GIRAR RULETA')}</span>
                             <span class="btn-glare"></span>
                         </button>
                          <div class="credit-readout">
@@ -191,30 +193,70 @@ export default function renderShop() {
         // Card selection from Roulette
         const cards = container.querySelectorAll('.roulette-card');
         cards.forEach(card => card.addEventListener('click', (e) => {
+            if (spinState === 'SPINNING') return; // Bloquear clicks manuales mientras gira
             const id = e.currentTarget.getAttribute('data-id');
             const selected = SHOP_ITEMS.find(i => i.id === id);
             if (selected && selected.id !== activeItem.id) {
                 activeItem = selected;
+                spinState = 'COMPRAR'; // Reset a comprar
                 updateUI();
                 if (shopSceneInstance) shopSceneInstance.setItem(activeItem.id);
             }
         }));
 
-        // Purchase Button
+        // Gacha Button Logic (GIRAR -> PARAR -> COMPRAR)
         const btnPurchase = container.querySelector('#btn-purchase');
         if (btnPurchase) {
             btnPurchase.addEventListener('click', () => {
                 const user = store.getState().currentUser;
-                if (!user || user.credits < activeItem.cost) return;
+                const textSpan = btnPurchase.querySelector('.btn-text');
 
-                if (activeItem.isOffensive) {
-                    // Open Target Modal
-                    const modal = container.querySelector('#target-modal');
-                    modal.style.display = 'flex';
-                } else {
-                    // Normal purchase
-                    if (store.purchaseItem(activeItem.cost)) {
-                        triggerPurchaseSuccess();
+                if (spinState === 'GIRAR') {
+                    // Modo 1: Iniciar el giro (SPIN)
+                    spinState = 'SPINNING';
+                    textSpan.innerText = 'PARAR';
+                    btnPurchase.style.borderColor = '#ffaa00';
+                    btnPurchase.style.color = '#ffaa00';
+                    btnPurchase.style.boxShadow = '0 0 30px rgba(255, 170, 0, 0.6)';
+
+                    spinInterval = setInterval(() => {
+                        const randomItem = SHOP_ITEMS[Math.floor(Math.random() * SHOP_ITEMS.length)];
+                        if (randomItem.id !== activeItem.id) {
+                            activeItem = randomItem;
+                            updateUI();
+                        }
+                    }, 100); // 100ms super fast rotation
+                }
+                else if (spinState === 'SPINNING') {
+                    // Modo 2: Detener el giro (STOP)
+                    spinState = 'COMPRAR';
+                    clearInterval(spinInterval);
+                    spinInterval = null;
+
+                    textSpan.innerText = 'COMPRAR MÓDULO';
+                    btnPurchase.style.borderColor = '#00f0ff';
+                    btnPurchase.style.color = '#fff';
+                    btnPurchase.style.boxShadow = '';
+
+                    // Update disabled state based on cost of landed item
+                    if (user && user.credits < activeItem.cost) {
+                        btnPurchase.disabled = true;
+                        btnPurchase.style.opacity = '0.5';
+                        btnPurchase.style.cursor = 'not-allowed';
+                    }
+                }
+                else if (spinState === 'COMPRAR') {
+                    // Modo 3: Comprar Original
+                    if (!user || user.credits < activeItem.cost) return;
+
+                    if (activeItem.isOffensive) {
+                        const modal = container.querySelector('#target-modal');
+                        modal.style.display = 'flex';
+                    } else {
+                        if (store.purchaseItem(activeItem.cost)) {
+                            spinState = 'GIRAR'; // Volver al inicio después de comprar
+                            triggerPurchaseSuccess();
+                        }
                     }
                 }
             });
@@ -239,6 +281,7 @@ export default function renderShop() {
                     const result = store.executeTacticalStrike(target, activeItem.stealAmount);
                     modal.style.display = 'none';
                     if (result.success) {
+                        spinState = 'GIRAR';
                         triggerPurchaseSuccess(`STEALTH HACK SUCCESSFUL. EXTRACTED ${result.actualStolen} PTS FROM ${target.toUpperCase()}.`);
                     }
                 }

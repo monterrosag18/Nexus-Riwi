@@ -61,43 +61,11 @@ export class ShopScene {
         gridHelper.material.opacity = 0.15;
         this.scene.add(gridHelper);
 
-        // --- 2. VOLUMETRIC GOD RAY (The "Realism" Upgrade) ---
-        this.volumetricBeam = new VolumetricBeam(0x00f0ff);
-        this.volumetricBeam.mesh.position.y = -50; // Base of unit
-        this.scene.add(this.volumetricBeam.mesh);
-
-        // --- 3. PROJECTOR BASE (Detailed Mesh) ---
-        const baseGroup = new THREE.Group();
-        baseGroup.position.y = -30;
-
-        // Main Ring
-        const ringGeo = new THREE.CylinderGeometry(40, 48, 6, 64);
-        const ringMat = new THREE.MeshStandardMaterial({
-            color: 0x0a0a0a, metalness: 0.95, roughness: 0.15
-        });
-        const ring = new THREE.Mesh(ringGeo, ringMat);
-        baseGroup.add(ring);
-
-        // Glowing Core
-        const coreGeo = new THREE.CylinderGeometry(28, 28, 7, 32);
-        const coreMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
-        const core = new THREE.Mesh(coreGeo, coreMat);
-        core.position.y = 1;
-        baseGroup.add(core);
-
-        // Floating Tech Rings
-        this.techRings = [];
-        for (let i = 0; i < 4; i++) {
-            const tGeo = new THREE.TorusGeometry(55 + (i * 15), 0.3, 16, 100);
-            const tMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.15 });
-            const tMesh = new THREE.Mesh(tGeo, tMat);
-            tMesh.rotation.x = Math.PI / 2;
-            tMesh.userData = { speed: (i + 1) * 0.3, axis: i % 2 === 0 ? 1 : -1 };
-            this.techRings.push(tMesh);
-            baseGroup.add(tMesh);
-        }
-
-        this.scene.add(baseGroup);
+        // --- 2. VOLUMETRIC GOD RAY & PROJECTOR BASE (Disabled for CSS Roulette) ---
+        // this.volumetricBeam = new VolumetricBeam(0x00f0ff);
+        // this.volumetricBeam.mesh.position.y = -50; 
+        // this.scene.add(this.volumetricBeam.mesh);
+        // ... (Base mesh removed to clean the CSS card background) ...
 
         // --- 4. PARTICLES (Data Dust - More localized) ---
         const pGeo = new THREE.BufferGeometry();
