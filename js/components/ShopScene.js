@@ -29,8 +29,8 @@ export class ShopScene {
         this.targetCameraPos = new THREE.Vector2(0, 0);
 
         this.initLights();
-        this.buildStage();
-        this.buildHologram(); // The central item
+        // this.buildStage();      // Temporarily disabled to make room for CSS Roulette
+        // this.buildHologram();   // Temporarily disabled to make room for CSS Roulette
 
         this.animate();
 
