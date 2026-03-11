@@ -1,0 +1,39 @@
+/* RANKING CUSTOM SCROLLBAR & GLOWS */
+/* [shared-theme] Colors pulled from css/rules.css variables */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #08090f;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #1f2937;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--theme-neon-rgb) / 1);
+}
+
+.text-glow {
+    text-shadow: 0 0 5px rgb(var(--theme-neon-rgb) / 0.7);
+}
+
+.border-glow-container {
+    box-shadow: 0 0 10px rgb(var(--theme-neon-rgb) / 0.2), inset 0 0 20px rgb(var(--theme-neon-rgb) / 0.05);
+}
+
+.shadow-neon {
+    box-shadow: 0 0 10px rgb(var(--theme-primary-rgb) / 0.5);
+}
+
+.shadow-neon-blue {
+    box-shadow: 0 0 10px rgb(var(--theme-blue-rgb) / 0.5);
+}
+
+.shadow-neon-magenta {
+    text-shadow: 0 0 10px rgb(var(--theme-magenta-rgb) / 0.8);
+}
