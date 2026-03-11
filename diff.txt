@@ -1,8 +1,98 @@
-﻿A	.vscode/settings.json
-A	assets/img/rules/watermarked-060bae11-4609-4962-90cb-74e948d57cf3.jpg
-A	assets/video/login.mp4
-M	css/login.css
-M	index.html
-M	js/components/Leaderboard.js
-M	js/components/Login.js
-M	js/store.js
+﻿commit c47a719c9d291b17cf98cc0cf91a47c50a5cfe91
+Author: Amon <y96mt9rmsb@privaterelay.appleid.com>
+Date:   Wed Mar 11 12:52:39 2026 -0500
+
+    Standardized the styles of the rank and rules views
+
+ generalidad_de_estilos/Leaderboard.js | 238 ++++++++++++++++++++++++
+ generalidad_de_estilos/RulesModal.js  | 229 +++++++++++++++++++++++
+ generalidad_de_estilos/camilo.md      |  14 ++
+ generalidad_de_estilos/rank.css       |  39 ++++
+ generalidad_de_estilos/rules.css      | 338 ++++++++++++++++++++++++++++++++++
+ 5 files changed, 858 insertions(+)
+
+commit 1160ee41cde26dffe905846309e1a5fd7f2275a3
+Author: Amon <y96mt9rmsb@privaterelay.appleid.com>
+Date:   Mon Mar 9 18:50:19 2026 -0500
+
+    add readme
+
+ README.md | 152 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 152 insertions(+)
+
+commit b14bbf408d5c289a690d6b905b1d5ff64bae4eeb
+Author: Amon <y96mt9rmsb@privaterelay.appleid.com>
+Date:   Mon Mar 9 18:03:02 2026 -0500
+
+    Create rules and views
+
+ .gitignore                                |    4 -
+ HexGrid_prev.js                           |  Bin 40598 -> 0 bytes
+ README.md                                 |    1 -
+ SpaceBackground_prev.js                   |  194 -
+ admin.html                                |  160 -
+ app_prev.js                               |   36 -
+ assets/space-bg.png                       |  Bin 85341 -> 0 bytes
+ assets/textures/8k_earth.jpg              |  Bin 4565076 -> 0 bytes
+ assets/textures/8k_stars.jpg              |  Bin 1905513 -> 0 bytes
+ assets/textures/8k_sun.jpg                |  Bin 3696361 -> 0 bytes
+ assets/textures/earth.jpg                 |  Bin 463087 -> 0 bytes
+ assets/textures/interstellar.mp3          |  Bin 10153018 -> 0 bytes
+ assets/textures/jupiter.jpg               |  Bin 498976 -> 0 bytes
+ assets/textures/lensflare0.png            |  Bin 78758 -> 0 bytes
+ assets/textures/lensflare2.png            |  Bin 2107 -> 0 bytes
+ assets/textures/mars.jpg                  |  Bin 750547 -> 0 bytes
+ assets/textures/mercury.jpg               |  Bin 872555 -> 0 bytes
+ assets/textures/neptune.jpg               |  Bin 241580 -> 0 bytes
+ assets/textures/saturn.jpg                |  Bin 199916 -> 0 bytes
+ assets/textures/saturn_ring.png           |  Bin 12119 -> 0 bytes
+ assets/textures/stars.jpg                 |  Bin 251454 -> 0 bytes
+ assets/textures/sun.jpg                   |  Bin 822427 -> 0 bytes
+ assets/textures/uranus.jpg                |  Bin 77751 -> 0 bytes
+ assets/textures/venus.jpg                 |  Bin 885075 -> 0 bytes
+ assets/video/inicio.mp4                   |  Bin 25913738 -> 0 bytes
+ css/admin.css                             |  467 ---
+ css/login.css                             |  241 --
+ css/mini-leaderboard.css                  |  145 -
+ css/question.css                          |  215 --
+ css/rank.css                              |   38 -
+ css/rules.css                             |  128 -
+ css/shop-tactics.css                      |  391 --
+ css/style.css                             | 5653 -----------------------------
+ {assets/img/rules => img}/ausencia.jpg    |  Bin
+ {assets/img/rules => img}/clanes.jpg      |  Bin
+ {assets/img/rules => img}/conquista.jpg   |  Bin
+ {assets/img/rules => img}/mapa_clanes.jpg |  Bin
+ {assets/img/rules => img}/poderes.jpg     |  Bin
+ index.html                                |  340 +-
+ js/admin-app.js                           |  334 --
+ js/app.js                                 |   36 -
+ js/components/AdminDashboard.js           |  212 --
+ js/components/ChallengeModal.js           |   72 -
+ js/components/Chat.js                     |   75 -
+ js/components/ChatWidget.js               |   71 -
+ js/components/FuturisticTower.js          |  173 -
+ js/components/GalaxyBackground.js         |   58 -
+ js/components/HexGrid.js                  |  445 ---
+ js/components/HoloLeaderboard.js          |  219 --
+ js/components/Leaderboard.js              |  221 --
+ js/components/Login.js                    |  298 --
+ js/components/MiniLeaderboard.js          |   52 -
+ js/components/QuestionModal.js            |  185 -
+ js/components/RulesModal.js               |  229 --
+ js/components/ShopCarousel.js             |  365 --
+ js/components/ShopScene.js                |  241 --
+ js/components/Sidebar.js                  |   59 -
+ js/components/SpaceBackground.js          |  194 -
+ js/components/StatsGraph.js               |  120 -
+ js/router.js                              |  176 -
+ js/store.js                               |  322 --
+ js/utils/HoloBanner.js                    |  204 --
+ js/utils/HologramMaterial.js              |  125 -
+ js/utils/VolumetricBeam.js                |   73 -
+ package-lock.json                         |  988 -----
+ package.json                              |   16 -
+ public/video/inicio.mp4                   |  Bin 25913738 -> 0 bytes
+ script.js                                 |   69 +
+ style.css                                 |  389 ++
+ 69 files changed, 637 insertions(+), 13397 deletions(-)

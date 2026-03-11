@@ -1,8 +1,8 @@
-export default function createRulesModal() {
+﻿export default function createRulesModal() {
     const modalOverlay = document.createElement('div');
     modalOverlay.className = 'modal-overlay fade-in';
-    // Add the "dark" class directly to ensure tailwind dark mode colors apply
-    modalOverlay.classList.add('dark');
+    // [shared-theme] Hook (colors controlled in css/rules.css)
+    modalOverlay.classList.add('dark', 'shared-theme');
 
     // Auto-close on outside click
     modalOverlay.addEventListener('click', (e) => {
