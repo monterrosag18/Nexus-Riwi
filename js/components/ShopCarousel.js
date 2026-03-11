@@ -3,61 +3,35 @@ import { ShopScene } from './ShopScene.js';
 
 const SHOP_ITEMS = [
     {
-        id: 'shield',
-        name: 'ION SHIELD',
-        type: 'defensive',
-        subtitle: 'CLASS IV DEFENSIVE MODULE',
-        icon: 'fa-shield-halved',
-        colorClass: 'text-neon-blue',
-        cost: 500,
-        specs: { absorption: '85%', recharge: '4.2s', weight: '12kg', energy: 'HIGH' },
-        desc: 'Generates a localized ionic field capable of dispersing directed energy weapons.'
+        id: 'shield', name: 'ION SHIELD', type: 'defensive', subtitle: 'CLASS IV MODULE', icon: 'fa-shield-halved', colorClass: 'text-neon-blue',
+        cost: 500, specs: { absorption: '85%', recharge: '4.2s', weight: '12kg', energy: 'HIGH' },
+        desc: 'Generates a localized ionic field capable of dispersing directed energy weapons.',
+        image: 'escudo_habilidad.png', rgb: '0, 136, 255'
     },
     {
-        id: 'siphon',
-        name: 'DATA SIPHON',
-        type: 'offensive',
-        subtitle: 'COVERT EXTRACTION PROTOCOL',
-        icon: 'fa-database',
-        colorClass: 'text-neon-red',
-        cost: 1500,
-        specs: { yield: 'HIGH', trace: 'LOW', duration: 'INSTANT', energy: 'CRIT' },
-        desc: 'A malicious packet injector designed to siphon raw Influence Points directly from a rival clan mainframe.',
-        isOffensive: true,
-        stealAmount: 200
+        id: 'siphon', name: 'DATA SIPHON', type: 'offensive', subtitle: 'COVERT EXTRACTION', icon: 'fa-database', colorClass: 'text-neon-red',
+        cost: 1500, specs: { yield: 'HIGH', trace: 'LOW', duration: 'INSTANT', energy: 'CRIT' },
+        desc: 'A malicious packet injector designed to siphon raw Influence Points directly from a rival clan.',
+        isOffensive: true, stealAmount: 200,
+        image: 'fuga_habilidad.png', rgb: '255, 0, 85'
     },
     {
-        id: 'overclock',
-        name: 'OVERCLOCK KIT',
-        type: 'utility',
-        subtitle: 'HARDWARE ACCELERATOR',
-        icon: 'fa-bolt',
-        colorClass: 'text-neon-yellow',
-        cost: 800,
-        specs: { boost: '+40%', heat: 'DANGEROUS', duration: '60s', energy: 'MED' },
-        desc: 'Bypasses safety limiters on core processors, boosting speeds at the risk of system damage.'
+        id: 'overclock', name: 'OVERCLOCK KIT', type: 'utility', subtitle: 'HARDWARE ACCELERATOR', icon: 'fa-bolt', colorClass: 'text-neon-yellow',
+        cost: 800, specs: { boost: '+40%', heat: 'DANGEROUS', duration: '60s', energy: 'MED' },
+        desc: 'Bypasses safety limiters on core processors, boosting speeds at the risk of system damage.',
+        image: 'bomba_habilidad.png', rgb: '255, 170, 0'
     },
     {
-        id: 'cloak',
-        name: 'STEALTH CLOAK',
-        type: 'utility',
-        subtitle: 'OPTICAL CAMOUFLAGE',
-        icon: 'fa-ghost',
-        colorClass: 'text-neon-purple',
-        cost: 1200,
-        specs: { visibility: 'ZERO', heat_sig: 'MASKED', duration: '120s', energy: 'HIGH' },
-        desc: 'Bends local light waves around the operator, rendering them invisible to standard optics.'
+        id: 'cloak', name: 'STEALTH CLOAK', type: 'utility', subtitle: 'OPTICAL CAMOUFLAGE', icon: 'fa-ghost', colorClass: 'text-neon-purple',
+        cost: 1200, specs: { visibility: 'ZERO', heat_sig: 'MASKED', duration: '120s', energy: 'HIGH' },
+        desc: 'Bends local light waves around the operator, rendering them invisible to standard optics.',
+        image: 'Lupa_habilidad.png', rgb: '170, 0, 255'
     },
     {
-        id: 'scanner',
-        name: 'OMNI-SCANNER',
-        type: 'utility',
-        subtitle: 'SECTOR RECONNAISSANCE',
-        icon: 'fa-eye',
-        colorClass: 'text-neon-green',
-        cost: 2000,
-        specs: { range: '50km', penetration: 'DEEP', type: 'PASSIVE', energy: 'LOW' },
-        desc: 'Advanced telemetry suit that highlights weak points in enemy territory.'
+        id: 'scanner', name: 'OMNI-SCANNER', type: 'utility', subtitle: 'SECTOR RECONNAISSANCE', icon: 'fa-eye', colorClass: 'text-neon-green',
+        cost: 2000, specs: { range: '50km', penetration: 'DEEP', type: 'PASSIVE', energy: 'LOW' },
+        desc: 'Advanced telemetry suit that highlights weak points in enemy territory.',
+        image: 'script_habilidad.png', rgb: '0, 255, 136'
     }
 ];
 
@@ -120,14 +94,29 @@ export default function renderShop() {
                     </div>
                 </div>
 
-                <!-- COLUMN 2: CENTER STAGE -->
-                <div class="holo-column col-center" style="pointer-events: none;"> 
-                    <div class="hologram-header">
+                <!-- COLUMN 2: CENTER STAGE (3D ROULETTE) -->
+                <div class="holo-column col-center" style="position: relative;"> 
+                    <div class="hologram-header" style="position: relative; z-index: 20;">
                         <h1 class="item-title-large" style="text-shadow: 0 0 10px var(--primary-cyan);">${activeItem.name}</h1>
                         <div class="item-subtitle" style="color: var(--primary-cyan);">${activeItem.subtitle}</div>
                     </div>
                     
-                    <div class="action-bar" style="pointer-events: auto;">
+                    <!-- ROULETTE WRAPPER -->
+                    <div class="roulette-wrapper">
+                        <div class="roulette-inner" style="--quantity: ${SHOP_ITEMS.length};">
+                            ${SHOP_ITEMS.map((item, index) => `
+                                <div class="roulette-card ${activeItem.id === item.id ? 'selected-card' : ''}" 
+                                     data-id="${item.id}"
+                                     style="--index: ${index}; --color-card: ${item.rgb};">
+                                    <div class="r-img">
+                                        <img src="./assets/img/rules/skills/${item.image}" alt="${item.name}">
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="action-bar" style="position: relative; z-index: 20; pointer-events: auto;">
                         <button id="btn-purchase" class="action-btn primary" ${credits < activeItem.cost ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>
                             <span class="btn-text">PURCHASE MODULE</span>
                             <span class="btn-glare"></span>
@@ -199,6 +188,18 @@ export default function renderShop() {
             });
         });
 
+        // Card selection from Roulette
+        const cards = container.querySelectorAll('.roulette-card');
+        cards.forEach(card => card.addEventListener('click', (e) => {
+            const id = e.currentTarget.getAttribute('data-id');
+            const selected = SHOP_ITEMS.find(i => i.id === id);
+            if (selected && selected.id !== activeItem.id) {
+                activeItem = selected;
+                updateUI();
+                if (shopSceneInstance) shopSceneInstance.setItem(activeItem.id);
+            }
+        }));
+
         // Purchase Button
         const btnPurchase = container.querySelector('#btn-purchase');
         if (btnPurchase) {
@@ -266,6 +267,16 @@ export default function renderShop() {
             const statusNode = row.querySelector('.item-status');
             if (statusNode && item) {
                 statusNode.innerText = credits >= item.cost ? 'AVAILABLE' : 'LOCKED';
+            }
+        });
+
+        // 1.b Update Roulette Ring
+        const cards = container.querySelectorAll('.roulette-card');
+        cards.forEach(card => {
+            if (card.getAttribute('data-id') === activeItem.id) {
+                card.classList.add('selected-card');
+            } else {
+                card.classList.remove('selected-card');
             }
         });
 
