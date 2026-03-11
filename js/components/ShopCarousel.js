@@ -270,15 +270,25 @@ export default function renderShop() {
             }
         });
 
-        // 1.b Update Roulette Ring
+        // 1.b Update Roulette Ring & Rotate Cylinder
         const cards = container.querySelectorAll('.roulette-card');
-        cards.forEach(card => {
+        const inner = container.querySelector('.roulette-inner');
+        let selectedIndex = 0;
+
+        cards.forEach((card, index) => {
             if (card.getAttribute('data-id') === activeItem.id) {
                 card.classList.add('selected-card');
+                selectedIndex = index;
             } else {
                 card.classList.remove('selected-card');
             }
         });
+
+        // Calculate and apply rotation
+        if (inner) {
+            const angle = (360 / SHOP_ITEMS.length) * selectedIndex * -1;
+            inner.style.transform = `rotateY(${angle}deg)`;
+        }
 
         // 2. Update Center Panel Text
         const title = container.querySelector('.item-title-large');
