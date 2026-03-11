@@ -1,6 +1,6 @@
-const THREE = window.THREE;
 import { createHologramMaterial } from '../utils/HologramMaterial.js';
 import { VolumetricBeam } from '../utils/VolumetricBeam.js';
+const THREE = window.THREE;
 
 export class ShopScene {
     constructor(containerId) {

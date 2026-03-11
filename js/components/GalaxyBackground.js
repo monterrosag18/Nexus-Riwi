@@ -1,5 +1,5 @@
-const THREE = window.THREE;
 import { FuturisticTower } from './FuturisticTower.js';
+const THREE = window.THREE;
 
 export class GalaxyBackground {
     constructor(scene) {
