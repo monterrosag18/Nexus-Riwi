@@ -1,11 +1,52 @@
 import { store } from '../store.js';
 
+// ─────────────────────────────────────────────
+//  CSS-BASED HEX BACKGROUND ELEMENTS
+// ─────────────────────────────────────────────
+function injectHexBackground(container) {
+    const hexSVG = `<svg viewBox="0 0 120 104" xmlns="http://www.w3.org/2000/svg"><polygon points="60,2 112,30 112,74 60,102 8,74 8,30" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>`;
+
+    const orbs = [1,2,3,4,5,6,7,8].map(i => {
+        const el = document.createElement('div');
+        el.className = `hex-orb hex-orb-${i}`;
+        el.innerHTML = hexSVG;
+        return el;
+    });
+
+    const circuits = Array.from({length: 10}, (_, i) => {
+        const el = document.createElement('div');
+        const isV = i >= 6;
+        el.className = `hex-circuit ${isV ? 'hex-circuit-v' : 'hex-circuit-h'} hex-circuit-${i+1}`;
+        return el;
+    });
+
+    const nodes = Array.from({length: 8}, (_, i) => {
+        const el = document.createElement('div');
+        el.className = `hex-node hex-node-${i+1}`;
+        return el;
+    });
+
+    const particles = Array.from({length: 12}, (_, i) => {
+        const el = document.createElement('div');
+        el.className = `hex-particle hex-particle-${i+1}`;
+        return el;
+    });
+
+    [...orbs, ...circuits, ...nodes, ...particles].forEach(el => container.appendChild(el));
+}
+
+// ─────────────────────────────────────────────
+//  RENDER LEADERBOARD
+// ─────────────────────────────────────────────
 export default function renderLeaderboard() {
     const container = document.createElement('div');
-    container.className = 'view-content fade-in w-full h-full';
+    container.className = 'view-content fade-in w-full h-full theme-leaderboard-bg dark shared-theme';
     container.style.padding = '0';
     container.style.margin = '0';
-    container.classList.add('dark', 'shared-theme');
+
+
+    // Inject CSS-based hex background elements
+    injectHexBackground(container);
 
     // Get Data
     const state = store.getState();
@@ -175,10 +216,10 @@ export default function renderLeaderboard() {
 
     const currentClanLabel = (currentUser.clan || 'UNASSIGNED').toUpperCase();
 
-    container.innerHTML = `
-        <div class="flex-1 flex flex-col w-full h-full text-gray-100 font-body antialiased overflow-y-auto custom-scrollbar relative theme-leaderboard-bg">
+    container.insertAdjacentHTML('beforeend', `
+        <div class="flex-1 flex flex-col w-full h-full text-gray-100 font-body antialiased overflow-y-auto custom-scrollbar relative" style="z-index:1;background:transparent;">
             
-            <header class="w-full pt-4 pb-4 px-6 flex justify-between items-center theme-surface-dark backdrop-blur-md border-b border-primary/20 sticky top-0 z-40 theme-neon-shadow">
+            <header class="w-full pt-4 pb-4 px-6 flex justify-between items-center backdrop-blur-md border-b border-primary/20 sticky top-0 z-40 theme-neon-shadow" style="background:rgba(3,10,22,0.75);">
                 <div class="flex flex-col">
                     <span class="text-[10px] font-display tracking-[0.2em] text-primary/80 uppercase mb-1 glitch-title" data-text="System Status: Online">System Status: Online</span>
                     <h1 class="text-xl md:text-3xl font-display font-bold text-white uppercase tracking-widest theme-neon-text-glow glitch-title" data-text="Global Rankings">Global Rankings</h1>
@@ -207,7 +248,7 @@ export default function renderLeaderboard() {
                 </div>
 
                 <!-- PANEL 1: CLAN RANKING -->
-                <section id="clan-panel" class="bg-gray-900/80 backdrop-blur border border-primary/30 relative flex flex-col theme-neon-shadow">
+                <section id="clan-panel" class="backdrop-blur border border-primary/30 relative flex flex-col theme-neon-shadow" style="background:rgba(10,16,30,0.72);">
                     <div class="absolute top-0 left-0 w-full h-[1px] bg-primary/50 shadow-neon"></div>
                     <div class="absolute bottom-0 left-0 w-full h-[1px] bg-primary/50 shadow-neon"></div>
                     <div class="absolute top-0 left-0 h-full w-[1px] bg-primary/50 shadow-neon"></div>
@@ -220,7 +261,7 @@ export default function renderLeaderboard() {
                         <span class="text-[10px] font-mono text-primary/70 tracking-widest uppercase border border-primary/20 px-2 py-1">Selecciona tu clan</span>
                     </div>
                     <div class="flex-1">
-                        <div class="text-xs font-mono uppercase text-primary/70 border-b border-primary/20 bg-gray-900" style="display:grid;grid-template-columns:${CLAN_GRID};align-items:center;">
+                        <div class="text-xs font-mono uppercase text-primary/70 border-b border-primary/20" style="display:grid;grid-template-columns:${CLAN_GRID};align-items:center;background:rgba(5,12,24,0.8);">
                             <div style="padding:14px 8px 14px 24px;text-align:center;">Rank</div>
                             <div style="padding:14px 16px;">Faction</div>
                             <div style="padding:14px 16px;text-align:center;">Operativos</div>
@@ -231,7 +272,7 @@ export default function renderLeaderboard() {
                 </section>
 
                 <!-- PANEL 2: OPERATIVES (hidden by default) -->
-                <section id="coders-section" style="display:none;" class="bg-gray-900/80 backdrop-blur border border-blue-500/30 relative flex-col transition-all duration-300 theme-blue-shadow">
+                <section id="coders-section" style="display:none;" class="backdrop-blur border border-blue-500/30 relative flex-col transition-all duration-300 theme-blue-shadow" style="background:rgba(10,16,30,0.72);">
                     <div id="coders-top-line" class="absolute top-0 left-0 w-full h-[1px] bg-blue-500/50 shadow-neon-blue"></div>
                     <div id="coders-bottom-line" class="absolute bottom-0 left-0 w-full h-[1px] bg-blue-500/50 shadow-neon-blue"></div>
                     <div id="coders-left-line" class="absolute top-0 left-0 h-full w-[1px] bg-blue-500/50 shadow-neon-blue"></div>
@@ -250,7 +291,7 @@ export default function renderLeaderboard() {
                     <div class="overflow-x-auto flex-1 relative">
                         <table class="w-full text-left border-collapse">
                             <thead class="sticky top-0 z-10">
-                                <tr id="coders-thead-row" class="text-xs font-mono uppercase text-blue-500/70 border-b border-blue-500/20 bg-gray-900">
+                                <tr id="coders-thead-row" class="text-xs font-mono uppercase text-blue-500/70 border-b border-blue-500/20" style="background:rgba(5,12,24,0.8);">
                                     <th class="py-4 pl-6 pr-2 font-medium w-16 text-center">Rank</th>
                                     <th class="py-4 px-4 font-medium">Operativo</th>
                                     <th class="py-4 px-4 font-medium text-center">Clan</th>
@@ -264,7 +305,7 @@ export default function renderLeaderboard() {
 
             </main>
         </div>
-    `;
+    `);
 
     // Glitch animation for leaderboard labels (staggered timings)
     const glitchTargets = container.querySelectorAll('.glitch-title');
