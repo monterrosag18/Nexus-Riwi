@@ -1,0 +1,8 @@
+﻿A	.vscode/settings.json
+A	assets/img/rules/watermarked-060bae11-4609-4962-90cb-74e948d57cf3.jpg
+A	assets/video/login.mp4
+M	css/login.css
+M	index.html
+M	js/components/Leaderboard.js
+M	js/components/Login.js
+M	js/store.js

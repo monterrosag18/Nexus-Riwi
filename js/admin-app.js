@@ -14,8 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
         turing: { name: 'Turing', color: '#2D9CDB', points: 2606, members: 25, icon: '\uf2db' },
         tesla: { name: 'Tesla', color: '#EB5757', points: 1932, members: 28, icon: '\uf0e7' },
         mccarthy: { name: 'McCarthy', color: '#27AE60', points: 1373, members: 22, icon: '\uf544' },
-        lovelace: { name: 'Lovelace', color: '#9B51E0', points: 1105, members: 18, icon: '\uf121' },
-        neumann: { name: 'Neumann', color: '#F2C94C', points: 940, members: 15, icon: '\uf0c3' }
+        thompson: { name: 'Thompson', color: '#9B51E0', points: 1105, members: 18, icon: '\uf085' },
+        halmiton: { name: 'Halmiton', color: '#F2C94C', points: 940, members: 15, icon: '\uf06d' }
     };
 
     function getClans() {
