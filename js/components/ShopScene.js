@@ -1,4 +1,4 @@
-import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
+const THREE = window.THREE;
 import { createHologramMaterial } from '../utils/HologramMaterial.js';
 import { VolumetricBeam } from '../utils/VolumetricBeam.js';
 
@@ -71,7 +71,7 @@ export class ShopScene {
         const pGeo = new THREE.BufferGeometry();
         const count = 1500;
         const pos = new Float32Array(count * 3);
-        for (let i = 0; i < count * 3; i++) {
+        for (let i = 0; i < count * 3; i += 3) {
             const r = Math.random() * 100 + 20; // Ring distribution
             const theta = Math.random() * Math.PI * 2;
             pos[i] = Math.cos(theta) * r;
