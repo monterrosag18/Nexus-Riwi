@@ -109,13 +109,17 @@ requestAnimationFrame(girar);
   if (calculado == false) {
     anguloFinal = Math.round(angulo / 36) * 36 + 5;
     calculado = true;
-    cartaGanadora = anguloFinal / 36;
-    winner[cartaGanadora].addEventListener("click",function click(){
-      winner[cartaGanadora].querySelector(".reverse").style.opacity = 1;
+    cartaGanadora = Math.round(anguloFinal / 36)
+    alert(cartaGanadora)
+    if (cartaGanadora >= 10) cartaGanadora = 0;
+      
 
+    
+    winner[cartaGanadora].addEventListener("click",function click(){
+     winner[cartaGanadora].querySelector(".reverse").style.opacity = 1;
     })
-  }
-  
+      // alert(winner[cartaGanadora])
+    }
 
 if (Math.abs (angulo - anguloFinal) < 0.5){
     angulo = anguloFinal;
@@ -141,19 +145,29 @@ if (llegue == false)
 
   
   }
-  requestAnimationFrame(girar);
-  if (anguloFinal >= 360)
-     anguloFinal -= 360;
 }
-girar() 
+ winner.forEach(function(card){
+  card.querySelector(".reverse").style.opacity = 0;
+  card.addEventListener("click", function(){
+    if (card === winner[cartaGanadora]) {
+      // alert(cartaGanadora);
+      card.querySelector(".reverse").style.backfaceVisibility = "visible";
+    }
+  })
+ })
 
 
 const touch = document.getElementById("touch")
-touch.addEventListener("click",function(){
+touch.addEventListener("click",function(event){
+  alert("carta clickeada")
+  event.stopPropagation();
     rapido = 5.0;
     llegue = false;
     calculado = false;
     angulo = 0;
-    
+    winner.forEach(function(card){
+      card.querySelector(".reverse").style.backfaceVisibility = "hidden";
+    })
+    girar()
   })
 
