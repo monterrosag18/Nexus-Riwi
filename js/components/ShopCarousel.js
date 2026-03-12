@@ -351,6 +351,12 @@ export default function renderShop() {
                         lastResult = activeCard.execute();
                         spinState = 'READY';
 
+                        // Log to event feed for News Ticker
+                        const logUser = store.getState().currentUser;
+                        const clanLabel = logUser ? (store.getState().clans[logUser.clan]?.name || logUser.clan).toUpperCase() : 'UNKNOWN';
+                        const logType = activeCard.type === 'good' ? 'shop-good' : 'shop-bad';
+                        store.logEvent(`⚡ ${clanLabel} drew ${activeCard.name} — ${activeCard.effect}`, logType);
+
                         if (shopScene) {
                             shopScene.setSpinning(false);
                             shopScene.setColor(activeCard.type === 'good' ? '#00ff88' : '#ff0055');

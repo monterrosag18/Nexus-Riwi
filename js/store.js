@@ -45,6 +45,11 @@ class Store {
         };
         this.listeners = [];
 
+        // --- EVENT LOG SYSTEM ---
+        try {
+            this.eventLog = JSON.parse(localStorage.getItem('riwi_events')) || [];
+        } catch(e) { this.eventLog = []; }
+
         // Build the dynamic map now that state is defined
         this.state.territories = this.initializeMap();
     }
@@ -282,7 +287,29 @@ class Store {
 
     addPoints(clanId, amount) {
         if (this.state.clans[clanId]) {
+            // Snapshot rankings before change
+            const before = Object.entries(this.state.clans)
+                .sort((a,b) => b[1].points - a[1].points)
+                .map(e => e[0]);
+
             this.state.clans[clanId].points += amount;
+
+            // Snapshot rankings after change
+            const after = Object.entries(this.state.clans)
+                .sort((a,b) => b[1].points - a[1].points)
+                .map(e => e[0]);
+
+            // Detect ranking shifts
+            after.forEach((id, idx) => {
+                const oldIdx = before.indexOf(id);
+                const name = (this.state.clans[id]?.name || id).toUpperCase();
+                if (idx < oldIdx) {
+                    this.logEvent(`🏆 ${name} climbed to #${idx+1}!`, 'rank-up');
+                } else if (idx > oldIdx && oldIdx < 3) {
+                    this.logEvent(`📉 ${name} fell to #${idx+1}`, 'rank-down');
+                }
+            });
+
             this.notify();
         }
     }
@@ -316,6 +343,18 @@ class Store {
 
         this.notify();
         return { success: true, actualStolen };
+    }
+
+    // --- EVENT LOG ---
+    logEvent(msg, type = 'info') {
+        const entry = { msg, type, time: Date.now() };
+        this.eventLog.unshift(entry);
+        if (this.eventLog.length > 30) this.eventLog.length = 30;
+        try { localStorage.setItem('riwi_events', JSON.stringify(this.eventLog)); } catch(e) {}
+    }
+
+    getEventLog() {
+        return this.eventLog;
     }
 }
 

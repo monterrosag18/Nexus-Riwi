@@ -3,6 +3,8 @@ import { GalaxyBackground } from './GalaxyBackground.js';
 import { HoloBanner } from '../utils/HoloBanner.js';
 import createQuestionModal from './QuestionModal.js';
 import renderMiniLeaderboard from './MiniLeaderboard.js';
+import createNewsTicker from './NewsTicker.js';
+import createWeeklyCountdown from './WeeklyCountdown.js';
 
 // --- MODULE SCOPE VARIABLES ---
 let scene, camera, renderer, composer, controls;
@@ -62,6 +64,16 @@ export default function renderMap() {
     // 1. Inject Mini Leaderboard
     const hud = container.querySelector('#tactical-hud');
     hud.appendChild(renderMiniLeaderboard());
+
+    // 1b. Inject Weekly Countdown (top-left)
+    const mapUI = container.querySelector('#map-ui');
+    const countdown = createWeeklyCountdown();
+    countdown.style.cssText = 'position:absolute;top:15px;left:15px;pointer-events:auto;z-index:60;';
+    mapUI.appendChild(countdown);
+
+    // 1c. Inject News Ticker (bottom)
+    const ticker = createNewsTicker();
+    mapUI.appendChild(ticker);
 
     // 2. Initialize 3D Engine
     setTimeout(() => {
