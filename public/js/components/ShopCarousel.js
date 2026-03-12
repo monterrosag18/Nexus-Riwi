@@ -399,6 +399,10 @@ export default function renderShop() {
 
         if (shopScene) shopScene.setSpinning(true);
 
+        // Reset counters for every spin
+        let cycleCount = 0;
+        const maxCycles = 30 + Math.floor(Math.random() * 15);
+
         const runCycle = () => {
             cycleCount++;
             const rndCard = NEXUS_CARDS[Math.floor(Math.random() * NEXUS_CARDS.length)];

@@ -52,7 +52,6 @@ export default function renderLeaderboard() {
     const state = store.getState();
     const clans = Object.values(state.clans).sort((a, b) => b.points - a.points);
     const currentUser = state.currentUser || { name: 'GUEST', clan: 'UNASSIGNED' };
-    const allUsers = store.getRegisteredUsers().sort((a, b) => (b.points || 0) - (a.points || 0));
     const userClanKey = (currentUser.clan || '').toLowerCase();
 
     // Helpers (colors controlled in css/rules.css)
@@ -331,32 +330,41 @@ export default function renderLeaderboard() {
     const setLineColors = (hex) => borderLines.forEach((el) => { if (el) el.style.background = hex; });
 
     // Show operatives panel and hide clans
-    const showCoders = (clanKey) => {
+    const showCoders = async (clanKey) => {
         const s = getClanStyles(clanKey);
-        const filtered = allUsers.filter((u) => (u.clan || '').toLowerCase() === clanKey);
         const label = clanKey ? clanKey.charAt(0).toUpperCase() + clanKey.slice(1) : 'Clan';
 
-        // Populate table
-        codersTbody.innerHTML = filtered.length > 0
-            ? filtered.map((u, i) => renderUserRow(u, i)).join('')
-            : emptyState(`No hay operativos en ${label} aun`);
-
-        // Update header
+        // Update header and show loading
         codersTitle.textContent = `${label} - Operativos`;
-        codersCount.textContent = `${filtered.length} OPS`;
-        codersCount.style.color = s.borderHex;
-        codersCount.style.borderColor = s.borderHex + '55';
-        codersIcon.style.color = s.borderHex;
-        codersSection.style.borderColor = s.borderHex + '70';
-        codersSection.style.boxShadow = `0 0 20px ${s.accentColor}`;
-        theadRow.style.color = s.borderHex + 'aa';
-        setLineColors(s.borderHex + '80');
-        backBtn.style.color = s.borderHex;
-        backBtn.style.borderColor = s.borderHex + '60';
-
+        codersTbody.innerHTML = `<tr><td colspan="4" class="py-16 text-center"><div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div><p class="mt-4 font-mono text-xs text-blue-500">DECRYPTING CLAN DATA...</p></td></tr>`;
+        
         // Swap panels
         clanPanel.style.display = 'none';
         codersSection.style.display = 'flex';
+
+        try {
+            const res = await fetch(`/api/clans/members?clanId=${clanKey}`);
+            const filtered = await res.ok ? await res.json() : [];
+
+            // Populate table
+            codersTbody.innerHTML = filtered.length > 0
+                ? filtered.map((u, i) => renderUserRow(u, i)).join('')
+                : emptyState(`No hay operativos en ${label} aun`);
+
+            codersCount.textContent = `${filtered.length} OPS`;
+            codersCount.style.color = s.borderHex;
+            codersCount.style.borderColor = s.borderHex + '55';
+            codersIcon.style.color = s.borderHex;
+            codersSection.style.borderColor = s.borderHex + '70';
+            codersSection.style.boxShadow = `0 0 20px ${s.accentColor}`;
+            theadRow.style.color = s.borderHex + 'aa';
+            setLineColors(s.borderHex + '80');
+            backBtn.style.color = s.borderHex;
+            backBtn.style.borderColor = s.borderHex + '60';
+        } catch (e) {
+            console.error('Fetch clan members failed', e);
+            codersTbody.innerHTML = emptyState(`Error al recuperar datos del clan`);
+        }
     };
 
     // Back to clans panel

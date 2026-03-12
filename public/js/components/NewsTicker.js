@@ -13,10 +13,13 @@ export default function createNewsTicker() {
         </div>
     `;
 
-    // Seed initial events if log is empty
+    // Seed initial events ONLY if log is completely empty AND store is ready
     const log = store.getEventLog();
     if (log.length === 0) {
-        seedEvents();
+        // Delay slightly to ensure clans are synced
+        setTimeout(() => {
+            if (store.getEventLog().length === 0) seedEvents();
+        }, 800);
     }
 
     function seedEvents() {
