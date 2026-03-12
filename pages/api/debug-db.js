@@ -1,8 +1,9 @@
-import { sql } from '@vercel/postgres';
+import { db } from '@vercel/postgres';
 
 export default async function handler(req, res) {
+  const client = await db.connect();
   try {
-    // 1. Check if ENV variables exist (just check keys, don't expose values)
+    // 1. Check if ENV variables exist
     const envCheck = {
       hasPostgresUrl: !!process.env.POSTGRES_URL,
       hasPostgresUser: !!process.env.POSTGRES_USER,
@@ -10,10 +11,10 @@ export default async function handler(req, res) {
     };
 
     // 2. Test simple query
-    const timeResult = await sql`SELECT NOW();`;
+    const timeResult = await client.sql`SELECT NOW();`;
     
     // 3. Check for tables
-    const tablesResult = await sql`
+    const tablesResult = await client.sql`
       SELECT table_name 
       FROM information_schema.tables 
       WHERE table_schema = 'public';
