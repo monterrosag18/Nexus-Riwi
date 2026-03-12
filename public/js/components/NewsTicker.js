@@ -31,7 +31,7 @@ export default function createNewsTicker() {
         }
     }
 
-    function updateTicker() {
+    async function updateTicker() {
         const content = bar.querySelector('#ticker-content');
         if (!content) return;
 
@@ -50,15 +50,20 @@ export default function createNewsTicker() {
             'admin-alert': '#ff3b5c'
         };
 
-        // Also inject admin news from localStorage
+        // Also inject admin news from API
         let allItems = [];
         try {
-            const adminNews = JSON.parse(localStorage.getItem('riwi_admin_news') || '[]');
-            adminNews.forEach(n => {
-                const prefix = n.type === 'warning' ? '⚠️' : n.type === 'alert' ? '🚨' : 'ℹ️';
-                allItems.push({ msg: `${prefix} ADMIN: ${n.msg}`, type: `admin-${n.type}` });
-            });
-        } catch(e) {}
+            const adminRes = await fetch('/api/admin/news');
+            if (adminRes.ok) {
+                const adminNews = await adminRes.json();
+                adminNews.forEach(n => {
+                    const prefix = n.type === 'warning' ? '⚠️' : n.type === 'alert' ? '🚨' : 'ℹ️';
+                    allItems.push({ msg: `${prefix} ADMIN: ${n.msg}`, type: `admin-${n.type}` });
+                });
+            }
+        } catch(e) {
+            console.error('Ticker sync failed', e);
+        }
 
         // Add game events after admin news
         events.forEach(e => allItems.push(e));

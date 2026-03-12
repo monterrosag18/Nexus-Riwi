@@ -61,9 +61,9 @@ export default async function createQuestionModal(hexData, hitMesh) {
 
             <div class="panel-footer">
                 <div class="hacking-progress">
-                    <div class="progress-bar-fill"></div>
+                    <div class="progress-bar-fill" id="timer-fill" style="width: 100%;"></div>
                 </div>
-                <div class="status-msg blink">AWAITING INPUT...</div>
+                <div class="status-msg blink" id="status-text">AWAITING INPUT... <span id="timer-secs">10s</span></div>
             </div>
         </div>
     `;
@@ -95,41 +95,93 @@ export default async function createQuestionModal(hexData, hitMesh) {
 
     closeBtn.addEventListener('click', closeModal);
 
-    optionBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            // Disable buttons to prevent double click
-            optionBtns.forEach(b => b.style.pointerEvents = 'none');
+    let timeLeft = 10;
+    let timerActive = true;
+    const timerFill = modalOverlay.querySelector('#timer-fill');
+    const timerText = modalOverlay.querySelector('#timer-secs');
+    const statusMsgText = modalOverlay.querySelector('#status-text');
 
-            const selectedIndex = parseInt(btn.getAttribute('data-index'));
-
-            if (selectedIndex === questionData.correct) {
-                // SUCCESS
-                btn.classList.add('correct-choice');
-                statusMsg.textContent = 'ACCESS GRANTED. OVERRIDING PROTOCOLS...';
-                statusMsg.style.color = '#00ff44';
-
-                // Execute Conquest
-                setTimeout(async () => {
-                    const success = await executeConquest(hexData, hitMesh, user.clan);
-                    if (success) closeModal();
-                    else statusMsg.textContent = 'SYNC ERROR. TRY AGAIN.';
-                }, 1500);
-
-            } else {
-                // FAILURE
-                btn.classList.add('wrong-choice');
-                statusMsg.textContent = 'ACCESS DENIED. INTRUSION DETECTED.';
-                statusMsg.style.color = '#ff0000';
-
-                // Show correct one
-                optionBtns[questionData.correct].classList.add('correct-choice');
-
-                setTimeout(() => {
-                    closeModal();
-                }, 2000);
+    const startTimer = () => {
+        const interval = setInterval(() => {
+            if (!timerActive || !modalOverlay.isConnected) {
+                clearInterval(interval);
+                return;
             }
-        });
+            timeLeft -= 0.1;
+            if (timerText) timerText.textContent = `${Math.ceil(timeLeft)}s`;
+            if (timerFill) timerFill.style.width = `${(timeLeft / 10) * 100}%`;
+
+            if (timeLeft <= 0) {
+                clearInterval(interval);
+                handleFailure("ENCRYPTION TIMEOUT. OVERRIDE FAILED.");
+            }
+        }, 100);
+    };
+
+    const handleFailure = (msg) => {
+        timerActive = false;
+        statusMsgText.textContent = msg;
+        statusMsgText.style.color = '#ff0000';
+        
+        // Disable buttons
+        optionBtns.forEach(b => b.style.pointerEvents = 'none');
+
+        // Wait 2 seconds then reload question
+        setTimeout(async () => {
+            statusMsgText.textContent = "GENERATING NEW ENCRYPTION KEY...";
+            statusMsgText.style.color = '#00f0ff';
+            
+            const newQuestion = await store.getQuestionForTerritory(hexData);
+            // Replace inner HTML of question container
+            const container = modalOverlay.querySelector('.question-container');
+            if (container) {
+                container.innerHTML = `
+                    <h3 class="the-question">> ${newQuestion.q}</h3>
+                    <div class="options-grid">
+                        ${newQuestion.options.map((opt, i) => `
+                            <button class="cyber-option-btn" data-index="${i}">
+                                <span class="opt-prefix">[${String.fromCharCode(65 + i)}]</span> ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+                // Re-attach events
+                const newBtns = container.querySelectorAll('.cyber-option-btn');
+                newBtns.forEach(btn => btn.addEventListener('click', () => handleOptionClick(btn, newBtns, newQuestion)));
+            }
+            
+            timeLeft = 10;
+            timerActive = true;
+            startTimer();
+        }, 2000);
+    };
+
+    const handleOptionClick = (btn, allBtns, qData) => {
+        timerActive = false;
+        allBtns.forEach(b => b.style.pointerEvents = 'none');
+        const selectedIndex = parseInt(btn.getAttribute('data-index'));
+
+        if (selectedIndex === qData.correct) {
+            btn.classList.add('correct-choice');
+            statusMsgText.textContent = 'ACCESS GRANTED. OVERRIDING PROTOCOLS...';
+            statusMsgText.style.color = '#00ff44';
+            setTimeout(async () => {
+                const success = await executeConquest(hexData, hitMesh, user.clan);
+                if (success) closeModal();
+                else statusMsgText.textContent = 'SYNC ERROR. TRY AGAIN.';
+            }, 1500);
+        } else {
+            btn.classList.add('wrong-choice');
+            allBtns[qData.correct].classList.add('correct-choice');
+            handleFailure("ACCESS DENIED. INTRUSION DETECTED.");
+        }
+    };
+
+    optionBtns.forEach(btn => {
+        btn.addEventListener('click', () => handleOptionClick(btn, optionBtns, questionData));
     });
+
+    startTimer();
 
     return modalOverlay;
 }

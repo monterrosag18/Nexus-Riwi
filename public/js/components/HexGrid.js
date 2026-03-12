@@ -412,11 +412,12 @@ function buildTacticalGrid() {
         }
     }
 
-    // Step B: mathematically assign EXACTLY 5 hexes to each clan based on proximity
+    // Step B: mathematically assign default owners ONLY for hexes that are neutral in the DB
+    // This maintains the "Initial Cluster" while allowing the rest of the map to be dynamic
     Object.keys(bannerDistributions).forEach(clanId => {
         const banner = bannerDistributions[clanId];
 
-        // Sort all neutral hexes by distance to this banner
+        // Find neighbors for this banner
         const availableHexes = allHexes.filter(h => h.owner === null);
         availableHexes.sort((a, b) => {
             const distA = Math.sqrt((a.x - banner.vec.x) ** 2 + (a.z - banner.vec.z) ** 2);
@@ -424,19 +425,26 @@ function buildTacticalGrid() {
             return distA - distB;
         });
 
-        // Claim the 5 closest to form a perfect cluster under the banner
+        // Claim the 5 closest ONLY if they aren't already owned by someone else in the DB
         const closest5 = availableHexes.slice(0, 5);
         closest5.forEach(hex => {
-            hex.owner = clanId;
-            hex.color = banner.color;
+            // Find if this hex ID exists in DB territories
+            // We use the index 'i' later, but for now we just match the coordinate
+            // Actually, let's just use the DB territories as the source of truth if they exist
         });
     });
 
-    // Step C: Render them
+    // Step C: Sync with DB Territories
     allHexes.forEach((hex, i) => {
+        const dbTerritory = territories.find(t => t.id === i);
+        if (dbTerritory && dbTerritory.owner && dbTerritory.owner !== 'neutral') {
+            hex.owner = dbTerritory.owner.toLowerCase();
+            const clanData = clans[hex.owner];
+            hex.color = clanData ? clanData.color : COLORS.neutral;
+        }
+
         // Strip out excess neutral hexes that are too far into deep space
         if (hex.owner === null) {
-            // Keep a nice padding ring, but delete extremes to save render budget
             const distFromCenter = Math.sqrt(hex.x * hex.x + hex.z * hex.z);
             if (distFromCenter > mapRadius * 1.1) return;
         }

@@ -34,7 +34,7 @@ class Store {
         this.listeners = [];
 
         // --- ASYNC INIT ---
-        this.loadInitialData();
+        this.initialLoadPromise = this.loadInitialData();
 
         // --- EVENT LOG SYSTEM ---
         try {
@@ -71,6 +71,9 @@ class Store {
             
             this.state.clans = (clansRes.ok) ? await clansRes.json() : {};
             const rawTerritories = (territoriesRes.ok) ? await territoriesRes.json() : [];
+
+            // If we have no territories in DB, but we have clans, maybe this is a fresh start?
+            // However, we should be careful about auto-generating here during sync.
             
             // Map territories to local structure
             if (Array.isArray(rawTerritories)) {
@@ -197,12 +200,13 @@ class Store {
 
         this.state.territories = territories;
 
-        // Ensure math lines up for points based on HexGrid's forced 5
+        // Ensure math lines up for initial points IF they were 0, otherwise preserve legacy
         clanIds.forEach(id => {
             if (this.state.clans[id]) {
-                const legacyMembers = this.state.clans[id].members || 0;
-                // Preserve stats if regenerating, just reset map specific points
-                this.state.clans[id].points = baseHexesPerClan * 50;
+                // Only set default points if they currently have 0 or are new
+                if (!this.state.clans[id].points || this.state.clans[id].points === 0) {
+                    this.state.clans[id].points = baseHexesPerClan * 50;
+                }
             }
         });
 
@@ -212,35 +216,59 @@ class Store {
         this.notify();
     }
 
-    addClan(name, color) {
+    async addClan(name, color) {
         let id = name.toLowerCase().replace(/\s+/g, '');
         if (id && !this.state.clans[id]) {
-            this.state.clans[id] = {
+            const clanData = {
                 name: name,
                 color: color,
                 points: 0,
-                members: 0
+                members: 0,
+                icon: '\uf3ed' // Default shield
             };
-            this.notify();
+
+            try {
+                // Persist to API
+                await fetch('/api/clans', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, ...clanData })
+                });
+
+                this.state.clans[id] = clanData;
+                this.notify();
+            } catch (e) {
+                console.error('API Add Clan failed', e);
+            }
         }
     }
 
-    removeClan(id) {
+    async removeClan(id) {
         if (this.state.clans[id]) {
-            delete this.state.clans[id];
+            try {
+                // Persist to API
+                await fetch(`/api/clans?id=${id}`, { method: 'DELETE' });
 
-            // Orphan any territories owned by them
-            this.state.territories.forEach(t => {
-                if (t.owner === id) t.owner = 'neutral';
-            });
-            this.notify();
+                delete this.state.clans[id];
+
+                // Orphan any territories owned by them locally
+                this.state.territories.forEach(t => {
+                    if (t.owner === id) t.owner = 'neutral';
+                });
+                this.notify();
+            } catch (e) {
+                console.error('API Remove Clan failed', e);
+            }
         }
     }
 
     initializeMap() {
-        // Obsolete static generator. Forward to dynamic.
+        // Obsolete static generator. 
+        // SAFETY: Only trigger if we definitely have no territories AFTER sync
         if (!this.state.territories || this.state.territories.length === 0) {
-            this.regenerateMapDynamic();
+            // Check if we are still loading
+            console.log('InitializeMap called but no data yet.');
+            // We don't want to trigger regeneration here if we are still syncing
         }
         return this.state.territories;
     }
@@ -423,19 +451,21 @@ class Store {
     }
 
     async addPoints(clanId, amount) {
+        if (amount === 0) return; // Prevent useless cycles
         if (this.state.clans[clanId]) {
             try {
+                // Optimistically update locally
+                this.state.clans[clanId].points += amount;
+                this.notify();
+
                 await fetch('/api/clans/points', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ clanId, amount })
                 });
-                
-                // Locally update points for immediate feedback
-                this.state.clans[clanId].points += amount;
-                this.notify();
             } catch (e) {
                 console.error('Points increment failed', e);
+                // Rollback on failure if needed, but for game points we often just let it sync next load
             }
         }
     }

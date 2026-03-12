@@ -399,10 +399,7 @@ export default function renderShop() {
 
         if (shopScene) shopScene.setSpinning(true);
 
-        // Rapid card cycling
-        let cycleCount = 0;
-        const maxCycles = 30 + Math.floor(Math.random() * 15);
-        spinInterval = setInterval(() => {
+        const runCycle = () => {
             cycleCount++;
             const rndCard = NEXUS_CARDS[Math.floor(Math.random() * NEXUS_CARDS.length)];
             activeCard = rndCard;
@@ -413,7 +410,7 @@ export default function renderShop() {
                 const inner = display.querySelector('.active-card-inner');
                 if (inner) inner.style.setProperty('--card-rgb', rndCard.rgb);
                 const img = display.querySelector('.active-card-image img');
-                if (img) img.src = `./assets/img/rules/skills/${rndCard.image}`;
+                if (img) img.src = `/assets/img/rules/skills/${rndCard.image}`;
                 const title = display.querySelector('.active-card-title');
                 if (title) title.textContent = rndCard.name;
                 const subtitle = display.querySelector('.active-card-subtitle');
@@ -430,17 +427,16 @@ export default function renderShop() {
                 }
             }
 
-            // Slow down near end
-            if (cycleCount >= maxCycles) {
-                clearInterval(spinInterval);
+            if (cycleCount < maxCycles) {
+                const nextDelay = 80 + (cycleCount * 5); // Decelerate
+                spinInterval = setTimeout(runCycle, nextDelay);
+            } else {
                 spinInterval = null;
-
                 // Execute effect
                 activeCard.execute().then(result => {
                     lastResult = result;
                     spinState = 'READY';
 
-                    // Log to event feed for News Ticker
                     const logUser = store.getState().currentUser;
                     const clanLabel = logUser ? (store.getState().clans[logUser.clan]?.name || logUser.clan).toUpperCase() : 'UNKNOWN';
                     const logType = activeCard.type === 'good' ? 'shop-good' : 'shop-bad';
@@ -451,16 +447,16 @@ export default function renderShop() {
                         shopScene.setColor(activeCard.type === 'good' ? '#00ff88' : '#ff0055');
                     }
 
-                    // Full re-render to show result
                     setTimeout(() => render(), 200);
                 });
 
-                // Reset Three.js color after a while
                 setTimeout(() => {
                     if (shopScene) shopScene.setColor('#22d3ee');
                 }, 3000);
             }
-        }, 80 + cycleCount * 4); // Gradually slows down
+        };
+
+        runCycle();
     }
 
     function attachEvents() {

@@ -72,34 +72,55 @@ export default function renderAdminDashboard() {
                         </div>
                     </div>
 
-                    <!-- MAIN AREA: ROSTER -->
+                    <!-- MAIN AREA: ROSTER & NEWS -->
                     <div class="admin-main">
-                        <div class="admin-section-title">ACTIVE FACTION ROSTER (${Object.keys(clans).length})</div>
-                        <div class="roster-grid">
-                            ${Object.keys(clans).map(clanId => {
-            const c = clans[clanId];
-            return `
-                                <div class="clan-card" style="--clan-color: ${c.color};">
-                                    <div class="clan-card-header">
-                                        <h3 class="clan-card-title">${c.name.toUpperCase()}</h3>
-                                        <i class="fa-solid fa-shield-halved" style="color: ${c.color}; font-size: 1.2rem;"></i>
-                                    </div>
-                                    <div class="clan-stat">
-                                        <span>INFLUENCE</span>
-                                        <span class="clan-stat-val text-neon-cyan">${c.points.toLocaleString()} PTS</span>
-                                    </div>
-                                    <div class="clan-stat">
-                                        <span>AGENTS</span>
-                                        <span class="clan-stat-val">${c.members || 1}</span>
-                                    </div>
-                                    <div class="card-actions">
-                                        <button class="btn-icon delete btn-delete-clan" data-id="${clanId}" title="Decommission Clan">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
-                                    </div>
+                        <div class="admin-grid-layout" style="display: grid; grid-template-columns: 1fr 350px; gap: 20px;">
+                            <div class="admin-roster-column">
+                                <div class="admin-section-title">ACTIVE FACTION ROSTER (${Object.keys(clans).length})</div>
+                                <div class="roster-grid">
+                                    ${Object.keys(clans).map(clanId => {
+                                        const c = clans[clanId];
+                                        return `
+                                            <div class="clan-card" style="--clan-color: ${c.color};">
+                                                <div class="clan-card-header">
+                                                    <h3 class="clan-card-title">${c.name.toUpperCase()}</h3>
+                                                    <i class="fa-solid fa-shield-halved" style="color: ${c.color}; font-size: 1.2rem;"></i>
+                                                </div>
+                                                <div class="clan-stat">
+                                                    <span>INFLUENCE</span>
+                                                    <span class="clan-stat-val text-neon-cyan">${c.points.toLocaleString()} PTS</span>
+                                                </div>
+                                                <div class="clan-stat">
+                                                    <span>AGENTS</span>
+                                                    <span class="clan-stat-val">${c.members || 1}</span>
+                                                </div>
+                                                <div class="card-actions">
+                                                    <button class="btn-icon delete btn-delete-clan" data-id="${clanId}" title="Decommission Clan">
+                                                        <i class="fa-solid fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            `;
+                                    }).join('')}
                                 </div>
-                                `;
-        }).join('')}
+                            </div>
+
+                            <div class="admin-news-column">
+                                <div class="admin-section-title">GLOBAL BROADCAST</div>
+                                <div class="broadcast-panel" style="background: rgba(0,0,0,0.3); padding: 15px; border: 1px solid rgba(0,240,255,0.1); border-radius: 8px;">
+                                    <textarea id="news-input" class="form-input" placeholder="Enter flash news..." style="height: 100px; margin-bottom: 10px; font-size: 0.8rem;"></textarea>
+                                    <div class="form-group">
+                                        <select id="news-type" class="form-input" style="background: #000; color: #00f0ff; border-color: #00f0ff44;">
+                                            <option value="info">INFO</option>
+                                            <option value="warning">WARNING</option>
+                                            <option value="alert">ALERT (CRITICAL)</option>
+                                        </select>
+                                    </div>
+                                    <button id="btn-post-news" class="btn-cyber" style="width: 100%; margin-top: 10px;">
+                                        <i class="fa-solid fa-tower-broadcast"></i> TRANSMIT NEWS
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -131,11 +152,16 @@ export default function renderAdminDashboard() {
         // Create Clan
         const btnCreate = container.querySelector('#btn-create-clan');
         if (btnCreate) {
-            btnCreate.addEventListener('click', () => {
+            btnCreate.addEventListener('click', async () => {
                 const input = container.querySelector('#clan-name-input');
                 const name = input ? input.value.trim() : '';
                 if (name.length > 0) {
-                    store.addClan(name, newClanColor);
+                    btnCreate.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> INITIALIZING...';
+                    btnCreate.style.pointerEvents = 'none';
+                    btnCreate.style.opacity = '0.5';
+
+                    await store.addClan(name, newClanColor);
+
                     newClanName = ''; // Reset form
                     reRender();
                 }
@@ -145,32 +171,42 @@ export default function renderAdminDashboard() {
         // Delete Clan
         const deleteBtns = container.querySelectorAll('.btn-delete-clan');
         deleteBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                // Find closest button in case icon was clicked
-                const id = e.target.closest('button').getAttribute('data-id');
+            btn.addEventListener('click', async (e) => {
+                const button = e.target.closest('button');
+                const id = button.getAttribute('data-id');
                 if (confirm(`Are you sure you want to delete ${id.toUpperCase()}? This will orphan their points.`)) {
-                    store.removeClan(id);
+                    button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+                    button.style.pointerEvents = 'none';
+                    button.style.opacity = '0.5';
+
+                    await store.removeClan(id);
                     reRender();
                 }
             });
         });
 
-        // Regenerate Map Button
-        const btnRebuild = container.querySelector('#btn-rebuild-map');
-        if (btnRebuild) {
-            btnRebuild.addEventListener('click', () => {
-                if (confirm("Regenerating the map will randomly reassign owners to guarantee 5 zones per clan. Proceed?")) {
-                    store.regenerateMapDynamic();
-                    // Flash notification or redirect
-                    const btn = document.getElementById('btn-rebuild-map');
-                    const oldText = btn.innerHTML;
-                    btn.innerHTML = '<i class="fa-solid fa-check"></i> REGENERATED';
-                    btn.style.backgroundColor = 'rgba(0,255,136,0.2)';
-                    btn.style.borderColor = '#00ff88';
-                    btn.style.color = '#00ff88';
-                    setTimeout(() => {
-                        window.location.hash = '#map';
-                    }, 1000);
+        // News Post
+        const btnPostNews = container.querySelector('#btn-post-news');
+        if (btnPostNews) {
+            btnPostNews.addEventListener('click', async () => {
+                const msg = container.querySelector('#news-input').value.trim();
+                const type = container.querySelector('#news-type').value;
+                if (msg) {
+                    btnPostNews.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> TRANSMITTING...';
+                    btnPostNews.disabled = true;
+                    try {
+                        await fetch('/api/admin/news', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ msg, type })
+                        });
+                        alert('News broadcast transmitted successfully.');
+                        container.querySelector('#news-input').value = '';
+                    } catch (e) {
+                        alert('Transmission failure.');
+                    }
+                    btnPostNews.innerHTML = '<i class="fa-solid fa-tower-broadcast"></i> TRANSMIT NEWS';
+                    btnPostNews.disabled = false;
                 }
             });
         }
