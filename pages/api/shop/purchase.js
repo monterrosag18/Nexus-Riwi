@@ -1,19 +1,18 @@
 import { db } from '@vercel/postgres';
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method not allowed' });
-  }
-
-  const { username, itemId, cost, type, color } = req.body;
-
-  if (!username || !itemId || cost === undefined) {
-    return res.status(400).json({ message: 'Missing fields' });
-  }
-
   const client = await db.connect();
 
   try {
+    if (req.method !== 'POST') {
+      return res.status(405).json({ message: 'Method not allowed' });
+    }
+
+    const { username, itemId, cost, type, color } = req.body;
+    if (!username || !itemId || cost === undefined) {
+      return res.status(400).json({ message: 'Missing fields' });
+    }
+
     // 1. Check user exists and has enough credits
     const userResult = await client.sql`SELECT credits, owned_cosmetics FROM users WHERE username = ${username} LIMIT 1;`;
     if (userResult.rowCount === 0) {
@@ -52,7 +51,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ success: true });
   } catch (error) {
-    console.error('Purchase error:', error);
+    console.error('Purchase API Error:', error);
     return res.status(500).json({ message: 'Internal server error' });
   } finally {
     await client.end();

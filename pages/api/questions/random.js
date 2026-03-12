@@ -1,12 +1,12 @@
 import { db } from '@vercel/postgres';
 
 export default async function handler(req, res) {
-  if (req.method !== 'GET') return res.status(405).json({ message: 'Method not allowed' });
-
-  const { type, difficulty } = req.query;
   const client = await db.connect();
 
   try {
+    if (req.method !== 'GET') return res.status(405).json({ message: 'Method not allowed' });
+
+    const { type, difficulty } = req.query;
     let result;
     if (type && difficulty) {
       result = await client.sql`
@@ -33,7 +33,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json(result.rows[0]);
   } catch (error) {
-    console.error('Fetch random question error:', error);
+    console.error('Fetch random question API Error:', error);
     return res.status(500).json({ message: 'Internal server error' });
   } finally {
     await client.end();

@@ -5,19 +5,18 @@ import jwt from 'jsonwebtoken';
 const JWT_SECRET = process.env.SUPABASE_JWT_SECRET || 'your-secret-key';
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method not allowed' });
-  }
-
-  const { username, password } = req.body;
-
-  if (!username || !password) {
-    return res.status(400).json({ message: 'Missing fields' });
-  }
-
   const client = await db.connect();
 
   try {
+    if (req.method !== 'POST') {
+      return res.status(405).json({ message: 'Method not allowed' });
+    }
+
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ message: 'Missing fields' });
+    }
+
     const result = await client.sql`
       SELECT * FROM users WHERE username = ${username} LIMIT 1;
     `;
@@ -52,7 +51,7 @@ export default async function handler(req, res) {
       token 
     });
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('Login API Error:', error);
     return res.status(500).json({ message: 'Internal server error' });
   } finally {
     await client.end();

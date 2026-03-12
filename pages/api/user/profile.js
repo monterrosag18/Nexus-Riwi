@@ -1,19 +1,18 @@
 import { db } from '@vercel/postgres';
 
 export default async function handler(req, res) {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ message: 'Method not allowed' });
-  }
-
-  const { username } = req.query;
-
-  if (!username) {
-    return res.status(400).json({ message: 'Missing username' });
-  }
-
   const client = await db.connect();
 
   try {
+    if (req.method !== 'GET') {
+      return res.status(405).json({ message: 'Method not allowed' });
+    }
+
+    const { username } = req.query;
+    if (!username) {
+      return res.status(400).json({ message: 'Missing username' });
+    }
+
     const result = await client.sql`
       SELECT username, clan_id, credits, active_skin, active_chat_color, active_border_color, active_shield_color, owned_cosmetics 
       FROM users 
@@ -37,7 +36,7 @@ export default async function handler(req, res) {
       ownedCosmetics: user.owned_cosmetics || []
     });
   } catch (error) {
-    console.error('Profile fetch error:', error);
+    console.error('Profile fetch API Error:', error);
     return res.status(500).json({ message: 'Internal server error' });
   } finally {
     await client.end();
