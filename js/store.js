@@ -50,6 +50,11 @@ class Store {
             this.eventLog = JSON.parse(localStorage.getItem('riwi_events')) || [];
         } catch(e) { this.eventLog = []; }
 
+        // --- CHAT SYSTEM ---
+        try {
+            this.chatDB = JSON.parse(localStorage.getItem('riwi_chat_db')) || {};
+        } catch(e) { this.chatDB = {}; }
+
         // Build the dynamic map now that state is defined
         this.state.territories = this.initializeMap();
     }
@@ -368,6 +373,30 @@ class Store {
 
     getEventLog() {
         return this.eventLog;
+    }
+
+    // --- CHAT SYSTEM METHODS ---
+    addChatMessage(clanId, user, msg) {
+        if (!this.chatDB[clanId]) this.chatDB[clanId] = [];
+        const entry = {
+            id: Date.now(),
+            user: user.name,
+            clan: user.clan,
+            msg: msg,
+            time: Date.now()
+        };
+        this.chatDB[clanId].push(entry);
+        if (this.chatDB[clanId].length > 50) this.chatDB[clanId].shift();
+        
+        try {
+            localStorage.setItem('riwi_chat_db', JSON.stringify(this.chatDB));
+        } catch(e) {}
+        
+        this.notify();
+    }
+
+    getChatMessages(clanId) {
+        return this.chatDB[clanId] || [];
     }
 }
 

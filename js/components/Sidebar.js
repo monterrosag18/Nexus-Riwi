@@ -10,6 +10,7 @@ export function renderSidebar() {
         { icon: 'fa-map', route: 'map', label: 'Map' },
         { icon: 'fa-trophy', route: 'leaderboard', label: 'Ranking' },
         { icon: 'fa-dungeon', route: 'shop', label: 'Shop' },
+        { icon: 'fa-comments', route: 'chat', label: 'Chat' },
         { icon: 'fa-book-atlas', route: 'rules', label: 'Rules' }
     ];
 
@@ -21,6 +22,15 @@ export function renderSidebar() {
             <i class="fa-solid ${item.icon}"></i>
             <span class="tooltip">${item.label}</span>
         `;
+
+        // Handle specific actions
+        if (item.route === 'chat') {
+            link.href = '#';
+            link.onclick = (e) => {
+                e.preventDefault();
+                window.dispatchEvent(new CustomEvent('nexus:toggleChat'));
+            };
+        }
 
         if (item.route === 'rules') {
             link.href = '#';

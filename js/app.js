@@ -1,7 +1,7 @@
 import { initRouter } from './router.js';
 import { renderSidebar } from './components/Sidebar.js';
 import { SpaceBackground } from './components/SpaceBackground.js';
-import renderChat from './components/Chat.js';
+import createFactionChat from './components/FactionChat.js';
 import renderMiniLeaderboard from './components/MiniLeaderboard.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -22,12 +22,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebarContainer = document.getElementById('sidebar');
     if (sidebarContainer) sidebarContainer.appendChild(renderSidebar());
 
-    // const chatContainer = document.getElementById('chat-widget');
-    // if (chatContainer) chatContainer.replaceWith(renderChat()); // Chat disabled per user request
+    // 2. Init Global Faction Chat
+    const chatWidget = document.getElementById('chat-widget');
+    if (chatWidget) {
+        chatWidget.innerHTML = '';
+        chatWidget.className = 'faction-chat-wrapper minimized'; // Start closed
+        chatWidget.appendChild(createFactionChat());
 
-    // Render Mini Leaderboard (Removed per user request)
-    // const miniLeaderboard = renderMiniLeaderboard();
-    // appContainer.appendChild(miniLeaderboard);
+        // Toggle Listener
+        window.addEventListener('nexus:toggleChat', () => {
+            chatWidget.classList.toggle('active');
+            chatWidget.classList.toggle('minimized');
+            console.log('Chat toggle triggered');
+        });
+    }
 
     // 2. Initialize Router (which renders the initial view)
     initRouter();
