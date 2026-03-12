@@ -62,6 +62,19 @@ class Store {
     }
 
     getMockQuestion(type) {
+        // 1. Try reading from admin question bank first
+        try {
+            const bankRaw = localStorage.getItem('riwi_questions_db');
+            if (bankRaw) {
+                const bank = JSON.parse(bankRaw);
+                const ofType = bank.filter(q => q.type === type);
+                if (ofType.length > 0) {
+                    return ofType[Math.floor(Math.random() * ofType.length)];
+                }
+            }
+        } catch(e) {}
+
+        // 2. Fallback to hardcoded defaults
         const questions = {
             'code': [
                 { q: "What does HTML stand for?", options: ["Hyper Text Markup Language", "Home Tool Markup Language", "Hyperlinks and Text Markup"], correct: 0 },

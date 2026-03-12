@@ -7,7 +7,7 @@
     <title>Riwi Nexus - Admin Override</title>
 
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -18,7 +18,25 @@
 
 <body>
 
-    <div class="admin-grid-layout">
+    <!-- ═══ ADMIN LOGIN GATE ═══ -->
+    <div id="admin-login-gate" class="login-gate">
+        <div class="gate-card">
+            <div class="gate-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <h2 class="gate-title">NEXUS CORE</h2>
+            <p class="gate-subtitle">ADMIN OVERRIDE REQUIRED</p>
+            <form id="admin-login-form">
+                <input type="text" id="admin-user" class="gate-input" placeholder="Username" autocomplete="off" required>
+                <input type="password" id="admin-pass" class="gate-input" placeholder="Password" required>
+                <div class="gate-error" id="gate-error"></div>
+                <button type="submit" class="gate-btn">
+                    <i class="fa-solid fa-right-to-bracket"></i> AUTHENTICATE
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══ ADMIN DASHBOARD (hidden until login) ═══ -->
+    <div id="admin-dashboard" class="admin-grid-layout" style="display:none;">
         <!-- Sidebar Navigation -->
         <aside class="admin-sidebar">
             <div class="brand">
@@ -27,8 +45,10 @@
             </div>
 
             <nav class="admin-nav">
-                <a href="#roster" class="active"><i class="fa-solid fa-users-gear"></i> Faction Roster</a>
-                <a href="#create"><i class="fa-solid fa-plus"></i> Initialize Clan</a>
+                <a href="#roster" class="active" data-view="roster"><i class="fa-solid fa-users-gear"></i> Faction Roster</a>
+                <a href="#create" data-view="create"><i class="fa-solid fa-plus"></i> Initialize Clan</a>
+                <a href="#questions" data-view="questions"><i class="fa-solid fa-circle-question"></i> Question Bank</a>
+                <a href="#news" data-view="news"><i class="fa-solid fa-newspaper"></i> News & Alerts</a>
                 <a href="index.html" class="danger-zone"><i class="fa-solid fa-door-open"></i> Return to Nexus</a>
             </nav>
 
@@ -42,14 +62,19 @@
         <main class="admin-main">
             <header class="admin-header">
                 <h1>FACTION OVERRIDE PROTOCOL</h1>
-                <button id="btn-force-regenerate" class="action-button critical">
-                    <i class="fa-solid fa-rotate"></i> FORCE GRID REGEN
-                </button>
+                <div class="header-actions">
+                    <button id="btn-reset-points" class="action-button danger">
+                        <i class="fa-solid fa-arrows-rotate"></i> RESET ALL POINTS
+                    </button>
+                    <button id="btn-force-regenerate" class="action-button critical">
+                        <i class="fa-solid fa-rotate"></i> FORCE GRID REGEN
+                    </button>
+                </div>
             </header>
 
             <div class="dashboard-content">
 
-                <!-- Active Factions List -->
+                <!-- ═══ FACTION ROSTER ═══ -->
                 <section id="roster-view" class="admin-panel">
                     <div class="panel-header">
                         <h3><i class="fa-solid fa-server"></i> Active Roster</h3>
@@ -59,10 +84,10 @@
                     </div>
                 </section>
 
-                <!-- Create Faction Form -->
-                <section id="create-view" class="admin-panel create-panel">
+                <!-- ═══ CREATE / EDIT FACTION ═══ -->
+                <section id="create-view" class="admin-panel create-panel" style="display:none;">
                     <div class="panel-header">
-                        <h3><i class="fa-solid fa-folder-plus"></i> Initialize New Designation</h3>
+                        <h3 id="create-panel-title"><i class="fa-solid fa-folder-plus"></i> Initialize New Designation</h3>
                     </div>
 
                     <form id="create-clan-form">
@@ -75,36 +100,27 @@
                             <div class="form-group">
                                 <label>SIGNATURE HEX COLOR</label>
                                 <div class="color-picker-grid" id="color-picker">
-                                    <!-- Neon Blues / Teals -->
                                     <div class="color-swatch" style="background: #00F0FF;" data-color="#00F0FF"></div>
                                     <div class="color-swatch" style="background: #0088FF;" data-color="#0088FF"></div>
                                     <div class="color-swatch" style="background: #2D9CDB;" data-color="#2D9CDB"></div>
                                     <div class="color-swatch" style="background: #00BFFF;" data-color="#00BFFF"></div>
                                     <div class="color-swatch" style="background: #00FFCC;" data-color="#00FFCC"></div>
                                     <div class="color-swatch" style="background: #20B2AA;" data-color="#20B2AA"></div>
-
-                                    <!-- Greens -->
                                     <div class="color-swatch" style="background: #00FF00;" data-color="#00FF00"></div>
                                     <div class="color-swatch" style="background: #39FF14;" data-color="#39FF14"></div>
                                     <div class="color-swatch" style="background: #27AE60;" data-color="#27AE60"></div>
                                     <div class="color-swatch" style="background: #ADFF2F;" data-color="#ADFF2F"></div>
-
-                                    <!-- Purples / Pinks -->
                                     <div class="color-swatch" style="background: #9D00FF;" data-color="#9D00FF"></div>
                                     <div class="color-swatch" style="background: #FF00FF;" data-color="#FF00FF"></div>
                                     <div class="color-swatch" style="background: #9B51E0;" data-color="#9B51E0"></div>
                                     <div class="color-swatch" style="background: #E83E8C;" data-color="#E83E8C"></div>
                                     <div class="color-swatch" style="background: #FF1493;" data-color="#FF1493"></div>
-
-                                    <!-- Reds / Oranges / Yellows -->
                                     <div class="color-swatch" style="background: #FF0000;" data-color="#FF0000"></div>
                                     <div class="color-swatch" style="background: #EB5757;" data-color="#EB5757"></div>
                                     <div class="color-swatch" style="background: #FF4500;" data-color="#FF4500"></div>
                                     <div class="color-swatch" style="background: #FF8C00;" data-color="#FF8C00"></div>
                                     <div class="color-swatch" style="background: #F2C94C;" data-color="#F2C94C"></div>
                                     <div class="color-swatch" style="background: #FFFF00;" data-color="#FFFF00"></div>
-
-                                    <!-- Grays / Whites -->
                                     <div class="color-swatch" style="background: #FFFFFF;" data-color="#FFFFFF"></div>
                                     <div class="color-swatch" style="background: #B0C4DE;" data-color="#B0C4DE"></div>
                                 </div>
@@ -114,39 +130,147 @@
                             <div class="form-group">
                                 <label for="clan-icon">SYSTEM ICON</label>
                                 <select id="clan-icon" required>
-                                    <option value="\uf521" data-icon="fa-solid fa-crown">👑 Crown</option>
-                                    <option value="\uf6d5" data-icon="fa-solid fa-dragon">🐉 Dragon</option>
-                                    <option value="\uf54c" data-icon="fa-solid fa-skull">💀 Skull</option>
-                                    <option value="\uf3ed" data-icon="fa-solid fa-shield-halved">🛡️ Shield</option>
-                                    <option value="\uf3a5" data-icon="fa-solid fa-gem">💎 Diamond</option>
-                                    <option value="\uf06d" data-icon="fa-solid fa-fire">🔥 Fire</option>
-                                    <option value="\uf0e7" data-icon="fa-solid fa-bolt">⚡ Lightning</option>
-                                    <option value="\uf5fc" data-icon="fa-solid fa-jedi">⚔️ Crossed Swords</option>
-                                    <option value="\uf441" data-icon="fa-solid fa-chess-knight">♞ Knight</option>
-                                    <option value="\uf70c" data-icon="fa-solid fa-meteor">☄️ Meteor</option>
-                                    <option value="\uf70b" data-icon="fa-solid fa-ring">💍 Artifact</option>
-                                    <option value="\uf185" data-icon="fa-solid fa-sun">☀️ Solar</option>
-                                    <option value="\uf186" data-icon="fa-solid fa-moon">🌙 Lunar</option>
-                                    <option value="\uf005" data-icon="fa-solid fa-star">⭐ Star</option>
-                                    <option value="\uf06e" data-icon="fa-solid fa-eye">👁️ Oracle</option>
-                                    <option value="\uf5a6" data-icon="fa-solid fa-monument">🏛️ Pantheon</option>
-                                    <option value="\uf504" data-icon="fa-solid fa-user-ninja">🥷 Assassin</option>
-                                    <option value="\uf4fb" data-icon="fa-solid fa-user-astronaut">👨‍🚀 Vanguard
-                                    </option>
-                                    <option value="\uf24e" data-icon="fa-solid fa-scale-balanced">⚖️ Justice</option>
-                                    <option value="\uf1e2" data-icon="fa-solid fa-bomb">💣 Detonator</option>
-                                    <option value="\uf0c3" data-icon="fa-solid fa-flask">🧪 Alchemy</option>
-                                    <option value="\uf21e" data-icon="fa-solid fa-heartbeat">💓 Lifeblood</option>
-                                    <option value="\uf5d2" data-icon="fa-solid fa-atom">⚛️ Quantum</option>
-                                    <option value="\uf0eb" data-icon="fa-solid fa-lightbulb">💡 Illumination</option>
+                                    <option value="\uf521">👑 Crown</option>
+                                    <option value="\uf6d5">🐉 Dragon</option>
+                                    <option value="\uf54c">💀 Skull</option>
+                                    <option value="\uf3ed">🛡️ Shield</option>
+                                    <option value="\uf3a5">💎 Diamond</option>
+                                    <option value="\uf06d">🔥 Fire</option>
+                                    <option value="\uf0e7">⚡ Lightning</option>
+                                    <option value="\uf5fc">⚔️ Crossed Swords</option>
+                                    <option value="\uf441">♞ Knight</option>
+                                    <option value="\uf70c">☄️ Meteor</option>
+                                    <option value="\uf70b">💍 Artifact</option>
+                                    <option value="\uf185">☀️ Solar</option>
+                                    <option value="\uf186">🌙 Lunar</option>
+                                    <option value="\uf005">⭐ Star</option>
+                                    <option value="\uf06e">👁️ Oracle</option>
+                                    <option value="\uf5a6">🏛️ Pantheon</option>
+                                    <option value="\uf504">🥷 Assassin</option>
+                                    <option value="\uf4fb">👨‍🚀 Vanguard</option>
+                                    <option value="\uf24e">⚖️ Justice</option>
+                                    <option value="\uf1e2">💣 Detonator</option>
+                                    <option value="\uf0c3">🧪 Alchemy</option>
+                                    <option value="\uf21e">💓 Lifeblood</option>
+                                    <option value="\uf5d2">⚛️ Quantum</option>
+                                    <option value="\uf0eb">💡 Illumination</option>
+                                    <option value="\uf2db">🖥️ Microchip</option>
+                                    <option value="\uf544">🧠 Brain</option>
+                                    <option value="\uf085">⚙️ Gears</option>
                                 </select>
                             </div>
                         </div>
 
-                        <button type="submit" class="action-button confirm">
+                        <button type="submit" class="action-button confirm" id="create-submit-btn">
                             <i class="fa-solid fa-upload"></i> INJECT TO MATRIX
                         </button>
                     </form>
+                </section>
+
+                <!-- ═══ QUESTION BANK ═══ -->
+                <section id="questions-view" class="admin-panel" style="display:none;">
+                    <div class="panel-header">
+                        <h3><i class="fa-solid fa-circle-question"></i> Question Bank</h3>
+                        <button id="btn-add-question" class="action-button confirm" style="padding:0.5rem 1rem;font-size:0.8rem;">
+                            <i class="fa-solid fa-plus"></i> ADD QUESTION
+                        </button>
+                    </div>
+
+                    <!-- Add/Edit Question Form (hidden by default) -->
+                    <div id="question-form-container" class="question-form-container" style="display:none;">
+                        <form id="question-form">
+                            <div class="form-row">
+                                <div class="form-group" style="flex:1;">
+                                    <label>CATEGORY</label>
+                                    <select id="q-type" required>
+                                        <option value="code">Code</option>
+                                        <option value="english">English</option>
+                                        <option value="soft-skills">Soft Skills</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="flex:1;">
+                                    <label>DIFFICULTY</label>
+                                    <select id="q-difficulty">
+                                        <option value="1">Level 1</option>
+                                        <option value="2">Level 2</option>
+                                        <option value="3">Level 3</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>QUESTION</label>
+                                <input type="text" id="q-text" placeholder="Enter the question..." required>
+                            </div>
+                            <div class="form-group">
+                                <label>OPTION A</label>
+                                <input type="text" id="q-opt-a" placeholder="First option" required>
+                            </div>
+                            <div class="form-group">
+                                <label>OPTION B</label>
+                                <input type="text" id="q-opt-b" placeholder="Second option" required>
+                            </div>
+                            <div class="form-group">
+                                <label>OPTION C</label>
+                                <input type="text" id="q-opt-c" placeholder="Third option" required>
+                            </div>
+                            <div class="form-group">
+                                <label>CORRECT ANSWER</label>
+                                <select id="q-correct" required>
+                                    <option value="0">Option A</option>
+                                    <option value="1">Option B</option>
+                                    <option value="2">Option C</option>
+                                </select>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="action-button confirm" id="q-submit-btn">
+                                    <i class="fa-solid fa-save"></i> SAVE QUESTION
+                                </button>
+                                <button type="button" class="action-button" id="q-cancel-btn" style="border-color:#666;color:#999;">
+                                    CANCEL
+                                </button>
+                            </div>
+                            <input type="hidden" id="q-edit-id" value="">
+                        </form>
+                    </div>
+
+                    <!-- Question List (grouped by type) -->
+                    <div id="questions-list" class="questions-list">
+                        <!-- Dynamically injected -->
+                    </div>
+                </section>
+
+                <!-- ═══ NEWS & ANNOUNCEMENTS ═══ -->
+                <section id="news-view" class="admin-panel" style="display:none;">
+                    <div class="panel-header">
+                        <h3><i class="fa-solid fa-newspaper"></i> News & Alerts</h3>
+                    </div>
+
+                    <form id="news-form" class="news-form">
+                        <div class="form-row">
+                            <div class="form-group" style="flex:2;">
+                                <label>MESSAGE</label>
+                                <input type="text" id="news-msg" placeholder="Enter announcement message..." required>
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label>TYPE</label>
+                                <select id="news-type">
+                                    <option value="warning">⚠️ Warning</option>
+                                    <option value="info">ℹ️ Info</option>
+                                    <option value="alert">🚨 Alert</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="action-button confirm" style="width:100%;">
+                            <i class="fa-solid fa-bullhorn"></i> BROADCAST TO NEXUS
+                        </button>
+                    </form>
+
+                    <div class="panel-header" style="margin-top:1.5rem;">
+                        <h3><i class="fa-solid fa-list"></i> Active Broadcasts</h3>
+                    </div>
+                    <div id="news-list" class="news-list">
+                        <!-- Dynamically injected -->
+                    </div>
                 </section>
 
             </div>

@@ -44,10 +44,26 @@ export default function createNewsTicker() {
             'rank-up': '#ffd700',
             'rank-down': '#ff6600',
             'territory': '#00f0ff',
-            'info': '#8b9bb4'
+            'info': '#8b9bb4',
+            'admin-warning': '#ff8c00',
+            'admin-info': '#00f0ff',
+            'admin-alert': '#ff3b5c'
         };
 
-        content.innerHTML = events.map(e => {
+        // Also inject admin news from localStorage
+        let allItems = [];
+        try {
+            const adminNews = JSON.parse(localStorage.getItem('riwi_admin_news') || '[]');
+            adminNews.forEach(n => {
+                const prefix = n.type === 'warning' ? '⚠️' : n.type === 'alert' ? '🚨' : 'ℹ️';
+                allItems.push({ msg: `${prefix} ADMIN: ${n.msg}`, type: `admin-${n.type}` });
+            });
+        } catch(e) {}
+
+        // Add game events after admin news
+        events.forEach(e => allItems.push(e));
+
+        content.innerHTML = allItems.map(e => {
             const color = typeColors[e.type] || '#8b9bb4';
             return `<span class="ticker-item" style="color:${color}">${e.msg}</span>`;
         }).join('<span class="ticker-separator">◆</span>');
