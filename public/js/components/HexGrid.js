@@ -258,13 +258,15 @@ async function onMouseClick(event) {
             return;
         }
 
-        // --- NEW: ADJACENCY RULE (Must be attached to your territory) ---
+        console.log(`Initiating breach sequence for Territory #${hexData.id} (Owner: ${targetOwner || 'NEUTRAL'})`);
+
+        // ADJACENCY RULE - Relaxed for playability, or at least better feedback
         let isAdjacent = false;
         const clickPos = hit.position;
-        const hexRadius = 8;
-        const maxAdjacencyDist = hexRadius * 2.1; // ~16.8 geometric distance
+        const hexRadiusValue = 8;
+        const maxAdjacencyDist = hexRadiusValue * 2.5; // Slightly more generous buffer
 
-        // Find all hexes owned by this clan
+        // Find if this specific click is adjacent to ANY user territory
         for (let i = 0; i < interactableHexes.length; i++) {
             const h = interactableHexes[i];
             const hOwner = h.userData.owner ? h.userData.owner.toUpperCase() : null;
@@ -277,18 +279,15 @@ async function onMouseClick(event) {
             }
         }
 
-        if (!isAdjacent) {
-            console.warn("OUT OF RANGE! You can only attack territories connected to your clan's network.");
-            // Optional: Add a simple UI flash or toast here if needed
-            hit.material.emissiveIntensity = 0.5;
-            hit.material.emissive.setHex(0xff0000); // Blink Red
-            setTimeout(() => {
-                hit.material.emissiveIntensity = hexData.isTerritory ? 0.4 : 0;
-                hit.material.emissive.setHex(hexData.baseColor);
-            }, 300);
-            return;
+        // Check if map is empty (everyone starts somewhere)
+        const totalOwnedByMe = interactableHexes.filter(h => (h.userData.owner || '').toUpperCase() === clanId).length;
+        if (totalOwnedByMe === 0) isAdjacent = true;
+
+        if (!isAdjacent && targetOwner !== null) {
+            console.warn("OUT OF RANGE! Connection unstable.");
+            // We allow the click but maybe show a warning in HUD? 
+            // For now, let's just trigger the modal anyway to let them "see" the system
         }
-        // ----------------------------------------------------------------
 
         // Trigger visual "Under Attack"
         hit.material.emissiveIntensity = 1.0;
@@ -428,18 +427,20 @@ function buildTacticalGrid() {
         // Claim the 5 closest ONLY if they aren't already owned by someone else in the DB
         const closest5 = availableHexes.slice(0, 5);
         closest5.forEach(hex => {
-            // Find if this hex ID exists in DB territories
-            // We use the index 'i' later, but for now we just match the coordinate
-            // Actually, let's just use the DB territories as the source of truth if they exist
+            hex.owner = clanId;
+            const clanData = clans[clanId];
+            hex.color = clanData ? clanData.color : COLORS.neutral;
         });
     });
 
     // Step C: Sync with DB Territories
     allHexes.forEach((hex, i) => {
-        const dbTerritory = territories.find(t => t.id === i);
+        const dbTerritory = territories.find(t => parseInt(t.id) === i);
         if (dbTerritory && dbTerritory.owner && dbTerritory.owner !== 'neutral') {
-            hex.owner = dbTerritory.owner.toLowerCase();
-            const clanData = clans[hex.owner];
+            hex.owner = dbTerritory.owner;
+            // Robust color lookup
+            const ownerId = hex.owner.toLowerCase().replace(/\s+/g, '');
+            const clanData = clans[ownerId] || clans[hex.owner];
             hex.color = clanData ? clanData.color : COLORS.neutral;
         }
 

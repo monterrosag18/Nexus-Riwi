@@ -269,9 +269,26 @@ class Store {
                 // Optimistic Update locally
                 const terr = this.state.territories.find(t => t.id == id);
                 if (terr) {
-                    if (terr.owner !== 'neutral') this.addPoints(terr.owner, -20);
+                    if (terr.owner !== 'neutral') this.addPoints(terr.owner, -50); // Loss to other clan
                     terr.owner = clan;
-                    this.addPoints(clan, 50);
+                    this.addPoints(clan, 100); // Give 100 to clan
+                    
+                    // NEW: Sync puntos to individual user profile
+                    if (this.state.currentUser) {
+                        const oldPoints = this.state.currentUser.points || 0;
+                        const newPoints = oldPoints + 100;
+                        this.state.currentUser.points = newPoints;
+                        
+                        fetch('/api/user/update', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                username: this.state.currentUser.name, 
+                                updates: { points: newPoints } 
+                            })
+                        }).catch(err => console.error('Failed to sync user points', err));
+                    }
+
                     this.notify();
                 }
                 return true;
@@ -395,6 +412,39 @@ class Store {
             console.error('Purchase failed', e);
         }
         return false;
+    }
+
+    async penalizeUser(amount = 10) {
+        if (!this.state.currentUser) return;
+        
+        // Deduct from current user credits as well as clan points?
+        // Let's do both to make it "painful" but fair
+        const clanId = this.state.currentUser.clan;
+        
+        try {
+            // 1. Clan Points Penalty
+            if (clanId) {
+                await this.addPoints(clanId, -amount);
+            }
+
+            // 2. User Credits Penalty (API)
+            const oldCredits = this.state.currentUser.credits;
+            const newCredits = Math.max(0, oldCredits - amount);
+            
+            await fetch('/api/user/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    username: this.state.currentUser.name, 
+                    updates: { credits: newCredits } 
+                })
+            });
+
+            this.state.currentUser.credits = newCredits;
+            this.notify();
+        } catch (e) {
+            console.error('Penalty sync failed', e);
+        }
     }
 
     logout() {

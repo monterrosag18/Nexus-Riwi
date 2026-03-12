@@ -123,6 +123,9 @@ export default async function createQuestionModal(hexData, hitMesh) {
         statusMsgText.textContent = msg;
         statusMsgText.style.color = '#ff0000';
         
+        // Apply Penalty
+        store.penalizeUser(10);
+        
         // Disable buttons
         optionBtns.forEach(b => b.style.pointerEvents = 'none');
 

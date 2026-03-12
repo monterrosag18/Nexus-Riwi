@@ -197,20 +197,20 @@ export default function renderLeaderboard() {
         const isTop3 = index < 3;
         const rankClass = isTop3 ? rankColors[index] : 'text-gray-500 border-transparent';
         const isOwnClan = (clan.name || '').toLowerCase() === userClanKey;
-        return '<div data-clan="' + (clan.name || '').toLowerCase() + '" class="clan-row transition-all border-l-2 border-transparent select-none border-b border-gray-800" style="display:grid;grid-template-columns:' + CLAN_GRID + ';align-items:center;cursor:' + (isOwnClan ? 'pointer' : 'not-allowed') + ';opacity:' + (isOwnClan ? '1' : '0.35') + ';filter:' + (isOwnClan ? 'none' : 'grayscale(0.6)') + ';background-color:' + (isOwnClan ? styles.accentColor : '') + ';border-left-color:' + (isOwnClan ? styles.borderHex + '55' : 'transparent') + ';">'
-            + '<div style="padding:14px 8px 14px 24px;display:flex;justify-content:center;">'
-            +   '<div class="w-8 h-8 flex items-center justify-center border text-sm font-bold font-mono ' + rankClass + '">' + (index + 1) + '</div>'
-            + '</div>'
-            + '<div style="padding:14px 16px;display:flex;align-items:center;gap:12px;overflow:hidden;">'
-            +   '<div class="p-1.5 bg-gray-900 border border-gray-700 flex-shrink-0"><span class="material-symbols-outlined ' + styles.colorClass + ' text-sm">' + styles.icon + '</span></div>'
-            +   '<span class="font-bold font-display tracking-wide ' + (isTop3 ? 'text-white text-lg' : 'text-gray-300') + '" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (clan.name || '').toUpperCase() + '</span>'
-            + '</div>'
-            + '<div style="padding:14px 16px;text-align:center;" class="text-gray-400 font-mono text-sm">' + (clan.members || 0) + '</div>'
-            + '<div style="padding:14px 24px 14px 16px;text-align:right;display:flex;align-items:center;justify-content:flex-end;gap:8px;">'
-            +   '<span class="font-bold font-mono tracking-wider ' + styles.colorClass + ' ' + (isTop3 ? 'text-lg' : 'text-sm') + ' ' + styles.glowClass + '">' + (clan.points || 0).toLocaleString() + '</span>'
-            +   '<span class="material-symbols-outlined text-sm" style="color:#374151;">' + (isOwnClan ? 'chevron_right' : 'lock') + '</span>'
-            + '</div>'
-            + '</div>';
+        return `<div data-clan="${(clan.name || '').toLowerCase()}" class="clan-row transition-all border-l-2 border-transparent select-none border-b border-gray-800 hover:bg-white/5 active:scale-[0.99] group/clan" style="display:grid;grid-template-columns:${CLAN_GRID};align-items:center;cursor:pointer;background-color:${isOwnClan ? styles.accentColor : ''};border-left-color:${isOwnClan ? styles.borderHex + '55' : 'transparent'};">
+            <div style="padding:14px 8px 14px 24px;display:flex;justify-content:center;">
+                <div class="w-8 h-8 flex items-center justify-center border text-sm font-bold font-mono ${rankClass}">${index + 1}</div>
+            </div>
+            <div style="padding:14px 16px;display:flex;align-items:center;gap:12px;overflow:hidden;">
+                <div class="p-1.5 bg-gray-900 border border-gray-700 flex-shrink-0"><span class="material-symbols-outlined ${styles.colorClass} text-sm">${styles.icon}</span></div>
+                <span class="font-bold font-display tracking-wide ${isTop3 ? 'text-white text-lg' : 'text-gray-300'} group-hover/clan:text-white transition-colors" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${(clan.name || '').toUpperCase()}</span>
+            </div>
+            <div style="padding:14px 16px;text-align:center;" class="text-gray-400 font-mono text-sm">${clan.members_count || clan.members || 0}</div>
+            <div style="padding:14px 24px 14px 16px;text-align:right;display:flex;align-items:center;justify-content:flex-end;gap:8px;">
+                <span class="font-bold font-mono tracking-wider ${styles.colorClass} ${isTop3 ? 'text-lg' : 'text-sm'} ${styles.glowClass}">${(clan.points || 0).toLocaleString()}</span>
+                <span class="material-symbols-outlined text-sm text-gray-600 group-hover/clan:text-primary transition-colors">chevron_right</span>
+            </div>
+        </div>`;
     }).join('');
 
     const currentClanLabel = (currentUser.clan || 'UNASSIGNED').toUpperCase();
@@ -373,14 +373,12 @@ export default function renderLeaderboard() {
         clanPanel.style.display = 'flex';
     };
 
-    // Bind clan rows - only own clan is clickable
+    // Bind clan rows - ALL clans are clickable now
     const clanBody = container.querySelector('#clan-tbody');
     if (clanBody) {
         clanBody.querySelectorAll('.clan-row').forEach((row) => {
             const clanKey = row.dataset.clan;
-            if (clanKey === userClanKey) {
-                row.addEventListener('click', () => showCoders(clanKey));
-            }
+            row.addEventListener('click', () => showCoders(clanKey));
         });
     }
 

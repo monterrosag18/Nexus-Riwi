@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   try {
     // Fetch users for the given clan
     const result = await client.sql`
-      SELECT username as name, clan_id as clan, coalesce(points, 0) as points 
+      SELECT username as name, clan_id as clan, points 
       FROM users 
       WHERE LOWER(clan_id) = LOWER(${clanId})
       ORDER BY points DESC;
