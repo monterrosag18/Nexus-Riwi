@@ -15,7 +15,7 @@ export default function renderLogin() {
         <!-- Intro Video Modal overlay -->
         <div id="introVideoModal" class="absolute inset-0 z-[9999] bg-black flex items-center justify-center transition-opacity duration-500">
             <div class="relative w-full max-w-5xl mx-auto px-4">
-                <video id="introVideo" src="../assets/video/login.mp4" autoplay preload="auto" playsinline muted controls class="w-full h-auto max-h-[85vh] rounded-lg border border-primary/30 object-cover"></video>
+                <video id="introVideo" src="/assets/video/login.mp4" autoplay preload="auto" playsinline muted controls class="w-full h-auto max-h-[85vh] rounded-lg border border-primary/30 object-cover"></video>
                 <button id="closeVideoBtn" class="absolute top-2 right-6 p-2 text-white cursor-pointer z-10 bg-black/80 rounded-full border border-white/30">
                     <span class="material-symbols-outlined">close</span>
                 </button>

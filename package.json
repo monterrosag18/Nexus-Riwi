@@ -12,7 +12,6 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "vite": "^5.0.0"
   },
   "dependencies": {
     "@vercel/postgres": "^0.10.0",

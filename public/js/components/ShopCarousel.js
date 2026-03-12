@@ -191,7 +191,11 @@ export default function renderShop() {
     function render() {
         const state = store.getState();
         const user = state.currentUser || { name: 'GUEST', clan: 'neutral', credits: 0, ownedCosmetics: [] };
-        const clanData = state.clans[user.clan] || { name: 'Unknown', points: 0 };
+        // Ensure properties exist on user
+        const userName = (user.name || 'GUEST').toUpperCase();
+        const userCredits = user.credits || 0;
+        const userClan = user.clan || 'neutral';
+        const clanData = (state.clans && state.clans[userClan]) || { name: 'Unknown', points: 0 };
 
         container.innerHTML = `
             <!-- THREE.JS CANVAS LAYER -->
@@ -220,7 +224,7 @@ export default function renderShop() {
                             NEXUS_CARDS.map(card => `
                                 <div class="gallery-card ${card.type}" data-card-id="${card.id}">
                                     <div class="gallery-card-img">
-                                        <img src="./assets/img/rules/skills/${card.image}" alt="${card.name}" />
+                                        <img src="/assets/img/rules/skills/${card.image}" alt="${card.name}" />
                                     </div>
                                     <div class="gallery-card-info">
                                         <span class="gallery-card-name">${card.name}</span>
@@ -291,7 +295,7 @@ export default function renderShop() {
                                     ${activeCard.type === 'good' ? '✦ REWARD' : '⚠ HAZARD'}
                                 </div>
                                 <div class="active-card-image">
-                                    <img src="./assets/img/rules/skills/${activeCard.image}" alt="${activeCard.name}" />
+                                    <img src="/assets/img/rules/skills/${activeCard.image}" alt="${activeCard.name}" />
                                 </div>
                                 <h2 class="active-card-title">${activeCard.name}</h2>
                                 <p class="active-card-subtitle">${activeCard.subtitle}</p>
@@ -346,11 +350,11 @@ export default function renderShop() {
                     <div class="panel-header"><i class="fa-solid fa-satellite-dish"></i> STATUS</div>
                     <div class="intel-section">
                         <div class="intel-label">OPERATOR</div>
-                        <div class="intel-value">${user.name.toUpperCase()}</div>
+                        <div class="intel-value">${userName}</div>
                     </div>
                     <div class="intel-section">
                         <div class="intel-label">QUANTUM CREDITS</div>
-                        <div class="intel-value credits" style="color:#0f0; font-size:1.4rem;">${user.credits.toLocaleString()} CR</div>
+                        <div class="intel-value credits" style="color:#0f0; font-size:1.4rem;">${userCredits.toLocaleString()} CR</div>
                     </div>
                     <div class="intel-divider"></div>
                     <div class="intel-section">

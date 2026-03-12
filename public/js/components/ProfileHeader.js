@@ -96,7 +96,7 @@ function updateContent(container) {
             <!-- Credits Display -->
             <div style="text-align: right;">
                 <div style="color: #00ff88; font-family: 'Share Tech Mono', monospace; font-size: 1.1rem; font-weight: bold; text-shadow: 0 0 10px rgba(0,255,136,0.3);">
-                    ${user ? user.credits.toLocaleString() : '0'} <span style="font-size: 0.7rem; color: #555;">CR</span>
+                    ${(user && typeof user.credits !== 'undefined') ? user.credits.toLocaleString() : '0'} <span style="font-size: 0.7rem; color: #555;">CR</span>
                 </div>
             </div>
         </div>
