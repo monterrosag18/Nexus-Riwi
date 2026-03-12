@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwi Nexus | Gamificando la Excelencia</title>
+
+    <link rel="icon" type="image/jpg" sizes="32x32"
+        href="./assets/img/rules/watermarked-060bae11-4609-4962-90cb-74e948d57cf3.jpg">
+    <!-- Google Fonts & Material Symbols -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Outfit:wght@300;400;700&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+
+    <!-- Tailwind Configuration (Preflight Disabled to prevent global CSS conflicts) -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            corePlugins: { preflight: false },
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: { primary: "#ec5b13", "neon-cyan": "#00f3ff", "neon-magenta": "#ff00ff", "background-dark": "#050505" },
+                    fontFamily: { display: ["Public Sans", "sans-serif"] },
+                    animation: {
+                        glitch: "glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite",
+                        vibrate: "vibrate 0.3s linear infinite",
+                        flicker: "flicker 2s linear infinite"
+                    },
+                    keyframes: {
+                        glitch: {
+                            "0%": { transform: "translate(0)" },
+                            "20%": { transform: "translate(-2px, 2px)" },
+                            "40%": { transform: "translate(-2px, -2px)" },
+                            "60%": { transform: "translate(2px, 2px)" },
+                            "80%": { transform: "translate(2px, -2px)" },
+                            "100%": { transform: "translate(0)" }
+                        },
+                        vibrate: {
+                            "0%, 100%": { transform: "translate(0)" },
+                            "25%": { transform: "translate(1px, -1px)" },
+                            "50%": { transform: "translate(-1px, 1px)" },
+                            "75%": { transform: "translate(1px, 1px)" }
+                        },
+                        flicker: {
+                            "0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100%": { opacity: "1", "text-shadow": "0 0 5px rgba(236,91,19,0.5)" },
+                            "20%, 21.999%, 63%, 63.999%, 65%, 69.999%": { opacity: "0.4", "text-shadow": "none" }
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Swiper.js for 3D Carousel -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+    <!-- Import Map for ESM Modules -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js"
+            }
+        }
+    </script>
+
+    <!-- Three.js & Post-Processing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+
+    <!-- Three.js & Post-Processing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+
+    <!-- UI Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FontLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/geometries/TextGeometry.js"></script>
+
+    <!-- App Logic -->
+    <script type="module" src="./js/app.js"></script>
+    <!-- Augmented UI (Cyberpunk Shapes) -->
+    <link rel="stylesheet" href="https://unpkg.com/augmented-ui@2/augmented-ui.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="css/question.css">
+    <link rel="stylesheet" href="css/mini-leaderboard.css">
+    <link rel="stylesheet" href="css/shop-tactics.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/rules.css">
+    <link rel="stylesheet" href="css/rank.css">
+    <link rel="stylesheet" href="css/chat.css">
+</head>
+
+<body>
+    <div id="app">
+        <!-- Sidebar will be injected here -->
+        <nav id="sidebar"></nav>
+
+        <!-- Main Content Area -->
+        <main id="main-content">
+            <header id="top-bar">
+                <!-- Injected via ProfileHeader.js -->
+            </header>
+
+            <!-- Dynamic View Container -->
+            <div id="view-container"></div>
+        </main>
+
+        <!-- Floating Chat -->
+        <div id="chat-widget"></div>
+
+        <!-- TRANSITION DOORS (Heavy Mechanical) -->
+        <div id="transition-doors">
+            <!-- Left Heavy Door -->
+            <div class="mech-door door-left">
+                <div class="door-plate"></div>
+                <div class="hazard-stripe"></div>
+                <div class="lock-mechanism">
+                    <div class="door-text">NEXUS</div>
+                </div>
+            </div>
+
+            <!-- Right Heavy Door -->
+            <div class="mech-door door-right">
+                <div class="door-plate"></div>
+                <div class="hazard-stripe"></div>
+                <div class="lock-mechanism">
+                    <div class="door-text">NEXUS</div>
+                </div>
+            </div>
+
+            <!-- Impact Flash -->
+            <div class="door-flash"></div>
+
+            <!-- Central Loading HUD -->
+            <div class="door-emblem">
+                <div class="loader-ring"></div>
+                <div class="loader-core"></div>
+                <div class="loading-text">LOADING SECTOR</div>
+                <div class="status-lights">
+                    <span class="light red"></span>
+                    <span class="light red"></span>
+                    <span class="light red"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GSAP (Advanced Animations) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <!-- tsParticles (Cosmic Dust) -->
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
+</body>
+
+</html>
