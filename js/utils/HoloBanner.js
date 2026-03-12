@@ -73,7 +73,7 @@ export class HoloBanner {
                     float iconStrength = iconSample.a; // Use alpha channel
                     
                     // 3. Effects
-                    float alpha = 0.6;
+                    float alpha = 0.35;
                     
                     // Scanlines
                     float scan = sin(vUv.y * 300.0 + time * 5.0) * 0.1;
@@ -106,7 +106,7 @@ export class HoloBanner {
             transparent: true,
             side: THREE.DoubleSide,
             depthWrite: false, // For hologram transparency overlap
-            blending: THREE.AdditiveBlending
+            blending: THREE.NormalBlending
         });
 
         this.mesh = new THREE.Mesh(geometry, material);
@@ -178,7 +178,7 @@ export class HoloBanner {
 
         // Glow Effect
         ctx.shadowColor = '#FFFFFF';
-        ctx.shadowBlur = 20;
+        ctx.shadowBlur = 8;
 
         // Draw Icon (Centered in top half)
         ctx.font = '900 300px "Font Awesome 6 Free"';

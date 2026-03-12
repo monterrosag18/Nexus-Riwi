@@ -65,13 +65,13 @@ export default function renderMap() {
     const hud = container.querySelector('#tactical-hud');
     hud.appendChild(renderMiniLeaderboard());
 
-    // 1b. Inject Weekly Countdown (top-left)
+    // 1b. Inject Weekly Countdown (top-left, offset past sidebar)
     const mapUI = container.querySelector('#map-ui');
     const countdown = createWeeklyCountdown();
-    countdown.style.cssText = 'position:absolute;top:15px;left:15px;pointer-events:auto;z-index:60;';
+    countdown.style.cssText = 'position:absolute;top:15px;left:85px;pointer-events:auto;z-index:60;';
     mapUI.appendChild(countdown);
 
-    // 1c. Inject News Ticker (bottom)
+    // 1c. Inject News Ticker (bottom, offset past sidebar)
     const ticker = createNewsTicker();
     mapUI.appendChild(ticker);
 
@@ -341,6 +341,47 @@ function buildTacticalGrid() {
 
         createClanStandard(clanData.name, pos, clanData.color, icon);
         bannerDistributions[id] = { vec: pos, color: clanData.color, assigned: 0 };
+
+        // Add pulsing ground light for the user's own clan
+        const currentUser = state.currentUser;
+        if (currentUser && currentUser.clan === id) {
+            // Outer pulsing ring
+            const ringGeo = new THREE.RingGeometry(12, 16, 64);
+            const ringMat = new THREE.MeshBasicMaterial({
+                color: new THREE.Color(clanData.color),
+                transparent: true,
+                opacity: 0.4,
+                side: THREE.DoubleSide,
+                blending: THREE.AdditiveBlending
+            });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotation.x = -Math.PI / 2;
+            ring.position.set(x, 0.5, z);
+            tacticalGroup.add(ring);
+
+            // Inner glow disk
+            const diskGeo = new THREE.CircleGeometry(12, 64);
+            const diskMat = new THREE.MeshBasicMaterial({
+                color: new THREE.Color(clanData.color),
+                transparent: true,
+                opacity: 0.08,
+                side: THREE.DoubleSide,
+                blending: THREE.AdditiveBlending
+            });
+            const disk = new THREE.Mesh(diskGeo, diskMat);
+            disk.rotation.x = -Math.PI / 2;
+            disk.position.set(x, 0.3, z);
+            tacticalGroup.add(disk);
+
+            // Point light for the user's clan
+            const clanLight = new THREE.PointLight(new THREE.Color(clanData.color), 3, 60);
+            clanLight.position.set(x, 8, z);
+            scene.add(clanLight);
+
+            // Store for animation
+            ring.userData.pulseRing = true;
+            ring.userData.baseMat = ringMat;
+        }
     });
 
     // 3. GENERATE HEXAGONS
