@@ -1,4 +1,4 @@
-import { sql } from '@vercel/postgres';
+import { db } from '@vercel/postgres';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -11,8 +11,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ message: 'Missing username' });
   }
 
+  const client = await db.connect();
+
   try {
-    const result = await sql`
+    const result = await client.sql`
       SELECT username, clan_id, credits, active_skin, active_chat_color, active_border_color, active_shield_color, owned_cosmetics 
       FROM users 
       WHERE username = ${username} 
@@ -37,5 +39,7 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('Profile fetch error:', error);
     return res.status(500).json({ message: 'Internal server error' });
+  } finally {
+    await client.end();
   }
 }

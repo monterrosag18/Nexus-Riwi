@@ -1,26 +1,27 @@
-import { sql } from '@vercel/postgres';
+import { db } from '@vercel/postgres';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ message: 'Method not allowed' });
 
   const { type, difficulty } = req.query;
+  const client = await db.connect();
 
   try {
     let result;
     if (type && difficulty) {
-      result = await sql`
+      result = await client.sql`
         SELECT * FROM questions 
         WHERE type = ${type} AND difficulty = ${difficulty} 
         ORDER BY RANDOM() LIMIT 1;
       `;
     } else if (type) {
-      result = await sql`
+      result = await client.sql`
         SELECT * FROM questions 
         WHERE type = ${type} 
         ORDER BY RANDOM() LIMIT 1;
       `;
     } else {
-      result = await sql`
+      result = await client.sql`
         SELECT * FROM questions 
         ORDER BY RANDOM() LIMIT 1;
       `;
@@ -34,5 +35,7 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('Fetch random question error:', error);
     return res.status(500).json({ message: 'Internal server error' });
+  } finally {
+    await client.end();
   }
 }

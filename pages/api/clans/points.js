@@ -1,4 +1,4 @@
-import { sql } from '@vercel/postgres';
+import { db } from '@vercel/postgres';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -11,8 +11,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ message: 'Missing fields' });
   }
 
+  const client = await db.connect();
+
   try {
-    await sql`
+    await client.sql`
       UPDATE clans 
       SET points = points + ${amount} 
       WHERE id = ${clanId};
@@ -21,5 +23,7 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('Points sync error:', error);
     return res.status(500).json({ message: 'Internal server error' });
+  } finally {
+    await client.end();
   }
 }
