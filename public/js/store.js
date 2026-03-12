@@ -125,7 +125,13 @@ class Store {
         return 'soft-skills';
     }
 
-        return this.getMockQuestion(type);
+    getMockQuestion(type) {
+        // Safe default return for disconnected/local mode
+        return { 
+            q: "SYSTEM_OFFLINE: Answer with any option to proceed.", 
+            options: ["A", "B", "C"], 
+            correct: 0 
+        };
     }
 
     // --- DYNAMIC CLAN & MAP MANAGEMENT --- //
