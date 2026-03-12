@@ -1,4 +1,4 @@
-import { sql } from '@vercel/postgres';
+import { db } from '@vercel/postgres';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
@@ -15,8 +15,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ message: 'Missing fields' });
   }
 
+  const client = await db.connect();
+
   try {
-    const result = await sql`
+    const result = await client.sql`
       SELECT * FROM users WHERE username = ${username} LIMIT 1;
     `;
 
@@ -52,5 +54,7 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('Login error:', error);
     return res.status(500).json({ message: 'Internal server error' });
+  } finally {
+    await client.end();
   }
 }

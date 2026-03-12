@@ -1,9 +1,11 @@
-import { sql } from '@vercel/postgres';
+import { db } from '@vercel/postgres';
 
 export default async function handler(req, res) {
+  const client = await db.connect();
+
   if (req.method === 'GET') {
     try {
-      const result = await sql`SELECT * FROM clans ORDER BY points DESC;`;
+      const result = await client.sql`SELECT * FROM clans ORDER BY points DESC;`;
       const clansMap = {};
       result.rows.forEach(clan => {
         clansMap[clan.id] = {
@@ -18,6 +20,8 @@ export default async function handler(req, res) {
     } catch (error) {
       console.error('Fetch clans error:', error);
       return res.status(500).json({ message: 'Internal server error' });
+    } finally {
+      await client.end();
     }
   }
 
@@ -26,7 +30,7 @@ export default async function handler(req, res) {
     if (!id || !name || !color) return res.status(400).json({ message: 'Missing fields' });
 
     try {
-      await sql`
+      await client.sql`
         INSERT INTO clans (id, name, color, icon, points, members_count)
         VALUES (${id}, ${name}, ${color}, ${icon}, ${points || 0}, ${members || 0})
         ON CONFLICT (id) DO UPDATE 
@@ -36,6 +40,8 @@ export default async function handler(req, res) {
     } catch (error) {
       console.error('Save clan error:', error);
       return res.status(500).json({ message: 'Internal server error' });
+    } finally {
+      await client.end();
     }
   }
 
@@ -44,11 +50,13 @@ export default async function handler(req, res) {
     if (!id) return res.status(400).json({ message: 'Missing id' });
 
     try {
-      await sql`DELETE FROM clans WHERE id = ${id};`;
+      await client.sql`DELETE FROM clans WHERE id = ${id};`;
       return res.status(200).json({ success: true });
     } catch (error) {
       console.error('Delete clan error:', error);
       return res.status(500).json({ message: 'Internal server error' });
+    } finally {
+      await client.end();
     }
   }
 

@@ -1,4 +1,4 @@
-import { sql } from '@vercel/postgres';
+import { db } from '@vercel/postgres';
 import bcrypt from 'bcrypt';
 
 export default async function handler(req, res) {
@@ -12,9 +12,11 @@ export default async function handler(req, res) {
     return res.status(400).json({ message: 'Missing fields' });
   }
 
+  const client = await db.connect();
+
   try {
     // Check if user exists
-    const userCheck = await sql`SELECT id FROM users WHERE username = ${username} LIMIT 1;`;
+    const userCheck = await client.sql`SELECT id FROM users WHERE username = ${username} LIMIT 1;`;
     if (userCheck.rowCount > 0) {
       return res.status(400).json({ message: 'CODENAME ALREADY TAKEN' });
     }
@@ -24,7 +26,7 @@ export default async function handler(req, res) {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     // Insert user
-    await sql`
+    await client.sql`
       INSERT INTO users (username, password_hash, clan_id, credits)
       VALUES (${username}, ${hashedPassword}, ${clan}, 2000);
     `;
@@ -33,5 +35,7 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('Registration error:', error);
     return res.status(500).json({ message: 'Internal server error', error: error.message });
+  } finally {
+    await client.end();
   }
 }
