@@ -1,4 +1,4 @@
-import { sql } from '@vercel/postgres';
+import { db } from '@vercel/postgres';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -11,9 +11,11 @@ export default async function handler(req, res) {
     return res.status(400).json({ message: 'Missing fields' });
   }
 
+  const client = await db.connect();
+
   try {
     // 1. Check user exists and has enough credits
-    const userResult = await sql`SELECT credits, owned_cosmetics FROM users WHERE username = ${username} LIMIT 1;`;
+    const userResult = await client.sql`SELECT credits, owned_cosmetics FROM users WHERE username = ${username} LIMIT 1;`;
     if (userResult.rowCount === 0) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -29,31 +31,30 @@ export default async function handler(req, res) {
       owned.push(itemId);
     }
 
-    // 3. Update user: deduct credits, update owned list, and auto-apply
-    let updateQuery = sql`
+    // 3. Update user: deduct credits, update owned list
+    await client.sql`
       UPDATE users 
       SET credits = credits - ${cost}, 
           owned_cosmetics = ${JSON.stringify(owned)}
       WHERE username = ${username}
     `;
 
-    // Perform the main update
-    await updateQuery;
-
     // 4. Auto-apply based on type
     if (type === 'skin') {
-      await sql`UPDATE users SET active_skin = ${itemId} WHERE username = ${username};`;
+      await client.sql`UPDATE users SET active_skin = ${itemId} WHERE username = ${username};`;
     } else if (type === 'chat') {
-      await sql`UPDATE users SET active_chat_color = ${color} WHERE username = ${username};`;
+      await client.sql`UPDATE users SET active_chat_color = ${color} WHERE username = ${username};`;
     } else if (type === 'border') {
-      await sql`UPDATE users SET active_border_color = ${color} WHERE username = ${username};`;
+      await client.sql`UPDATE users SET active_border_color = ${color} WHERE username = ${username};`;
     } else if (type === 'shield') {
-      await sql`UPDATE users SET active_shield_color = ${color} WHERE username = ${username};`;
+      await client.sql`UPDATE users SET active_shield_color = ${color} WHERE username = ${username};`;
     }
 
     return res.status(200).json({ success: true });
   } catch (error) {
     console.error('Purchase error:', error);
     return res.status(500).json({ message: 'Internal server error' });
+  } finally {
+    await client.end();
   }
 }

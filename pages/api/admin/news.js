@@ -1,13 +1,17 @@
-import { sql } from '@vercel/postgres';
+import { db } from '@vercel/postgres';
 
 export default async function handler(req, res) {
+  const client = await db.connect();
+
   if (req.method === 'GET') {
     try {
-      const result = await sql`SELECT * FROM announcements ORDER BY created_at DESC LIMIT 20;`;
+      const result = await client.sql`SELECT * FROM announcements ORDER BY created_at DESC LIMIT 20;`;
       return res.status(200).json(result.rows);
     } catch (error) {
       console.error('Fetch news error:', error);
       return res.status(500).json({ message: 'Internal server error' });
+    } finally {
+      await client.end();
     }
   }
 
@@ -16,7 +20,7 @@ export default async function handler(req, res) {
     if (!msg) return res.status(400).json({ message: 'Missing msg' });
 
     try {
-      await sql`
+      await client.sql`
         INSERT INTO announcements (msg, type)
         VALUES (${msg}, ${type || 'info'});
       `;
@@ -24,6 +28,8 @@ export default async function handler(req, res) {
     } catch (error) {
       console.error('Save news error:', error);
       return res.status(500).json({ message: 'Internal server error' });
+    } finally {
+      await client.end();
     }
   }
 
@@ -32,11 +38,13 @@ export default async function handler(req, res) {
     if (!id) return res.status(400).json({ message: 'Missing id' });
 
     try {
-      await sql`DELETE FROM announcements WHERE id = ${id};`;
+      await client.sql`DELETE FROM announcements WHERE id = ${id};`;
       return res.status(200).json({ success: true });
     } catch (error) {
       console.error('Delete news error:', error);
       return res.status(500).json({ message: 'Internal server error' });
+    } finally {
+      await client.end();
     }
   }
 
