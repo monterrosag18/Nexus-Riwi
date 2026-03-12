@@ -45,6 +45,23 @@ class Store {
         this.chatDB = {}; // Will be handled via API
     }
 
+    // --- EVENT LOG METHODS ---
+    getEventLog() {
+        return this.eventLog || [];
+    }
+
+    logEvent(msg, type = 'info') {
+        const event = { msg, type, time: new Date().toISOString() };
+        this.eventLog.unshift(event);
+        if (this.eventLog.length > 50) this.eventLog.pop(); // Keep last 50
+        
+        try {
+            localStorage.setItem('riwi_events', JSON.stringify(this.eventLog));
+        } catch(e) {}
+        
+        this.notify();
+    }
+
     async loadInitialData() {
         try {
             const [clansRes, territoriesRes] = await Promise.all([
