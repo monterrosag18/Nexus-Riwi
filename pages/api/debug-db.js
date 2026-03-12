@@ -20,9 +20,13 @@ export default async function handler(req, res) {
       WHERE table_schema = 'public';
     `;
 
+    const url = process.env.POSTGRES_URL || '';
+    const maskedUrl = url.replace(/:([^@]+)@/, ':****@').split('?')[0];
+
     return res.status(200).json({
       success: true,
       env: envCheck,
+      postgresUrl: maskedUrl,
       time: timeResult.rows[0].now,
       tables: tablesResult.rows.map(r => r.table_name)
     });
@@ -34,5 +38,7 @@ export default async function handler(req, res) {
       stack: error.stack,
       envKeys: Object.keys(process.env).filter(k => k.includes('POSTGRES'))
     });
+  } finally {
+    if (client) await client.end();
   }
 }
