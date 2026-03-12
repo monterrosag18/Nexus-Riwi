@@ -29,7 +29,7 @@ export default function createFactionChat() {
             
             <div class="chat-view ${activeTab === 'clan' ? 'active' : ''}" id="clan-view">
                 <div class="chat-history" id="faction-chat-history">
-                    ${renderMessages(user.clan)}
+                    ${renderMessagesFromList([])}
                 </div>
                 <div class="chat-input-area">
                     <input type="text" id="faction-chat-input" placeholder="Secure transmit..." autocomplete="off">

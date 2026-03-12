@@ -1,5 +1,6 @@
 {
   "framework": "nextjs",
+  "outputDirectory": ".next",
   "rewrites": [
     { "source": "/", "destination": "/index.html" }
   ]

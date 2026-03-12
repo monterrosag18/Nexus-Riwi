@@ -52,18 +52,23 @@ class Store {
                 fetch('/api/territories')
             ]);
             
-            this.state.clans = await clansRes.json();
-            const rawTerritories = await territoriesRes.json();
+            this.state.clans = (clansRes.ok) ? await clansRes.json() : {};
+            const rawTerritories = (territoriesRes.ok) ? await territoriesRes.json() : [];
             
             // Map territories to local structure
-            this.state.territories = rawTerritories.map(t => ({
-                id: parseInt(t.id),
-                owner: t.owner_id || 'neutral',
-                type: t.type || 'code',
-                biome: t.biome || 'city',
-                difficulty: t.difficulty || 1,
-                question: t.question || this.getMockQuestion(t.type || 'code')
-            }));
+            if (Array.isArray(rawTerritories)) {
+                this.state.territories = rawTerritories.map(t => ({
+                    id: parseInt(t.id),
+                    owner: t.owner_id || 'neutral',
+                    type: t.type || 'code',
+                    biome: t.biome || 'city',
+                    difficulty: t.difficulty || 1,
+                    question: t.question || this.getMockQuestion(t.type || 'code')
+                }));
+            } else {
+                console.error('Expected territories array, got:', rawTerritories);
+                this.state.territories = [];
+            }
 
             // Sync User profile if logged in
             if (this.state.currentUser) {
