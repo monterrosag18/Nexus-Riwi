@@ -1,441 +1,397 @@
 import { store } from '../store.js';
 import { ShopScene } from './ShopScene.js';
 
-const SHOP_ITEMS = [
+// ═══════════════════════════════════════════════
+//  THE 8 NEXUS CARDS — 4 GOOD / 4 BAD
+// ═══════════════════════════════════════════════
+const NEXUS_CARDS = [
+    // ✅ GOOD CARDS
     {
-        id: 'shield', name: 'ION SHIELD', type: 'defensive', subtitle: 'CLASS IV MODULE', icon: 'fa-shield-halved', colorClass: 'text-neon-blue',
-        cost: 500, specs: { absorption: '85%', recharge: '4.2s', weight: '12kg', energy: 'HIGH' },
-        desc: 'Generates a localized ionic field capable of dispersing directed energy weapons.',
-        image: 'escudo_habilidad.png', rgb: '0, 136, 255'
+        id: 'ion-shield', name: 'ION SHIELD', type: 'good',
+        subtitle: 'DEFENSIVE PROTOCOL',
+        desc: 'Emergency defense matrix activated. Quantum credits surge through your account.',
+        effect: '+500 CREDITS', effectDetail: 'Your account receives 500 bonus credits.',
+        image: 'escudo_habilidad.png', rgb: '0, 220, 255',
+        icon: 'fa-shield-halved',
+        execute: () => {
+            const user = store.getState().currentUser;
+            if (user) { user.credits += 500; store.setUser(user); }
+            return { msg: 'ION SHIELD activated! +500 CR deposited.', success: true };
+        }
     },
     {
-        id: 'siphon', name: 'DATA SIPHON', type: 'offensive', subtitle: 'COVERT EXTRACTION', icon: 'fa-database', colorClass: 'text-neon-red',
-        cost: 1500, specs: { yield: 'HIGH', trace: 'LOW', duration: 'INSTANT', energy: 'CRIT' },
-        desc: 'A malicious packet injector designed to siphon raw Influence Points directly from a rival clan.',
-        isOffensive: true, stealAmount: 200,
-        image: 'fuga_habilidad.png', rgb: '255, 0, 85'
+        id: 'neural-patch', name: 'NEURAL PATCH', type: 'good',
+        subtitle: 'CLAN BOOST MODULE',
+        desc: 'A neural uplink patch that feeds raw influence data directly to your faction.',
+        effect: '+200 CLAN PTS', effectDetail: 'Your clan gains 200 influence points.',
+        image: 'parche_habilidad.png', rgb: '0, 255, 136',
+        icon: 'fa-microchip',
+        execute: () => {
+            const user = store.getState().currentUser;
+            if (user) store.addPoints(user.clan, 200);
+            return { msg: 'NEURAL PATCH deployed! +200 pts to your clan.', success: true };
+        }
     },
     {
-        id: 'overclock', name: 'OVERCLOCK KIT', type: 'utility', subtitle: 'HARDWARE ACCELERATOR', icon: 'fa-bolt', colorClass: 'text-neon-yellow',
-        cost: 800, specs: { boost: '+40%', heat: 'DANGEROUS', duration: '60s', energy: 'MED' },
-        desc: 'Bypasses safety limiters on core processors, boosting speeds at the risk of system damage.',
-        image: 'bomba_habilidad.png', rgb: '255, 170, 0'
+        id: 'xp-elixir', name: 'XP ELIXIR', type: 'good',
+        subtitle: 'EXPERIENCE CATALYST',
+        desc: 'Rare quantum elixir that amplifies clan experience output for a limited window.',
+        effect: '+300 CLAN PTS', effectDetail: 'Your clan surges with 300 bonus points.',
+        image: 'pocion_habilidad.png', rgb: '170, 0, 255',
+        icon: 'fa-flask',
+        execute: () => {
+            const user = store.getState().currentUser;
+            if (user) store.addPoints(user.clan, 300);
+            return { msg: 'XP ELIXIR consumed! +300 pts to your clan!', success: true };
+        }
     },
     {
-        id: 'cloak', name: 'STEALTH CLOAK', type: 'utility', subtitle: 'OPTICAL CAMOUFLAGE', icon: 'fa-ghost', colorClass: 'text-neon-purple',
-        cost: 1200, specs: { visibility: 'ZERO', heat_sig: 'MASKED', duration: '120s', energy: 'HIGH' },
-        desc: 'Bends local light waves around the operator, rendering them invisible to standard optics.',
-        image: 'Lupa_habilidad.png', rgb: '170, 0, 255'
+        id: 'data-scroll', name: 'DATA SCROLL', type: 'good',
+        subtitle: 'HYBRID REWARD',
+        desc: 'Ancient encrypted scroll containing both credits and influence data fragments.',
+        effect: '+150 PTS +200 CR', effectDetail: 'Your clan gains 150 pts and you gain 200 credits.',
+        image: 'pergamino_habilidad.png', rgb: '255, 215, 0',
+        icon: 'fa-scroll',
+        execute: () => {
+            const user = store.getState().currentUser;
+            if (user) {
+                store.addPoints(user.clan, 150);
+                user.credits += 200;
+                store.setUser(user);
+            }
+            return { msg: 'DATA SCROLL decoded! +150 clan pts +200 CR!', success: true };
+        }
+    },
+    // ❌ BAD CARDS
+    {
+        id: 'sys-overload', name: 'SYSTEM OVERLOAD', type: 'bad',
+        subtitle: 'CRITICAL FAILURE',
+        desc: 'Power surge damages your clan\'s infrastructure. Influence points are lost.',
+        effect: '−300 CLAN PTS', effectDetail: 'Your clan loses 300 influence points.',
+        image: 'bomba_habilidad.png', rgb: '255, 60, 60',
+        icon: 'fa-explosion',
+        execute: () => {
+            const user = store.getState().currentUser;
+            if (user) store.addPoints(user.clan, -300);
+            return { msg: 'SYSTEM OVERLOAD! Your clan lost 300 pts!', success: false };
+        }
     },
     {
-        id: 'scanner', name: 'OMNI-SCANNER', type: 'utility', subtitle: 'SECTOR RECONNAISSANCE', icon: 'fa-eye', colorClass: 'text-neon-green',
-        cost: 2000, specs: { range: '50km', penetration: 'DEEP', type: 'PASSIVE', energy: 'LOW' },
-        desc: 'Advanced telemetry suit that highlights weak points in enemy territory.',
-        image: 'script_habilidad.png', rgb: '0, 255, 136'
+        id: 'data-leak', name: 'DATA LEAK', type: 'bad',
+        subtitle: 'ESPIONAGE BREACH',
+        desc: 'A rival faction intercepts your data stream. Points leak to the enemy.',
+        effect: '−200 PTS → RIVAL', effectDetail: 'Your clan loses 200 pts; a random rival gains them.',
+        image: 'fuga_habilidad.png', rgb: '255, 0, 85',
+        icon: 'fa-skull-crossbones',
+        execute: () => {
+            const state = store.getState();
+            const user = state.currentUser;
+            if (!user) return { msg: 'NO OPERATOR', success: false };
+            const rivals = Object.keys(state.clans).filter(k => k !== user.clan);
+            if (rivals.length > 0) {
+                const target = rivals[Math.floor(Math.random() * rivals.length)];
+                store.addPoints(user.clan, -200);
+                store.addPoints(target, 200);
+                const rivalName = state.clans[target]?.name || target;
+                return { msg: `DATA LEAK! −200 pts leaked to ${rivalName.toUpperCase()}!`, success: false };
+            }
+            store.addPoints(user.clan, -200);
+            return { msg: 'DATA LEAK! Your clan lost 200 pts!', success: false };
+        }
+    },
+    {
+        id: 'trojan', name: 'TROJAN INJECTION', type: 'bad',
+        subtitle: 'ACCOUNT COMPROMISE',
+        desc: 'Malware drains quantum credits from your personal account reserves.',
+        effect: '−400 CREDITS', effectDetail: 'You lose 400 credits from your account.',
+        image: 'inyectador_habilidad.png', rgb: '255, 120, 0',
+        icon: 'fa-syringe',
+        execute: () => {
+            const user = store.getState().currentUser;
+            if (user) {
+                user.credits = Math.max(0, user.credits - 400);
+                store.setUser(user);
+            }
+            return { msg: 'TROJAN INJECTION! −400 CR drained!', success: false };
+        }
+    },
+    {
+        id: 'corrupt-script', name: 'CORRUPTED SCRIPT', type: 'bad',
+        subtitle: 'DOUBLE DAMAGE',
+        desc: 'A corrupted execution damages both your credits and clan influence.',
+        effect: '−150 PTS −100 CR', effectDetail: 'Your clan loses 150 pts and you lose 100 credits.',
+        image: 'script_habilidad.png', rgb: '180, 0, 0',
+        icon: 'fa-bug',
+        execute: () => {
+            const user = store.getState().currentUser;
+            if (user) {
+                store.addPoints(user.clan, -150);
+                user.credits = Math.max(0, user.credits - 100);
+                store.setUser(user);
+            }
+            return { msg: 'CORRUPTED SCRIPT! −150 clan pts −100 CR!', success: false };
+        }
     }
 ];
 
+// ═══════════════════════════════════════════════
+//  MAIN RENDER FUNCTION
+// ═══════════════════════════════════════════════
 export default function renderShop() {
     const container = document.createElement('div');
     container.className = 'cockpit-wrapper fade-in';
 
-    let activeItem = SHOP_ITEMS[0];
-    let shopSceneInstance = null;
-    let unsubscribe = null;
-    let spinState = 'SPIN'; // 'SPIN' -> 'SPINNING' -> 'PURCHASE'
+    let activeCard = NEXUS_CARDS[0];
+    let shopScene = null;
+    let spinState = 'READY'; // READY -> SPINNING -> RESULT
     let spinInterval = null;
+    let lastResult = null;
 
-    function renderDOM() {
+    function render() {
         const state = store.getState();
         const user = state.currentUser || { name: 'GUEST', clan: 'neutral', credits: 0 };
-        const credits = user.credits || 0;
+        const clanData = state.clans[user.clan] || { name: 'Unknown', points: 0 };
 
         container.innerHTML = `
-            <!-- 3D BACKGROUND -->
-            <div id="shop-scene-container" style="position: absolute; inset: 0; z-index: 0;"></div>
+            <!-- THREE.JS CANVAS LAYER -->
+            <div id="shop-3d-canvas" style="position:absolute;inset:0;z-index:0;"></div>
 
-            <!-- GLOBAL OVERLAYS -->
-            <div class="cockpit-frame" style="pointer-events: none; z-index: 10;">
-                <div class="frame-top"></div>
-                <div class="frame-bottom"></div>
-            </div>
-            <div class="scan-lines"></div>
-            <div class="holo-noise"></div>
+            <!-- VIGNETTE OVERLAY -->
+            <div style="position:absolute;inset:0;z-index:1;pointer-events:none;
+                background:radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.85) 100%);"></div>
 
-            <!-- MAIN GRID LAYOUT -->
-            <div class="holo-grid-container" style="z-index: 20; position: relative; display: grid; grid-template-columns: 350px 1fr 300px; height: 100vh; padding: 80px 40px 40px 40px; gap: 20px;">
-                
-                <!-- COLUMN 1: INVENTORY & MODULES -->
-                <div class="holo-column col-left">
-                    <div class="holo-panel mini-profile">
-                        <div class="panel-header">OPERATOR STATUS</div>
-                        <div class="profile-row">
-                            <div class="avatar-frame"><i class="fa-solid fa-user-astronaut"></i></div>
-                            <div class="profile-info">
-                                <div class="name">${user.name.toUpperCase()}</div>
-                                <div class="rank">SECTOR: ${user.clan.toUpperCase()}</div>
-                            </div>
-                        </div>
+            <!-- SCANLINE TEXTURE -->
+            <div style="position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0.04;
+                background:repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px);"></div>
+
+            <!-- MAIN 3-PANEL LAYOUT -->
+            <div class="shop-nexus-layout" style="position:relative;z-index:10;">
+
+                <!-- ═══ LEFT PANEL: CARD GALLERY ═══ -->
+                <div class="nexus-panel nexus-left-panel">
+                    <div class="panel-header">
+                        <i class="fa-solid fa-layer-group"></i> NEXUS ARSENAL
                     </div>
-
-                    <div class="holo-tabs">
-                        <button class="holo-tab active">BLACK MARKET</button>
-                    </div>
-
-                    <div class="holo-list-scroll">
-                        ${SHOP_ITEMS.map(item => `
-                            <div class="holo-item-row ${activeItem.id === item.id ? 'selected' : ''}" data-id="${item.id}">
-                                <div class="item-icon"><i class="fa-solid ${item.icon}"></i></div>
-                                <div class="item-details">
-                                    <div class="item-name">${item.name}</div>
-                                    <div class="item-cost ${item.colorClass}">${item.cost} CR</div>
+                    <div class="card-gallery">
+                        ${NEXUS_CARDS.map(card => `
+                            <div class="gallery-card ${card.type}" data-card-id="${card.id}">
+                                <div class="gallery-card-img">
+                                    <img src="./assets/img/rules/skills/${card.image}" alt="${card.name}" />
                                 </div>
-                                <div class="item-status">${credits >= item.cost ? 'AVAILABLE' : 'LOCKED'}</div>
+                                <div class="gallery-card-info">
+                                    <span class="gallery-card-name">${card.name}</span>
+                                    <span class="gallery-card-effect ${card.type}">${card.effect}</span>
+                                </div>
                             </div>
                         `).join('')}
                     </div>
                 </div>
 
-                <!-- COLUMN 2: CENTER STAGE (3D ROULETTE) -->
-                <div class="holo-column col-center" style="position: relative;"> 
-                    <div class="hologram-header" style="position: relative; z-index: 20;">
-                        <h1 class="item-title-large" style="text-shadow: 0 0 10px var(--primary-cyan);">${activeItem.name}</h1>
-                        <div class="item-subtitle" style="color: var(--primary-cyan);">${activeItem.subtitle}</div>
-                    </div>
-                    
-                    <!-- ROULETTE WRAPPER -->
-                    <div class="roulette-wrapper">
-                        <div class="roulette-inner" style="--quantity: ${SHOP_ITEMS.length};">
-                            ${SHOP_ITEMS.map((item, index) => `
-                                <div class="roulette-card ${activeItem.id === item.id ? 'selected-card' : ''}" 
-                                     data-id="${item.id}"
-                                     style="--index: ${index}; --color-card: ${item.rgb};">
-                                    <div class="r-img">
-                                        <img src="./assets/img/rules/skills/${item.image}" alt="${item.name}">
-                                    </div>
-                                </div>
-                            `).join('')}
+                <!-- ═══ CENTER: ROULETTE ═══ -->
+                <div class="nexus-center">
+                    <!-- ACTIVE CARD DISPLAY -->
+                    <div class="nexus-active-card ${spinState === 'SPINNING' ? 'spinning-blur' : ''}" id="active-card-display">
+                        <div class="active-card-inner" style="--card-rgb: ${activeCard.rgb};">
+                            <div class="active-card-type-badge ${activeCard.type}">
+                                ${activeCard.type === 'good' ? '✦ REWARD' : '⚠ HAZARD'}
+                            </div>
+                            <div class="active-card-image">
+                                <img src="./assets/img/rules/skills/${activeCard.image}" alt="${activeCard.name}" />
+                            </div>
+                            <h2 class="active-card-title">${activeCard.name}</h2>
+                            <p class="active-card-subtitle">${activeCard.subtitle}</p>
+                            <div class="active-card-effect ${activeCard.type}">${activeCard.effect}</div>
+                            <p class="active-card-desc">${activeCard.desc}</p>
                         </div>
                     </div>
-                    
-                    <div class="action-bar" style="position: relative; z-index: 20; pointer-events: auto;">
-                        <button id="btn-purchase" class="action-btn primary" ${credits < activeItem.cost && spinState === 'PURCHASE' ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''} style="${spinState === 'SPINNING' ? 'border-color:#ffaa00;color:#ffaa00;box-shadow:0 0 30px rgba(255,170,0,0.6);' : ''}">
-                            <span class="btn-text">${spinState === 'SPINNING' ? 'STOP' : (spinState === 'PURCHASE' ? 'PURCHASE MODULE' : 'SPIN ROULETTE')}</span>
-                            <span class="btn-glare"></span>
+
+                    <!-- RESULT OVERLAY -->
+                    ${lastResult ? `
+                    <div class="nexus-result-overlay ${lastResult.success ? 'result-good' : 'result-bad'}" id="result-overlay">
+                        <div class="result-icon">${lastResult.success ? '✦' : '⚠'}</div>
+                        <p class="result-msg">${lastResult.msg}</p>
+                        <button class="result-dismiss" id="btn-dismiss">ACKNOWLEDGED</button>
+                    </div>
+                    ` : ''}
+
+                    <!-- SPIN BUTTON -->
+                    <div class="nexus-action-bar">
+                        <button class="nexus-spin-btn ${spinState === 'SPINNING' ? 'btn-spinning' : ''}" id="btn-spin"
+                            ${(spinState === 'SPINNING' || user.credits < 100) ? 'disabled' : ''}>
+                            <span class="spin-btn-icon"><i class="fa-solid fa-atom"></i></span>
+                            <span class="spin-btn-text">
+                                ${spinState === 'SPINNING' ? 'SYNTHESIZING...' : 'SPIN THE NEXUS — 100 CR'}
+                            </span>
                         </button>
-                         <div class="credit-readout">
-                            <div class="label">CREDITS AVAILABLE</div>
-                            <div class="value">${credits.toLocaleString()} <small>CR</small></div>
-                        </div>
                     </div>
                 </div>
 
-                <!-- COLUMN 3: TECH SPECS -->
-                <div class="holo-column col-right">
-                    <div class="holo-panel specs-panel">
-                        <div class="panel-header">TECHNICAL SPECIFICATIONS</div>
-                        <div class="spec-grid">
-                            ${Object.keys(activeItem.specs).map(key => `
-                                <div class="spec-item">
-                                    <div class="spec-label">${key.toUpperCase()}</div>
-                                    <div class="spec-val ${key === 'energy' ? 'text-neon-red' : 'text-neon-cyan'}">${activeItem.specs[key]}</div>
-                                </div>
-                            `).join('')}
+                <!-- ═══ RIGHT PANEL: CLAN INTEL ═══ -->
+                <div class="nexus-panel nexus-right-panel">
+                    <div class="panel-header">
+                        <i class="fa-solid fa-satellite-dish"></i> CLAN INTEL
+                    </div>
+
+                    <div class="intel-section">
+                        <div class="intel-label">COMMANDER</div>
+                        <div class="intel-value">${user.name.toUpperCase()}</div>
+                    </div>
+
+                    <div class="intel-section">
+                        <div class="intel-label">FACTION</div>
+                        <div class="intel-value clan-name">${clanData.name.toUpperCase()}</div>
+                    </div>
+
+                    <div class="intel-section">
+                        <div class="intel-label">CLAN INFLUENCE</div>
+                        <div class="intel-value points">${(clanData.points || 0).toLocaleString()} PTS</div>
+                    </div>
+
+                    <div class="intel-section">
+                        <div class="intel-label">QUANTUM CREDITS</div>
+                        <div class="intel-value credits">${user.credits.toLocaleString()} CR</div>
+                    </div>
+
+                    <div class="intel-divider"></div>
+
+                    <div class="intel-warning">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span>TACTICAL ADVISORY: Consult your clan before engaging the Nexus Roulette. 50% chance of hazard cards.</span>
+                    </div>
+
+                    <div class="intel-odds">
+                        <div class="odds-row good">
+                            <span class="odds-label">REWARD ODDS</span>
+                            <span class="odds-value">50%</span>
                         </div>
-                        <div class="panel-divider"></div>
-                        <div class="description-box">
-                            <p class="desc-text">${activeItem.desc}</p>
-                        </div>
-                        <div class="radar-widget">
-                            <div class="radar-circle small"><div class="radar-sweep"></div></div>
-                            <div class="radar-text">LIVE FEED // SECURE</div>
+                        <div class="odds-row bad">
+                            <span class="odds-label">HAZARD ODDS</span>
+                            <span class="odds-value">50%</span>
                         </div>
                     </div>
-                </div>
-            </div>
-            
-            <!-- OFFENSIVE TARGET MODAL (Hidden by default) -->
-            <div id="target-modal" class="hidden" style="position: absolute; inset:0; z-index: 100; display:none; justify-content:center; align-items:center; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);">
-                <div class="holo-panel" style="width: 400px; border-color: red; box-shadow: 0 0 30px rgba(255,0,0,0.3);">
-                    <div class="panel-header" style="color: red; border-bottom-color: red;"><i class="fa-solid fa-triangle-exclamation"></i> SELECT TARGET CLAN</div>
-                    <div class="p-4 text-center">
-                        <p class="text-sm text-gray-300 mb-4">Deploying ${activeItem.name}. Select a rival clan to siphon influence points from their mainframe.</p>
-                        <select id="target-clan-select" class="w-full bg-black border border-red-500 text-red-500 p-2 mb-4 font-mono outline-none">
-                            ${Object.values(store.getState().clans).filter(c => c.name.toLowerCase() !== user.clan.toLowerCase()).map(c =>
-            `<option value="${c.name.toLowerCase()}">${c.name.toUpperCase()} (PTS: ${c.points})</option>`
-        ).join('')}
-                        </select>
-                        <div class="flex gap-4">
-                            <button id="btn-cancel-strike" class="flex-1 border border-gray-600 text-gray-400 py-2 hover:bg-gray-800 transition">ABORT</button>
-                            <button id="btn-confirm-strike" class="flex-1 bg-red-600/20 border border-red-500 text-red-500 py-2 hover:bg-red-600 hover:text-white transition font-bold" style="box-shadow: 0 0 10px rgba(255,0,0,0.5);">EXECUTE STRIKE</button>
+
+                    ${lastResult ? `
+                    <div class="intel-divider"></div>
+                    <div class="intel-section">
+                        <div class="intel-label">LAST OUTCOME</div>
+                        <div class="intel-value ${lastResult.success ? 'result-good-text' : 'result-bad-text'}">
+                            ${lastResult.msg}
                         </div>
                     </div>
+                    ` : ''}
                 </div>
             </div>
         `;
+
+        attachEvents();
+
+        // Init Three.js scene
+        setTimeout(() => {
+            const canvas = container.querySelector('#shop-3d-canvas');
+            if (canvas && !shopScene) {
+                shopScene = new ShopScene('shop-3d-canvas');
+            }
+        }, 100);
     }
 
     function attachEvents() {
-        // Row selection
-        const rows = container.querySelectorAll('.holo-item-row');
-        rows.forEach(row => {
-            row.addEventListener('click', (e) => {
-                const id = e.currentTarget.getAttribute('data-id');
-                const selected = SHOP_ITEMS.find(i => i.id === id);
-                if (selected && selected.id !== activeItem.id) {
-                    activeItem = selected;
-                    updateUI();
-                    if (shopSceneInstance) shopSceneInstance.setItem(activeItem.id);
-                }
-            });
-        });
-
-        // Card selection from Roulette
-        const cards = container.querySelectorAll('.roulette-card');
-        cards.forEach(card => card.addEventListener('click', (e) => {
-            if (spinState === 'SPINNING') return; // Bloquear clicks manuales mientras gira
-            const id = e.currentTarget.getAttribute('data-id');
-            const selected = SHOP_ITEMS.find(i => i.id === id);
-            if (selected && selected.id !== activeItem.id) {
-                activeItem = selected;
-                spinState = 'PURCHASE'; // Reset a comprar
-                updateUI();
-                if (shopSceneInstance) shopSceneInstance.setItem(activeItem.id);
-            }
-        }));
-
-        // Gacha Button Logic (SPIN -> STOP -> PURCHASE)
-        const btnPurchase = container.querySelector('#btn-purchase');
-        if (btnPurchase) {
-            btnPurchase.addEventListener('click', () => {
+        // Spin button
+        const btnSpin = container.querySelector('#btn-spin');
+        if (btnSpin) {
+            btnSpin.addEventListener('click', () => {
                 const user = store.getState().currentUser;
-                const textSpan = btnPurchase.querySelector('.btn-text');
+                if (!user || user.credits < 100 || spinState !== 'READY') return;
 
-                // If disabled during PURCHASE mode, block click
-                if (spinState === 'PURCHASE' && btnPurchase.hasAttribute('disabled')) return;
+                // Charge spin cost
+                user.credits -= 100;
+                store.setUser(user);
+                lastResult = null;
+                spinState = 'SPINNING';
+                render();
 
-                if (spinState === 'SPIN' || spinState === 'GIRAR') {
-                    // Modo 1: Iniciar el giro (SPIN)
-                    spinState = 'SPINNING';
-                    textSpan.innerText = 'STOP';
-                    btnPurchase.style.borderColor = '#ffaa00';
-                    btnPurchase.style.color = '#ffaa00';
-                    btnPurchase.style.boxShadow = '0 0 30px rgba(255, 170, 0, 0.6)';
+                if (shopScene) shopScene.setSpinning(true);
 
-                    spinInterval = setInterval(() => {
-                        const randomItem = SHOP_ITEMS[Math.floor(Math.random() * SHOP_ITEMS.length)];
-                        if (randomItem.id !== activeItem.id) {
-                            activeItem = randomItem;
-                            updateUI();
+                // Rapid card cycling
+                let cycleCount = 0;
+                const maxCycles = 30 + Math.floor(Math.random() * 15);
+                spinInterval = setInterval(() => {
+                    cycleCount++;
+                    const rndCard = NEXUS_CARDS[Math.floor(Math.random() * NEXUS_CARDS.length)];
+                    activeCard = rndCard;
+
+                    // Update card display without full re-render
+                    const display = container.querySelector('#active-card-display');
+                    if (display) {
+                        const inner = display.querySelector('.active-card-inner');
+                        if (inner) inner.style.setProperty('--card-rgb', rndCard.rgb);
+                        const img = display.querySelector('.active-card-image img');
+                        if (img) img.src = `./assets/img/rules/skills/${rndCard.image}`;
+                        const title = display.querySelector('.active-card-title');
+                        if (title) title.textContent = rndCard.name;
+                        const subtitle = display.querySelector('.active-card-subtitle');
+                        if (subtitle) subtitle.textContent = rndCard.subtitle;
+                        const effect = display.querySelector('.active-card-effect');
+                        if (effect) {
+                            effect.textContent = rndCard.effect;
+                            effect.className = `active-card-effect ${rndCard.type}`;
                         }
-                    }, 100); // 100ms super fast rotation
-                }
-                else if (spinState === 'SPINNING') {
-                    // Modo 2: Detener el giro (STOP)
-                    spinState = 'PURCHASE';
-                    clearInterval(spinInterval);
-                    spinInterval = null;
-
-                    textSpan.innerText = 'PURCHASE MODULE';
-                    btnPurchase.style.borderColor = '#00f0ff';
-                    btnPurchase.style.color = '#fff';
-                    btnPurchase.style.boxShadow = '';
-
-                    // Update disabled state based on cost of landed item
-                    if (user && user.credits < activeItem.cost) {
-                        btnPurchase.disabled = true;
-                        btnPurchase.setAttribute('disabled', 'true');
-                        btnPurchase.style.opacity = '0.5';
-                        btnPurchase.style.cursor = 'not-allowed';
-                    }
-                }
-                else if (spinState === 'PURCHASE' || spinState === 'COMPRAR') {
-                    // Modo 3: Comprar Original
-                    if (!user || user.credits < activeItem.cost) return;
-
-                    if (activeItem.isOffensive) {
-                        const modal = container.querySelector('#target-modal');
-                        modal.style.display = 'flex';
-                    } else {
-                        if (store.purchaseItem(activeItem.cost)) {
-                            spinState = 'SPIN'; // Volver al inicio después de comprar
-                            triggerPurchaseSuccess();
-
-                            // Immediately reset button text to SPIN after purchase
-                            setTimeout(() => {
-                                updateUI();
-                                textSpan.innerText = 'SPIN ROULETTE';
-                            }, 50);
+                        const badge = display.querySelector('.active-card-type-badge');
+                        if (badge) {
+                            badge.textContent = rndCard.type === 'good' ? '✦ REWARD' : '⚠ HAZARD';
+                            badge.className = `active-card-type-badge ${rndCard.type}`;
                         }
                     }
-                }
-            });
-        }
 
-        // Modal Buttons
-        const btnCancel = container.querySelector('#btn-cancel-strike');
-        const btnConfirm = container.querySelector('#btn-confirm-strike');
-        const modal = container.querySelector('#target-modal');
-        const select = container.querySelector('#target-clan-select');
+                    // Slow down near end
+                    if (cycleCount >= maxCycles) {
+                        clearInterval(spinInterval);
+                        spinInterval = null;
 
-        if (btnCancel) {
-            btnCancel.addEventListener('click', () => {
-                modal.style.display = 'none';
-            });
-        }
+                        // Execute effect
+                        lastResult = activeCard.execute();
+                        spinState = 'READY';
 
-        if (btnConfirm) {
-            btnConfirm.addEventListener('click', () => {
-                const target = select.value;
-                if (store.purchaseItem(activeItem.cost)) {
-                    const result = store.executeTacticalStrike(target, activeItem.stealAmount);
-                    modal.style.display = 'none';
-                    if (result.success) {
-                        spinState = 'SPIN';
-                        triggerPurchaseSuccess(`STEALTH HACK SUCCESSFUL. EXTRACTED ${result.actualStolen} PTS FROM ${target.toUpperCase()}.`);
+                        if (shopScene) {
+                            shopScene.setSpinning(false);
+                            shopScene.setColor(activeCard.type === 'good' ? '#00ff88' : '#ff0055');
+                        }
+
+                        // Full re-render to show result
+                        setTimeout(() => render(), 200);
+
+                        // Reset Three.js color after a while
+                        setTimeout(() => {
+                            if (shopScene) shopScene.setColor('#22d3ee');
+                        }, 3000);
                     }
-                }
+                }, 80 + cycleCount * 4); // Gradually slows down
             });
         }
-    }
 
-    function updateUI() {
-        const state = store.getState();
-        const user = state.currentUser || { name: 'GUEST', clan: 'neutral', credits: 0 };
-        const credits = user.credits || 0;
+        // Dismiss result
+        const btnDismiss = container.querySelector('#btn-dismiss');
+        if (btnDismiss) {
+            btnDismiss.addEventListener('click', () => {
+                lastResult = null;
+                render();
+            });
+        }
 
-        // 1. Update List Styles
-        const rows = container.querySelectorAll('.holo-item-row');
-        rows.forEach(row => {
-            const id = row.getAttribute('data-id');
-            const item = SHOP_ITEMS.find(i => i.id === id);
-
-            if (id === activeItem.id) {
-                row.classList.add('selected');
-            } else {
-                row.classList.remove('selected');
-            }
-
-            // Update lock status
-            const statusNode = row.querySelector('.item-status');
-            if (statusNode && item) {
-                statusNode.innerText = credits >= item.cost ? 'AVAILABLE' : 'LOCKED';
-            }
+        // Gallery card hover
+        container.querySelectorAll('.gallery-card').forEach(card => {
+            card.addEventListener('click', () => {
+                if (spinState === 'SPINNING') return;
+                const id = card.dataset.cardId;
+                const found = NEXUS_CARDS.find(c => c.id === id);
+                if (found) {
+                    activeCard = found;
+                    if (shopScene) shopScene.setColor(`rgb(${found.rgb})`);
+                    render();
+                }
+            });
         });
-
-        // 1.b Update Roulette Ring & Rotate Cylinder
-        const cards = container.querySelectorAll('.roulette-card');
-        const inner = container.querySelector('.roulette-inner');
-        let selectedIndex = 0;
-
-        cards.forEach((card, index) => {
-            if (card.getAttribute('data-id') === activeItem.id) {
-                card.classList.add('selected-card');
-                selectedIndex = index;
-            } else {
-                card.classList.remove('selected-card');
-            }
-        });
-
-        // Calculate and apply rotation
-        if (inner) {
-            const angle = (360 / SHOP_ITEMS.length) * selectedIndex * -1;
-            inner.style.transform = `rotateY(${angle}deg)`;
-        }
-
-        // 2. Update Center Panel Text
-        const title = container.querySelector('.item-title-large');
-        const subtitle = container.querySelector('.item-subtitle');
-        if (title) title.innerText = activeItem.name;
-        if (subtitle) subtitle.innerText = activeItem.subtitle;
-
-        // 3. Update Action Bar
-        const btnPurchase = container.querySelector('#btn-purchase');
-        if (btnPurchase) {
-            // Only disable the button if it's in PURCHASE state and user lacks credits.
-            // Never disable it while SPINNING or ready to SPIN.
-            if (credits < activeItem.cost && spinState === 'PURCHASE') {
-                btnPurchase.setAttribute('disabled', 'true');
-                btnPurchase.style.opacity = '0.5';
-                btnPurchase.style.cursor = 'not-allowed';
-            } else {
-                btnPurchase.removeAttribute('disabled');
-                btnPurchase.style.opacity = '1';
-                btnPurchase.style.cursor = 'pointer';
-            }
-        }
-
-        const creditValue = container.querySelector('.credit-readout .value');
-        if (creditValue) {
-            creditValue.innerHTML = `${credits.toLocaleString()} <small>CR</small>`;
-        }
-
-        // 4. Update Specs Panel
-        const specGrid = container.querySelector('.spec-grid');
-        if (specGrid) {
-            specGrid.innerHTML = Object.keys(activeItem.specs).map(key => `
-                <div class="spec-item">
-                    <div class="spec-label">${key.toUpperCase()}</div>
-                    <div class="spec-val ${key === 'energy' ? 'text-neon-red' : 'text-neon-cyan'}">${activeItem.specs[key]}</div>
-                </div>
-            `).join('');
-        }
-
-        const descText = container.querySelector('.desc-text');
-        if (descText) {
-            descText.innerText = activeItem.desc;
-        }
     }
 
-    function triggerPurchaseSuccess(customMsg) {
-        // Flash screen logic or notification bubble
-        const centerCol = container.querySelector('.col-center');
-        const msg = document.createElement('div');
-        msg.className = 'text-neon-green font-bold text-center mt-4 absolute w-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl pointer-events-none z-50';
-        msg.style.textShadow = '0 0 20px #0f0';
-        msg.innerText = customMsg || 'MODULE ACQUIRED. CREDITS DEDUCTED.';
-        centerCol.appendChild(msg);
-
-        // Flash Light
-        if (typeof window.gsap !== 'undefined') {
-            window.gsap.fromTo(msg, { scale: 0.8, opacity: 1 }, { scale: 1.2, opacity: 0, duration: 2, ease: "power2.out" });
-            if (shopSceneInstance && shopSceneInstance.scene) {
-                const light = shopSceneInstance.scene.children.find(c => c instanceof THREE.AmbientLight);
-                if (light) window.gsap.fromTo(light, { intensity: 10 }, { intensity: 2, duration: 1 });
-            }
-        }
-        setTimeout(() => { if (msg.parentElement) msg.remove(); }, 2000);
-    }
-
-    // Initial Render
-    renderDOM();
-
-    // Init 3D Scene once, delayed
-    setTimeout(() => {
-        const sceneContainer = container.querySelector('#shop-scene-container');
-        if (sceneContainer && typeof ShopScene !== 'undefined') {
-            shopSceneInstance = new ShopScene('shop-scene-container');
-            shopSceneInstance.setItem(activeItem.id);
-        }
-        attachEvents();
-
-        if (typeof window.gsap !== 'undefined') {
-            const tl = window.gsap.timeline();
-            tl.from(container.querySelector('.col-left'), { x: -50, opacity: 0, duration: 0.6, ease: "power2.out" })
-                .from(container.querySelector('.col-right'), { x: 50, opacity: 0, duration: 0.6, ease: "power2.out" }, "-=0.4")
-                .from(container.querySelector('.hologram-header'), { y: -30, opacity: 0, duration: 0.8 }, "-=0.4")
-                .from(container.querySelector('.action-bar'), { y: 30, opacity: 0, duration: 0.8 }, "-=0.6");
-        }
-    }, 100);
-
-    // Keep UI updated if credits change
-    unsubscribe = store.subscribe(() => {
-        updateUI();
-    });
-
-    container.destroy = () => {
-        if (unsubscribe) unsubscribe();
-    };
-
+    render();
     return container;
 }
