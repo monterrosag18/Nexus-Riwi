@@ -34,6 +34,8 @@ class Store {
         this.listeners = [];
 
         // --- ASYNC INIT ---
+        // We start loading immediately, but we don't block the UI threads.
+        // Views that need this data should await store.initialLoadPromise if necessary.
         this.initialLoadPromise = this.loadInitialData();
 
         // --- EVENT LOG SYSTEM ---
@@ -63,6 +65,7 @@ class Store {
     }
 
     async loadInitialData() {
+        console.log('Syncing database in background...');
         try {
             const [clansRes, territoriesRes] = await Promise.all([
                 fetch('/api/clans'),
@@ -122,45 +125,7 @@ class Store {
         return 'soft-skills';
     }
 
-    getMockQuestion(type) {
-        // 1. Try reading from admin question bank first
-        try {
-            const bankRaw = localStorage.getItem('riwi_questions_db');
-            if (bankRaw) {
-                const bank = JSON.parse(bankRaw);
-                const ofType = bank.filter(q => q.type === type);
-                if (ofType.length > 0) {
-                    return ofType[Math.floor(Math.random() * ofType.length)];
-                }
-            }
-        } catch(e) {}
-
-        // 2. Fallback to hardcoded defaults
-        const questions = {
-            'code': [
-                { q: "What does HTML stand for?", options: ["Hyper Text Markup Language", "Home Tool Markup Language", "Hyperlinks and Text Markup"], correct: 0 },
-                { q: "Which property changes text color in CSS?", options: ["text-style", "color", "font-color"], correct: 1 },
-                { q: "Inside which HTML element do we put JavaScript?", options: ["<js>", "<scripting>", "<script>"], correct: 2 },
-                { q: "How do you call a function named 'myFunction'?", options: ["call myFunction()", "myFunction()", "call function myFunction()"], correct: 1 },
-                { q: "What is the correct syntax for referring to an external script called 'xxx.js'?", options: ["<script href='xxx.js'>", "<script name='xxx.js'>", "<script src='xxx.js'>"], correct: 2 }
-            ],
-            'english': [
-                { q: "Select the synonym for 'Happy'", options: ["Sad", "Joyful", "Angry"], correct: 1 },
-                { q: "Past tense of 'Run'", options: ["Runned", "Ran", "Running"], correct: 1 },
-                { q: "Which is a correct sentence?", options: ["She don't like apples.", "She doesn't like apples.", "She no like apples."], correct: 1 },
-                { q: "Select the antonym for 'Expand'", options: ["Shrink", "Grow", "Increase"], correct: 0 },
-                { q: "What is a 'noun'?", options: ["Action word", "Descriptive word", "Person, place, or thing"], correct: 2 }
-            ],
-            'soft-skills': [
-                { q: "A teammate is not contributing. What do you do?", options: ["Ignore them", "Report them immediately", "Talk to them privately to understand"], correct: 2 },
-                { q: "You missed a deadline. Best reaction?", options: ["Blame the internet", "Own it and communicate new timeline", "Hide until finished"], correct: 1 },
-                { q: "Effective communication involves...", options: ["Speaking constantly", "Active listening", "Using big words"], correct: 1 },
-                { q: "How to handle constructive criticism?", options: ["Get defensive", "Listen and improve", "Ignore it"], correct: 1 },
-                { q: "What is 'empathy'?", options: ["Feeling sorry for someone", "Understanding someone else's feelings", "Ignoring emotions"], correct: 1 }
-            ]
-        };
-        const pool = questions[type] || questions['code'];
-        return pool[Math.floor(Math.random() * pool.length)];
+        return this.getMockQuestion(type);
     }
 
     // --- DYNAMIC CLAN & MAP MANAGEMENT --- //
@@ -263,13 +228,6 @@ class Store {
     }
 
     initializeMap() {
-        // Obsolete static generator. 
-        // SAFETY: Only trigger if we definitely have no territories AFTER sync
-        if (!this.state.territories || this.state.territories.length === 0) {
-            // Check if we are still loading
-            console.log('InitializeMap called but no data yet.');
-            // We don't want to trigger regeneration here if we are still syncing
-        }
         return this.state.territories;
     }
 

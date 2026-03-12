@@ -23,7 +23,7 @@ export class GalaxyBackground {
         // 1. STARFIELD
         const starsGeo = new THREE.SphereGeometry(4000, 64, 64);
         const starsMat = new THREE.MeshBasicMaterial({
-            map: loader.load(basePath + '8k_stars.jpg'),
+            map: loader.load(basePath + 'stars.jpg'),
             side: THREE.BackSide
         });
         this.starfield = new THREE.Mesh(starsGeo, starsMat);
