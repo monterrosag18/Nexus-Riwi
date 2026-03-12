@@ -1,4 +1,4 @@
-﻿import { store } from "../store.js";
+import { store } from "../store.js";
 
 export default function renderLogin() {
   const container = document.createElement("div");
@@ -47,8 +47,8 @@ export default function renderLogin() {
                 <input type="text" class="form-control" id="username" name="username" required placeholder="Codename / Alias" autocomplete="off" />
               </div>
 
-              <div class="mb-3" style="display: none;">
-                <input type="password" class="form-control" id="password" name="password" placeholder="Contrase├▒a" />
+              <div class="mb-3">
+                <input type="password" class="form-control" id="password" name="password" required placeholder="Security Key / Password" />
               </div>
 
               <div class="register-only">
@@ -136,13 +136,14 @@ export default function renderLogin() {
         e.preventDefault();
         errorMsg.textContent = "";
         const usernameInput = container.querySelector("#username").value.trim();
-        if (!usernameInput) { errorMsg.textContent = "CODENAME REQUIRED"; return; }
+        const passwordInput = container.querySelector("#password").value;
+        if (!passwordInput) { errorMsg.textContent = "SECURITY KEY REQUIRED"; return; }
 
         if (isRegisterMode()) {
           const clan = container.querySelector("#clanSelect").value;
           if (!clan) { errorMsg.textContent = "ALLEGIANCE REQUIRED"; return; }
           try {
-            const result = store.registerUser(usernameInput, clan);
+            const result = store.registerUser(usernameInput, clan, passwordInput);
             if (result.success) { window.location.hash = "#map"; }
             else {
               errorMsg.textContent = `ERROR: ${result.message}`;
@@ -151,7 +152,7 @@ export default function renderLogin() {
           } catch (err) { errorMsg.textContent = "SYSTEM ERROR"; }
         } else {
           try {
-            const result = store.loginUser(usernameInput);
+            const result = store.loginUser(usernameInput, passwordInput);
             if (result.success) { window.location.hash = "#map"; }
             else {
               errorMsg.textContent = `ERROR: ${result.message}`;

@@ -1,4 +1,4 @@
-﻿import { store } from '../store.js';
+import { store } from '../store.js';
 
 // ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 //  CSS-BASED HEX BACKGROUND ELEMENTS
@@ -225,13 +225,7 @@ export default function renderLeaderboard() {
                     <h1 class="text-xl md:text-3xl font-display font-bold text-white uppercase tracking-widest theme-neon-text-glow glitch-title" data-text="Global Rankings">Global Rankings</h1>
                 </div>
                 <div class="flex items-center space-x-4 z-50">
-                    <div class="text-right hidden sm:block">
-                        <p class="text-sm font-bold text-primary font-display tracking-wide uppercase glitch-title" data-text="COMMANDER ${currentUser.name}">COMMANDER ${currentUser.name}</p>
-                        <div class="flex items-center justify-end space-x-1">
-                            <span class="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                            <p class="text-xs text-gray-400 font-mono">Lvl 42 // ${currentClanLabel}</p>
-                        </div>
-                    </div>
+                    <!-- Clean state: Header details moved to global ProfileHeader -->
                 </div>
             </header>
 

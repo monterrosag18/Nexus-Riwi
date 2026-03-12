@@ -384,6 +384,62 @@ document.addEventListener('DOMContentLoaded', () => {
         renderQuestions();
     });
 
+    // ─── BULK IMPORT LOGIC ───
+    const bulkImportModal = document.getElementById('bulk-import-modal');
+    const btnOpenBulk = document.getElementById('btn-bulk-import');
+    const btnCloseBulk = document.getElementById('bulk-close-btn');
+    const btnExecuteBulk = document.getElementById('btn-execute-bulk');
+    const bulkInput = document.getElementById('bulk-json-input');
+
+    if (btnOpenBulk) {
+        btnOpenBulk.addEventListener('click', () => {
+            bulkInput.value = '';
+            bulkImportModal.style.display = 'flex';
+        });
+    }
+
+    if (btnCloseBulk) {
+        btnCloseBulk.addEventListener('click', () => {
+            bulkImportModal.style.display = 'none';
+        });
+    }
+
+    if (btnExecuteBulk) {
+        btnExecuteBulk.addEventListener('click', () => {
+            const raw = bulkInput.value.trim();
+            if (!raw) return;
+
+            try {
+                const data = JSON.parse(raw);
+                if (!Array.isArray(data)) throw new Error('Input must be an array of questions');
+
+                let questions = getQuestions();
+                let added = 0;
+
+                data.forEach(q => {
+                    // Basic validation & Sanitization
+                    const cleanQ = {
+                        id: q.id || Date.now() + added,
+                        type: q.type || 'code',
+                        difficulty: parseInt(q.difficulty) || 1,
+                        q: q.q || q.question || 'Untitled Question',
+                        options: Array.isArray(q.options) ? q.options : ['Opt A', 'Opt B', 'Opt C'],
+                        correct: typeof q.correct === 'number' ? q.correct : 0
+                    };
+                    questions.push(cleanQ);
+                    added++;
+                });
+
+                saveQuestions(questions);
+                alert(`SUCCESS: ${added} questions injected into the matrix.`);
+                bulkImportModal.style.display = 'none';
+                renderQuestions();
+            } catch (err) {
+                alert(`CRITICAL ERROR: Invalid JSON format. ${err.message}`);
+            }
+        });
+    }
+
     function editQuestion(id) {
         const questions = getQuestions();
         const q = questions.find(q => q.id === id);

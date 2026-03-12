@@ -22,6 +22,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebarContainer = document.getElementById('sidebar');
     if (sidebarContainer) sidebarContainer.appendChild(renderSidebar());
 
+    const topBar = document.getElementById('top-bar');
+    if (topBar) {
+        topBar.innerHTML = ''; // Clear hardcoded HTML
+        import('./components/ProfileHeader.js').then(m => {
+            topBar.appendChild(m.createProfileHeader());
+        });
+    }
     // 2. Init Global Faction Chat
     const chatWidget = document.getElementById('chat-widget');
     if (chatWidget) {

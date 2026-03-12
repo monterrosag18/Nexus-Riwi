@@ -1,3 +1,5 @@
+import { store } from '../store.js';
+
 export default function renderChat() {
     const chatContainer = document.createElement('div');
     chatContainer.id = 'chat-widget';
@@ -64,11 +66,15 @@ export default function renderChat() {
 }
 
 function addMessage(container, text, type) {
+    const user = store.getState().currentUser;
+    const chatColor = (type === 'user' && user?.activeChatColor) ? user.activeChatColor : '#fff';
+    const glow = (type === 'user' && user?.activeChatColor) ? `text-shadow: 0 0 10px ${user.activeChatColor}44;` : '';
+
     const msg = document.createElement('div');
     msg.className = `msg ${type}`;
     msg.innerHTML = `
         <span class="msg-time">${new Date().toLocaleTimeString()}</span>
-        <span class="msg-content">${text}</span>
+        <span class="msg-content" style="color: ${chatColor}; ${glow}">${text}</span>
     `;
     container.appendChild(msg);
     container.scrollTop = container.scrollHeight;

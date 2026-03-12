@@ -98,9 +98,10 @@ function handleRoute() {
 
             // --- STEP 4: UNLOCK & OPEN (Mechanical Release) ---
             .to('.lock-mechanism', {
-                rotation: 180,
+                scale: 1.2,
+                opacity: 1,
                 duration: 0.4,
-                ease: "back.in(1.7)"
+                ease: "back.out(1.7)"
             }, "+=0.5") // Wait for load
 
             .to('.door-emblem', {

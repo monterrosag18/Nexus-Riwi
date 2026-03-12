@@ -42,6 +42,17 @@ class Store {
             currentUser: savedUser,
             clans: clansDB,
             territories: [],
+            cosmetics: [
+                { id: 'skin_neon_pink', name: 'NEON PINK OVERLAY', cost: 1500, type: 'skin', color: '#ff00ff' },
+                { id: 'skin_gold_glitch', name: 'GOLDEN GLITCH', cost: 3000, type: 'skin', color: '#ffd700' },
+                { id: 'skin_matrix_rain', name: 'MATRIX RAIN', cost: 5000, type: 'skin', color: '#00ff41' },
+                { id: 'chat_cyan', name: 'CYAN CHAT MOD', cost: 800, type: 'chat', color: '#00ffff' },
+                { id: 'chat_lava', name: 'LAVA CHAT MOD', cost: 1200, type: 'chat', color: '#ff4400' },
+                { id: 'chat_toxic', name: 'TOXIC GREEN CHAT', cost: 900, type: 'chat', color: '#39ff14' },
+                { id: 'border_shimmer', name: 'SHIMMER BORDER', cost: 2500, type: 'border', color: '#ffffff' },
+                { id: 'border_obsidian', name: 'OBSIDIAN BORDER', cost: 3500, type: 'border', color: '#1a1a1a' },
+                { id: 'shield_plasma', name: 'PLASMA SHIELD', cost: 4000, type: 'shield', color: '#7b61ff' }
+            ]
         };
         this.listeners = [];
 
@@ -242,7 +253,7 @@ class Store {
     }
 
     // Actions
-    registerUser(username, clan) {
+    registerUser(username, clan, password) {
         const users = this.getRegisteredUsers();
         if (users.find(u => u.name.toLowerCase() === username.toLowerCase())) {
             return { success: false, message: 'CODENAME ALREADY TAKEN' };
@@ -251,6 +262,7 @@ class Store {
         const newUser = {
             name: username,
             clan: clan,
+            password: password, // For staging, will be hashed in Next.js
             points: 0,
             credits: 2000,
             joinedAt: new Date().toISOString()
@@ -262,11 +274,14 @@ class Store {
         return { success: true };
     }
 
-    loginUser(username) {
+    loginUser(username, password) {
         const users = this.getRegisteredUsers();
         const user = users.find(u => u.name.toLowerCase() === username.toLowerCase());
 
         if (user) {
+            if (user.password !== password) {
+                return { success: false, message: 'INVALID SECURITY KEY' };
+            }
             this.setUser(user);
             return { success: true };
         } else {
@@ -288,6 +303,41 @@ class Store {
         this.notify();
     }
 
+    updateUserName(newName) {
+        if (this.state.currentUser) {
+            this.state.currentUser.name = newName;
+            this.setUser(this.state.currentUser);
+            
+            // Also update in users_db
+            try {
+                const users = this.getRegisteredUsers();
+                const idx = users.findIndex(u => u.name.toLowerCase() === this.state.currentUser.name.toLowerCase());
+                if (idx !== -1) {
+                    users[idx].name = newName;
+                    localStorage.setItem('riwi_users_db', JSON.stringify(users));
+                }
+            } catch(e) {}
+        }
+    }
+
+    purchaseCosmetic(item) {
+        const user = this.state.currentUser;
+        if (!user || user.credits < item.cost) return false;
+        
+        user.credits -= item.cost;
+        if (!user.ownedCosmetics) user.ownedCosmetics = [];
+        user.ownedCosmetics.push(item.id);
+        
+        // Auto-apply based on type
+        if (item.type === 'skin') user.activeSkin = item.id;
+        if (item.type === 'chat') user.activeChatColor = item.color;
+        if (item.type === 'border') user.activeBorderColor = item.color;
+        if (item.type === 'shield') user.activeShieldColor = item.color;
+        
+        this.setUser(user);
+        return true;
+    }
+
     logout() {
         this.state.currentUser = null;
         localStorage.removeItem('riwi_user');
@@ -299,7 +349,9 @@ class Store {
     setView(viewName) {
         if (this.state.currentView !== viewName) {
             this.state.currentView = viewName;
-            this.notify();
+            // NOTE: Do NOT call notify() here — view changes are transient
+            // and triggering all listeners causes infinite re-render loops
+            // this.notify();
         }
     }
 

@@ -3841,20 +3841,39 @@ button:hover {
 .lock-mechanism {
     position: absolute;
     top: 50%;
-    right: 10px;
-    /* On edge */
-    width: 150px;
+    width: 300px;
     height: 150px;
-    background: url('https://cdn-icons-png.flaticon.com/512/93/93154.png');
-    /* Generic Gear/Lock Icon */
-    background-size: contain;
-    filter: invert(1) drop-shadow(0 0 10px cyan);
-    opacity: 0.5;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(-50%);
+    z-index: 5;
+}
+
+.door-left .lock-mechanism {
+    right: 100px;
 }
 
 .door-right .lock-mechanism {
-    left: 10px;
-    right: auto;
+    left: 100px;
+}
+
+.door-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 4rem;
+    font-weight: 800;
+    color: #00f0ff;
+    text-shadow: 0 0 20px #00f0ff, 0 0 50px rgba(0, 240, 255, 0.6);
+    letter-spacing: 15px;
+    white-space: nowrap;
+    text-transform: uppercase;
+    animation: textPulse 2s infinite alternate;
+}
+
+@keyframes textPulse {
+    from { opacity: 0.8; transform: scale(1); }
+    to { opacity: 1; transform: scale(1.05); }
 }
 
 /* Impact Flash */
