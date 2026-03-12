@@ -159,8 +159,12 @@ function initSolarSystem() {
     tacticalGroup = new THREE.Group();
     scene.add(tacticalGroup);
 
-    // BUILD GRID
-    buildTacticalGrid();
+    // BUILD GRID (Defensive call)
+    try {
+        buildTacticalGrid();
+    } catch (e) {
+        console.warn("Initial grid build skipped:", e);
+    }
 
     // Force Visible
     tacticalGroup.visible = true;
@@ -311,7 +315,11 @@ function buildTacticalGrid() {
     const territories = state.territories;
     const clans = state.clans;
 
-    if (!territories || territories.length === 0) return;
+    // Defensive check: If no data, just show the background/empty scene
+    if (!territories || territories.length === 0 || !clans) {
+        console.warn("No Map Data Available. Showing Empty Sector.");
+        return;
+    }
 
     // 1. Grid Parameters
     const hexRadius = 8;

@@ -8,13 +8,13 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Initializing Nexus...');
 
     // 0. Init 3D Universe
-    // try {
-    //     const spaceBg = new SpaceBackground();
-    //     spaceBg.init();
-    //     console.log('SpaceBackground initialized.');
-    // } catch (e) {
-    //     console.error('Failed to init SpaceBackground:', e);
-    // }
+    try {
+        const spaceBg = new SpaceBackground();
+        spaceBg.init();
+        console.log('SpaceBackground initialized.');
+    } catch (e) {
+        console.error('Failed to init SpaceBackground:', e);
+    }
 
     // 1. Render Static Shell Components
     const appContainer = document.getElementById('app');
