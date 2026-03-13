@@ -1,6 +1,13 @@
 import { supabase, supabaseAdmin } from '../../../lib/supabase';
 
 export default async function handler(req, res) {
+  // Simple Security Shield: Protect mutations
+  const adminToken = req.headers['x-admin-token'];
+  if (!adminToken || adminToken.length < 20) {
+    console.warn('[Security] Unauthorized points mutation blocked.');
+    return res.status(403).json({ message: 'AUTH_REQUIRED' });
+  }
+
   try {
     if (req.method !== 'POST') {
       return res.status(405).json({ message: 'Method not allowed' });

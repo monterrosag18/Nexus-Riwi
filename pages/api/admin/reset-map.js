@@ -6,6 +6,12 @@ export default async function handler(req, res) {
         return res.status(405).json({ message: 'Method not allowed' });
     }
 
+    const adminToken = req.headers['x-admin-token'];
+    if (!adminToken || adminToken.length < 20) {
+      console.warn('[Security] Unauthorized Reset-Map blocked.');
+      return res.status(403).json({ message: 'AUTH_REQUIRED' });
+    }
+
     try {
         console.log('[AdminAPI] Starting Global Map Reset...');
 

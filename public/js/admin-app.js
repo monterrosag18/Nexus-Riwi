@@ -12,8 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const CLANS_KEY = 'riwi_clans_db';
     const QUESTIONS_KEY = 'riwi_questions_db';
     const NEWS_KEY = 'riwi_admin_news';
-    const ADMIN_USER = 'admin';
-    const ADMIN_PASS = '1234';
 
     // Default Factions (all points at 0 for fresh start)
     const defaultClans = {
@@ -33,23 +31,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const gateError = document.getElementById('gate-error');
 
     // Check session
-    if (sessionStorage.getItem('nexus_admin_auth') === 'true') {
+    if (sessionStorage.getItem('nexus_admin_token')) {
         loginGate.style.display = 'none';
         dashboard.style.display = 'grid';
+        renderRoster();
     }
 
-    loginForm.addEventListener('submit', (e) => {
+    loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const user = document.getElementById('admin-user').value.trim();
         const pass = document.getElementById('admin-pass').value;
 
-        if (user === ADMIN_USER && pass === ADMIN_PASS) {
-            sessionStorage.setItem('nexus_admin_auth', 'true');
-            loginGate.style.display = 'none';
-            dashboard.style.display = 'grid';
-            renderRoster();
-        } else {
-            gateError.textContent = 'ACCESS DENIED — INVALID CREDENTIALS';
+        try {
+            const res = await fetch('/api/admin/auth', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user, pass })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                sessionStorage.setItem('nexus_admin_token', data.token);
+                loginGate.style.display = 'none';
+                dashboard.style.display = 'grid';
+                renderRoster();
+            } else {
+                throw new Error(data.message || 'AUTHENTICATION FAILED');
+            }
+        } catch (err) {
+            gateError.textContent = err.message.toUpperCase();
             const card = loginGate.querySelector('.gate-card');
             card.style.animation = 'shake 0.4s ease';
             setTimeout(() => card.style.animation = '', 400);
@@ -70,7 +80,10 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             await fetch('/api/clans', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-admin-token': sessionStorage.getItem('nexus_admin_token')
+                },
                 body: JSON.stringify({ id, ...clanData })
             });
         } catch (e) { console.error('Save clan failed', e); }
@@ -78,7 +91,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function deleteClan(id) {
         try {
-            await fetch(`/api/clans?id=${id}`, { method: 'DELETE' });
+            await fetch(`/api/clans?id=${id}`, { 
+                method: 'DELETE',
+                headers: { 'x-admin-token': sessionStorage.getItem('nexus_admin_token') }
+            });
         } catch (e) { console.error('Delete clan failed', e); }
     }
 
@@ -93,7 +109,10 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             await fetch('/api/admin/questions', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-admin-token': sessionStorage.getItem('nexus_admin_token')
+                },
                 body: JSON.stringify(qData)
             });
         } catch (e) { console.error('Save question failed', e); }
@@ -101,7 +120,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function deleteQuestionFromDB(id) {
         try {
-            await fetch(`/api/admin/questions?id=${id}`, { method: 'DELETE' });
+            await fetch(`/api/admin/questions?id=${id}`, { 
+                method: 'DELETE',
+                headers: { 'x-admin-token': sessionStorage.getItem('nexus_admin_token') }
+            });
         } catch (e) { console.error('Delete question failed', e); }
     }
 
@@ -116,7 +138,10 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             await fetch('/api/admin/news', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-admin-token': sessionStorage.getItem('nexus_admin_token')
+                },
                 body: JSON.stringify(newsData)
             });
         } catch (e) { console.error('Save news failed', e); }
@@ -124,7 +149,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function deleteNewsItemFromDB(id) {
         try {
-            await fetch(`/api/admin/news?id=${id}`, { method: 'DELETE' });
+            await fetch(`/api/admin/news?id=${id}`, { 
+                method: 'DELETE',
+                headers: { 'x-admin-token': sessionStorage.getItem('nexus_admin_token') }
+            });
         } catch (e) { console.error('Delete news failed', e); }
     }
 
@@ -356,7 +384,10 @@ document.addEventListener('DOMContentLoaded', () => {
             for (const id of Object.keys(clans)) {
                 await fetch('/api/clans/points', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'x-admin-token': sessionStorage.getItem('nexus_admin_token')
+                    },
                     body: JSON.stringify({ clanId: id, amount: -clans[id].points })
                 });
             }
@@ -644,7 +675,10 @@ document.addEventListener('DOMContentLoaded', () => {
             globalMapResetBtn.textContent = "RESETTING...";
 
             try {
-                const res = await fetch('/api/admin/reset-map', { method: 'POST' });
+                const res = await fetch('/api/admin/reset-map', { 
+                    method: 'POST',
+                    headers: { 'x-admin-token': sessionStorage.getItem('nexus_admin_token') }
+                });
                 const result = await res.json();
                 
                 if (result.success) {
@@ -676,7 +710,10 @@ document.addEventListener('DOMContentLoaded', () => {
             finalizeBtn.textContent = "CROWNING...";
 
             try {
-                const res = await fetch('/api/tournament/champion', { method: 'POST' });
+                const res = await fetch('/api/tournament/champion', { 
+                    method: 'POST',
+                    headers: { 'x-admin-token': sessionStorage.getItem('nexus_admin_token') }
+                });
                 const result = await res.json();
                 
                 if (result.success) {

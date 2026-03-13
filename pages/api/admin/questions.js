@@ -1,6 +1,15 @@
 import { supabaseAdmin } from '../../../lib/supabase';
 
 export default async function handler(req, res) {
+  // Simple Security Shield: Protect mutations
+  if (req.method !== 'GET') {
+    const adminToken = req.headers['x-admin-token'];
+    if (!adminToken || adminToken.length < 20) {
+      console.warn('[Security] Unauthorized question bank access blocked.');
+      return res.status(403).json({ message: 'AUTH_REQUIRED' });
+    }
+  }
+
   try {
     // 1. GET: Fetch all questions (Admin View)
     if (req.method === 'GET') {

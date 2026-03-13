@@ -7,6 +7,15 @@ export default async function handler(req, res) {
     // Set headers to prevent any caching
     res.setHeader('Cache-Control', 'no-store, max-age=0');
     
+    // Simple Security Shield: Protect mutations
+    if (req.method === 'POST') {
+        const adminToken = req.headers['x-admin-token'];
+        if (!adminToken || adminToken.length < 20) {
+            console.warn('[Security] Unauthorized coronation blocked.');
+            return res.status(403).json({ message: 'AUTH_REQUIRED' });
+        }
+    }
+
     try {
         if (req.method === 'GET') {
             // Get last champion
