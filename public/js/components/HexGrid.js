@@ -216,13 +216,20 @@ function initSolarSystem() {
 
     // 6. REALTIME REACTION
     store.subscribe((state) => {
-        // We only care if territories changed. 
+        // A. REBUILD GRID IF FIRST LOAD (Data arrived after init)
+        if (state.clans && Object.keys(state.clans).length > 0 && interactableHexes.length === 0) {
+            console.log("[HexGrid] Data detected - Building Tactical Grid...");
+            buildTacticalGrid();
+            return;
+        }
+
+        // B. Update existing hexes
         if (state.territories && interactableHexes.length > 0) {
             state.territories.forEach(t => {
                 const mesh = interactableHexes.find(m => m.userData.id === t.id);
                 if (mesh) {
-                    const newOwner = t.owner;
-                    if (mesh.userData.owner !== newOwner) {
+                    const newOwner = (t.owner || 'neutral').toLowerCase();
+                    if ((mesh.userData.owner || '').toLowerCase() !== newOwner) {
                         console.log(`[RealtimeMap] Updating Hex ${t.id} -> ${newOwner}`);
                         
                         // Update Data
@@ -231,15 +238,14 @@ function initSolarSystem() {
                         
                         // Update Visuals
                         const clanData = state.clans[newOwner];
-                        const color = clanData ? clanData.color : 0x666666; // Neutral color
+                        const color = clanData ? clanData.color : 0x666666;
                         
                         mesh.material.color.set(color);
                         mesh.material.emissive.set(color);
                         mesh.material.emissiveIntensity = (newOwner !== 'neutral') ? 0.4 : 0;
                         mesh.material.opacity = (newOwner !== 'neutral') ? 0.3 : 0.12;
                         
-                        // Also update the line loop (sibling)
-                        const line = mesh.parent.children.find(c => c instanceof THREE.LineLoop && c.position.equals(mesh.position));
+                        const line = mesh.parent.children.find(c => c.type === 'LineLoop' && c.position.distanceToSquared(mesh.position) < 0.1);
                         if (line) {
                             line.material.color.set(color);
                             line.material.linewidth = (newOwner !== 'neutral') ? 3 : 1;

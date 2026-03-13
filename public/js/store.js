@@ -122,7 +122,7 @@ class Store {
                 if (Array.isArray(rawTerritories) && rawTerritories.length > 0) {
                     this.state.territories = rawTerritories.map(t => ({
                         id: parseInt(t.id),
-                        owner: t.owner_id || 'neutral',
+                        owner: (t.owner_id || 'neutral').toLowerCase(),
                         type: t.type || 'code',
                         biome: t.biome || 'city',
                         difficulty: t.difficulty || 1,
@@ -282,9 +282,10 @@ class Store {
 
     // Check if a target hex ID is adjacent to any hex owned by the clan
     checkAdjacency(targetId, clan) {
+        const clanId = clan.toLowerCase();
         const neighbors = this.getNeighbors(targetId);
         const ownedIds = this.state.territories
-            .filter(t => t.owner === clan)
+            .filter(t => t.owner.toLowerCase() === clanId)
             .map(t => t.id);
 
         return neighbors.some(nId => ownedIds.includes(nId));
@@ -301,20 +302,20 @@ class Store {
     }
 
     async conquerTerritory(id, clan) {
+        const clanId = clan.toLowerCase();
         try {
             const response = await fetch('/api/territories', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id, clanId: clan })
+                body: JSON.stringify({ id, clanId })
             });
             const result = await response.json();
             if (result.success) {
-                // Confirm state locally (should already be done by optimistic call in UI, but safe to repeat)
                 const terr = this.state.territories.find(t => t.id == id);
-                if (terr && terr.owner !== clan) {
+                if (terr && terr.owner.toLowerCase() !== clanId) {
                     if (terr.owner !== 'neutral') this.addPoints(terr.owner, -50);
-                    terr.owner = clan;
-                    this.addPoints(clan, 100);
+                    terr.owner = clanId;
+                    this.addPoints(clanId, 100);
                     
                     // NEW: Sync puntos to individual user profile
                     if (this.state.currentUser) {
@@ -460,9 +461,7 @@ class Store {
     async penalizeUser(amount = 10) {
         if (!this.state.currentUser) return;
         
-        // Deduct from current user credits as well as clan points?
-        // Let's do both to make it "painful" but fair
-        const clanId = this.state.currentUser.clan;
+        const clanId = this.state.currentUser.clan.toLowerCase();
         
         try {
             // 1. Clan Points Penalty
@@ -507,8 +506,9 @@ class Store {
         }
     }
 
-    async addPoints(clanId, amount) {
-        if (amount === 0) return; // Prevent useless cycles
+    async addPoints(clan, amount) {
+        if (amount === 0) return;
+        const clanId = clan.toLowerCase();
         if (this.state.clans[clanId]) {
             try {
                 // Optimistically update locally
