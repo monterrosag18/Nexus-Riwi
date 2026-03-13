@@ -618,4 +618,35 @@ document.addEventListener('DOMContentLoaded', () => {
     if (sessionStorage.getItem('nexus_admin_auth') === 'true') {
         renderRoster();
     }
+
+    // ═══════════════════════════════════════════
+    // 8. GLOBAL MAP RESET
+    // ═══════════════════════════════════════════
+    const resetBtn = document.getElementById('reset-map-btn');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', async () => {
+            const confirmed = confirm("⚠️ ATTENTION: This will wipe ALL territory ownership and reset points for ALL clans. This action is irreversible. Proceed?");
+            if (!confirmed) return;
+
+            resetBtn.disabled = true;
+            resetBtn.textContent = "RESETTING...";
+
+            try {
+                const res = await fetch('/api/admin/reset-map', { method: 'POST' });
+                const result = await res.json();
+                
+                if (result.success) {
+                    alert("✅ SUCCESS: Systems normalized. Map has been cleared.");
+                    window.location.reload();
+                } else {
+                    alert("❌ ERROR: Reset sequence failed - " + result.error);
+                }
+            } catch (e) {
+                alert("❌ CRITICAL ERROR: Network link broken.");
+            } finally {
+                resetBtn.disabled = false;
+                resetBtn.textContent = "RESET GLOBAL MAP";
+            }
+        });
+    }
 });
