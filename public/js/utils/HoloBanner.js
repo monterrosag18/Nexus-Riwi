@@ -84,36 +84,42 @@ export class HoloBanner {
                     vec3 baseColor = color;
                     
                     // 2. Sample Icon Texture
-                    vec4 iconSample = texture2D(textureMap, vUv);
+                    vec4 texColor = texture2D(textureMap, vUv);
                     
-                    // Icon is white on transparent background. 
-                    // We want the icon to be brighter and white/tinted.
-                    float iconStrength = iconSample.a; // Use alpha channel
+                    // Luminance logic: 
+                    // texColor.rgb near white (1.0) -> Bright Highlight
+                    // texColor.rgb near black (0.0) -> Dark Contrast Plate
+                    float lum = (texColor.r + texColor.g + texColor.b) / 3.0;
+                    float iconAlpha = texColor.a;
                     
                     // 3. Effects
-                    float alpha = 0.25; // Lowered base alpha (0.35 -> 0.25)
+                    float alphaBase = 0.20; // Lowered further for subtler look
                     
                     // Scanlines
-                    float scan = sin(vUv.y * 300.0 + time * 5.0) * 0.1;
+                    float scan = sin(vUv.y * 300.0 + time * 5.0) * 0.08;
                     
-                    // Hologram Edge Fade (Sides)
+                    // Technology Edge Fade
                     float edge = smoothstep(0.0, 0.1, vUv.x) * smoothstep(1.0, 0.9, vUv.x);
                     
-                    // Tech Grid Pattern
-                    float grid = step(0.95, fract(vUv.y * 10.0)) * 0.2;
-
                     // Highlight peaks of wave
-                    float highlight = vWave * 0.2;
+                    float highlight = vWave * 0.15;
 
                     // MIXING
-                    // If pixel is part of icon, make it white/bright. Else use base clan color.
-                    vec3 finalColor = mix(baseColor, vec3(1.0, 1.0, 1.0), iconStrength * 0.8);
+                    vec3 finalColor = color;
+                    if (iconAlpha > 0.01) {
+                        if (lum > 0.4) {
+                            // Text/Icon: Bright White Glow
+                            finalColor = mix(finalColor, vec4(1.0, 1.0, 1.0, 1.0).rgb, iconAlpha * 0.9);
+                        } else {
+                            // Dark Plate: Deep Contrast
+                            finalColor = mix(finalColor, vec3(0.0), iconAlpha * 0.7);
+                        }
+                    }
                     
-                    // Add effects
-                    finalColor += vec3(scan + grid + highlight);
+                    finalColor += vec3(scan + highlight);
                     
-                    // Boost alpha where icon is
-                    float finalAlpha = alpha + (iconStrength * 0.4);
+                    // Boost alpha where text/plate is
+                    float finalAlpha = alphaBase + (iconAlpha * 0.5);
                     
                     // Bottom fade out
                     float fade = smoothstep(0.0, 0.2, vUv.y);
@@ -261,32 +267,27 @@ export class HoloBanner {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
-        // Glow Effect
-        ctx.shadowColor = '#FFFFFF';
-        ctx.shadowBlur = 8;
-
         // Draw Icon (Centered in top half)
         const is3D = this.iconChar.toLowerCase().startsWith('3d_');
         if (!is3D) {
             ctx.font = '900 300px "Font Awesome 6 Free"';
+            ctx.shadowColor = '#FFFFFF';
+            ctx.shadowBlur = 10;
             ctx.fillText(this.iconChar, 256, 400);
         }
 
         // Draw Label (Below icon) - Enhanced Visibility
         const labelY = 750;
         
-        // Background plate for text contrast
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'; // Dark translucent box
-        ctx.fillRect(50, labelY - 70, 412, 140);
+        ctx.shadowBlur = 0; // Disable shadow for background plate
         
-        ctx.font = '700 110px "Rajdhani"'; // Slightly bigger
-        ctx.strokeStyle = '#000000';
-        ctx.lineWidth = 8;
-        ctx.strokeText(this.label, 256, labelY);
-
+        // Background plate for text contrast (Darker for the shader to interpret correctly)
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.9)'; 
+        ctx.fillRect(40, labelY - 75, 432, 150);
+        
+        ctx.font = '900 110px "Rajdhani"'; 
         ctx.fillStyle = '#FFFFFF';
-        ctx.shadowBlur = 5;
-        ctx.fillText(this.label, 256, labelY);
+        ctx.fillText(this.label, 256, labelY + 10);
 
         // Create Texture
         const texture = new THREE.CanvasTexture(canvas);
