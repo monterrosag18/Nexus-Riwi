@@ -91,7 +91,7 @@ export class HoloBanner {
                     float iconStrength = iconSample.a; // Use alpha channel
                     
                     // 3. Effects
-                    float alpha = 0.35;
+                    float alpha = 0.25; // Lowered base alpha (0.35 -> 0.25)
                     
                     // Scanlines
                     float scan = sin(vUv.y * 300.0 + time * 5.0) * 0.1;
@@ -197,8 +197,8 @@ export class HoloBanner {
                 this.scene.add(this.icon3d);
             }
             
-            // Add a point light to the icon itself - Lowered intensity (2.0 -> 0.8)
-            const light = new THREE.PointLight(this.color, 0.8, 30);
+            // Add a point light to the icon itself - Lowered intensity further (0.8 -> 0.4)
+            const light = new THREE.PointLight(this.color, 0.4, 30);
             this.icon3d.add(light);
             console.log(`[HoloBanner] 3D Icon Attached: ${this.iconChar}`);
         }
@@ -238,6 +238,7 @@ export class HoloBanner {
         const emitter = new THREE.Mesh(emitterGeo, emitterMat);
         emitter.position.y = 3;
         emitter.rotation.x = Math.PI; // Point up
+        emitter.material.opacity = 0.3; // Lowered emitter opacity (0.5 -> 0.3)
         this.standGroup.add(emitter);
 
         this.scene.add(this.standGroup);
@@ -271,15 +272,21 @@ export class HoloBanner {
             ctx.fillText(this.iconChar, 256, 400);
         }
 
-        // Draw Label (Below icon) - Increased size and contrast
-        ctx.font = '700 100px "Rajdhani"';
-        // Stroke for contrast
-        ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
-        ctx.lineWidth = 15;
-        ctx.strokeText(this.label, 256, 700);
+        // Draw Label (Below icon) - Enhanced Visibility
+        const labelY = 750;
+        
+        // Background plate for text contrast
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'; // Dark translucent box
+        ctx.fillRect(50, labelY - 70, 412, 140);
+        
+        ctx.font = '700 110px "Rajdhani"'; // Slightly bigger
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 8;
+        ctx.strokeText(this.label, 256, labelY);
 
-        ctx.shadowBlur = 15;
-        ctx.fillText(this.label, 256, 700);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.shadowBlur = 5;
+        ctx.fillText(this.label, 256, labelY);
 
         // Create Texture
         const texture = new THREE.CanvasTexture(canvas);
