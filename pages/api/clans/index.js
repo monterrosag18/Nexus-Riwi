@@ -3,29 +3,36 @@ import { supabaseAdmin } from '../../../lib/supabase';
 export default async function handler(req, res) {
   try {
     if (req.method === 'GET') {
-      // Fetch clans with member count from users table using Admin client to bypass RLS
-      const { data: clans, error } = await supabaseAdmin
-        .from('clans')
-        .select(`
-          *,
-          profiles(id)
-        `)
-        .order('points', { ascending: false });
+      try {
+        const { data: clans, error } = await supabaseAdmin
+          .from('clans')
+          .select(`
+            *,
+            profiles(id)
+          `)
+          .order('points', { ascending: false });
 
-      if (error) throw error;
+        if (error) {
+          console.error('[ClansAPI] Supabase Fetch Error:', error);
+          throw error;
+        }
 
-      const clansMap = {};
-      clans.forEach(clan => {
-        clansMap[clan.id] = {
-          id: clan.id,
-          name: clan.name,
-          color: clan.color,
-          points: clan.points,
-          members: clan.profiles ? clan.profiles.length : 0,
-          icon: clan.icon
-        };
-      });
-      return res.status(200).json(clansMap);
+        const clansMap = {};
+        clans.forEach(clan => {
+          clansMap[clan.id] = {
+            id: clan.id,
+            name: clan.name,
+            color: clan.color,
+            points: clan.points,
+            members: clan.profiles ? clan.profiles.length : 0,
+            icon: clan.icon
+          };
+        });
+        return res.status(200).json(clansMap);
+      } catch (err) {
+        console.error('[ClansAPI] GET handler nested failure:', err);
+        return res.status(500).json({ message: 'Error fetching clans', details: err.message });
+      }
     }
 
     if (req.method === 'POST') {
