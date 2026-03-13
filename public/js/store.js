@@ -4,6 +4,24 @@ import { getSupabaseClient } from './supabaseClient.js';
  * Simple Pub/Sub State Management
  */
 class Store {
+    async authenticatedFetch(url, options = {}) {
+        const token = localStorage.getItem('riwi_token');
+        const headers = {
+            ...options.headers,
+            'Authorization': `Bearer ${token}`
+        };
+
+        const response = await fetch(url, { ...options, headers });
+
+        if (response.status === 401 || response.status === 403) {
+            console.warn('Neural Pulse Failure: Unauthorized access detected. Purging session...');
+            this.logout('SESSION_EXPIRED');
+            throw new Error('UNAUTHORIZED_ACCESS');
+        }
+
+        return response;
+    }
+
     constructor() {
         let savedUser = null;
         try {
@@ -122,11 +140,21 @@ class Store {
 
     logout(reason = 'USER_INITIATED') {
         localStorage.removeItem('riwi_user');
+        localStorage.removeItem('riwi_token');
         this.state.currentUser = null;
         this.state.currentView = 'login';
         this.notify();
+        
         if (reason === 'SESSION_OVERWRITE') {
             alert("⚠ SESSION TERMINATED: You have logged in from another device.");
+        } else if (reason === 'SESSION_EXPIRED') {
+            alert("🔒 NEURAL LINK TERMINATED: Your session has expired or been revoked. Please re-authenticate.");
+        }
+
+        // Force reload to login to ensure clean state
+        if (window.location.hash !== '#login') {
+            window.location.hash = '#login';
+            window.location.reload();
         }
     }
 
@@ -187,6 +215,16 @@ class Store {
 
             // Sync User profile if logged in
             if (this.state.currentUser) {
+                // Proactive "Neural Pulse" Verification
+                const pulse = await fetch('/api/auth/validate', {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('riwi_token')}` }
+                });
+                
+                if (!pulse.ok) {
+                    this.logout('SESSION_EXPIRED');
+                    return;
+                }
+
                 await this.syncUserProfile();
             }
 
@@ -383,12 +421,9 @@ class Store {
     async conquerTerritory(id, clan) {
         const clanId = clan.toLowerCase();
         try {
-            const response = await fetch('/api/territories', {
+            const response = await this.authenticatedFetch('/api/territories', {
                 method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('riwi_token')}`
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     id, 
                     clanId, 
@@ -496,12 +531,9 @@ class Store {
         if (this.state.currentUser) {
             const oldName = this.state.currentUser.name;
             try {
-                const response = await fetch('/api/user/update', {
+                const response = await this.authenticatedFetch('/api/user/update', {
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('riwi_token')}`
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: oldName, updates: { newName } })
                 });
                 const result = await response.json();
@@ -520,12 +552,9 @@ class Store {
         if (!user || user.credits < item.cost) return false;
         
         try {
-            const response = await fetch('/api/shop/purchase', {
+            const response = await this.authenticatedFetch('/api/shop/purchase', {
                 method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('riwi_token')}`
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     username: user.name,
                     itemId: item.id,
@@ -629,12 +658,9 @@ class Store {
             const { filterChat } = await import('./utils/filter.js');
             const cleanMsg = filterChat(msg);
             
-            await fetch('/api/chat', {
+            await this.authenticatedFetch('/api/chat', {
                 method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('riwi_token')}`
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ clanId, username: user.name, content: cleanMsg })
             });
             
