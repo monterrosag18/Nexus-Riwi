@@ -151,11 +151,9 @@ class Store {
             alert("🔒 NEURAL LINK TERMINATED: Your session has expired or been revoked. Please re-authenticate.");
         }
 
-        // Force reload to login to ensure clean state
-        if (window.location.hash !== '#login') {
-            window.location.hash = '#login';
-            window.location.reload();
-        }
+        // Force a total reset of the frontend state
+        window.location.hash = '#login';
+        window.location.reload();
     }
 
     // --- EVENT LOG METHODS ---
@@ -611,11 +609,7 @@ class Store {
     }
 
     logout() {
-        this.state.currentUser = null;
-        localStorage.removeItem('riwi_user');
-        this.notify();
-        window.location.href = window.location.origin + window.location.pathname + '#login';
-        window.location.reload();
+        this.logout('USER_INITIATED');
     }
 
     setView(viewName) {

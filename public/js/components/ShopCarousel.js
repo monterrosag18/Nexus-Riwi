@@ -23,18 +23,19 @@ const NEXUS_CARDS = [
         icon: 'fa-shield-halved',
         execute: async () => {
             const user = store.getState().currentUser;
-            if (user) { 
-                try {
-                    await fetch('/api/user/update', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username: user.name, updates: { credits: user.credits + 500 } })
-                    });
+            if (!user) return { msg: 'NO OPERATOR', success: false };
+            try {
+                const res = await store.authenticatedFetch('/api/shop/card-effect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: user.name, cardId: 'ion-shield' })
+                });
+                if (res.ok) {
                     await store.syncUserProfile();
                     return { msg: 'ION SHIELD activated! +500 CR deposited.', success: true };
-                } catch (e) { return { msg: 'SYNC ERROR', success: false }; }
-            }
-            return { msg: 'NO OPERATOR', success: false };
+                }
+            } catch (e) { console.error(e); }
+            return { msg: 'SYNC ERROR', success: false };
         }
     },
     {
@@ -46,11 +47,20 @@ const NEXUS_CARDS = [
         icon: 'fa-microchip',
         execute: async () => {
             const user = store.getState().currentUser;
-            if (user) {
-                await store.addPoints(user.clan, 200);
-                return { msg: 'NEURAL PATCH deployed! +200 pts to your clan.', success: true };
-            }
-            return { msg: 'NO OPERATOR', success: false };
+            if (!user) return { msg: 'NO OPERATOR', success: false };
+            try {
+                const res = await store.authenticatedFetch('/api/shop/card-effect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: user.name, cardId: 'neural-patch' })
+                });
+                if (res.ok) {
+                    await store.syncUserProfile();
+                    await store.loadInitialData(); // Sync clan points
+                    return { msg: 'NEURAL PATCH deployed! +200 pts to your clan.', success: true };
+                }
+            } catch (e) { console.error(e); }
+            return { msg: 'SYNC ERROR', success: false };
         }
     },
     {
@@ -62,11 +72,20 @@ const NEXUS_CARDS = [
         icon: 'fa-flask',
         execute: async () => {
             const user = store.getState().currentUser;
-            if (user) {
-                await store.addPoints(user.clan, 300);
-                return { msg: 'XP ELIXIR consumed! +300 pts to your clan!', success: true };
-            }
-            return { msg: 'NO OPERATOR', success: false };
+            if (!user) return { msg: 'NO OPERATOR', success: false };
+            try {
+                const res = await store.authenticatedFetch('/api/shop/card-effect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: user.name, cardId: 'xp-elixir' })
+                });
+                if (res.ok) {
+                    await store.syncUserProfile();
+                    await store.loadInitialData();
+                    return { msg: 'XP ELIXIR consumed! +300 pts to your clan!', success: true };
+                }
+            } catch (e) { console.error(e); }
+            return { msg: 'SYNC ERROR', success: false };
         }
     },
     {
@@ -78,19 +97,20 @@ const NEXUS_CARDS = [
         icon: 'fa-scroll',
         execute: async () => {
             const user = store.getState().currentUser;
-            if (user) {
-                await store.addPoints(user.clan, 150);
-                try {
-                    await fetch('/api/user/update', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username: user.name, updates: { credits: user.credits + 200 } })
-                    });
+            if (!user) return { msg: 'NO OPERATOR', success: false };
+            try {
+                const res = await store.authenticatedFetch('/api/shop/card-effect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: user.name, cardId: 'data-scroll' })
+                });
+                if (res.ok) {
                     await store.syncUserProfile();
+                    await store.loadInitialData();
                     return { msg: 'DATA SCROLL decoded! +150 clan pts +200 CR!', success: true };
-                } catch (e) { return { msg: 'SYNC ERROR', success: false }; }
-            }
-            return { msg: 'NO OPERATOR', success: false };
+                }
+            } catch (e) { console.error(e); }
+            return { msg: 'SYNC ERROR', success: false };
         }
     },
     // ❌ BAD CARDS
@@ -103,11 +123,20 @@ const NEXUS_CARDS = [
         icon: 'fa-explosion',
         execute: async () => {
             const user = store.getState().currentUser;
-            if (user) {
-                await store.addPoints(user.clan, -300);
-                return { msg: 'SYSTEM OVERLOAD! Your clan lost 300 pts!', success: false };
-            }
-            return { msg: 'NO OPERATOR', success: false };
+            if (!user) return { msg: 'NO OPERATOR', success: false };
+            try {
+                const res = await store.authenticatedFetch('/api/shop/card-effect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: user.name, cardId: 'sys-overload' })
+                });
+                if (res.ok) {
+                    await store.syncUserProfile();
+                    await store.loadInitialData();
+                    return { msg: 'SYSTEM OVERLOAD! Your clan lost 300 pts!', success: false };
+                }
+            } catch (e) { console.error(e); }
+            return { msg: 'SYNC ERROR', success: false };
         }
     },
     {
@@ -118,19 +147,21 @@ const NEXUS_CARDS = [
         image: 'fuga_habilidad.png', rgb: '255, 0, 85',
         icon: 'fa-skull-crossbones',
         execute: async () => {
-            const state = store.getState();
-            const user = state.currentUser;
+            const user = store.getState().currentUser;
             if (!user) return { msg: 'NO OPERATOR', success: false };
-            const rivals = Object.keys(state.clans).filter(k => k !== user.clan);
-            if (rivals.length > 0) {
-                const target = rivals[Math.floor(Math.random() * rivals.length)];
-                await store.addPoints(user.clan, -200);
-                await store.addPoints(target, 200);
-                const rivalName = state.clans[target]?.name || target;
-                return { msg: `DATA LEAK! −200 pts leaked to ${rivalName.toUpperCase()}!`, success: false };
-            }
-            await store.addPoints(user.clan, -200);
-            return { msg: 'DATA LEAK! Your clan lost 200 pts!', success: false };
+            try {
+                const res = await store.authenticatedFetch('/api/shop/card-effect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: user.name, cardId: 'data-leak' })
+                });
+                if (res.ok) {
+                    await store.syncUserProfile();
+                    await store.loadInitialData();
+                    return { msg: 'DATA LEAK! −200 pts leaked to rival!', success: false };
+                }
+            } catch (e) { console.error(e); }
+            return { msg: 'SYNC ERROR', success: false };
         }
     },
     {
@@ -142,18 +173,19 @@ const NEXUS_CARDS = [
         icon: 'fa-syringe',
         execute: async () => {
             const user = store.getState().currentUser;
-            if (user) {
-                try {
-                    await fetch('/api/user/update', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username: user.name, updates: { credits: Math.max(0, user.credits - 400) } })
-                    });
+            if (!user) return { msg: 'NO OPERATOR', success: false };
+            try {
+                const res = await store.authenticatedFetch('/api/shop/card-effect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: user.name, cardId: 'trojan' })
+                });
+                if (res.ok) {
                     await store.syncUserProfile();
                     return { msg: 'TROJAN INJECTION! −400 CR drained!', success: false };
-                } catch (e) { return { msg: 'SYNC ERROR', success: false }; }
-            }
-            return { msg: 'NO OPERATOR', success: false };
+                }
+            } catch (e) { console.error(e); }
+            return { msg: 'SYNC ERROR', success: false };
         }
     },
     {
@@ -165,19 +197,20 @@ const NEXUS_CARDS = [
         icon: 'fa-bug',
         execute: async () => {
             const user = store.getState().currentUser;
-            if (user) {
-                await store.addPoints(user.clan, -150);
-                try {
-                    await fetch('/api/user/update', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username: user.name, updates: { credits: Math.max(0, user.credits - 100) } })
-                    });
+            if (!user) return { msg: 'NO OPERATOR', success: false };
+            try {
+                const res = await store.authenticatedFetch('/api/shop/card-effect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: user.name, cardId: 'corrupt-script' })
+                });
+                if (res.ok) {
                     await store.syncUserProfile();
+                    await store.loadInitialData();
                     return { msg: 'CORRUPTED SCRIPT! −150 clan pts −100 CR!', success: false };
-                } catch (e) { return { msg: 'SYNC ERROR', success: false }; }
-            }
-            return { msg: 'NO OPERATOR', success: false };
+                }
+            } catch (e) { console.error(e); }
+            return { msg: 'SYNC ERROR', success: false };
         }
     }
 ];

@@ -79,13 +79,17 @@ export default function createNewsTicker() {
             return true;
         });
 
-        content.innerHTML = filteredItems.map(e => {
+        const htmlContent = filteredItems.map(e => {
             const color = typeColors[e.type] || '#8b9bb4';
             return `<span class="ticker-item" style="color:${color}">${e.msg}</span>`;
         }).join('<span class="ticker-separator">◆</span>');
 
-        // Duplicate for seamless loop
-        content.innerHTML += '<span class="ticker-separator">◆</span>' + content.innerHTML;
+        content.innerHTML = htmlContent;
+
+        // Duplicate for seamless loop ONLY once in the DOM
+        if (filteredItems.length > 2) {
+             content.innerHTML += '<span class="ticker-separator">◆</span>' + htmlContent;
+        }
     }
 
     updateTicker();
