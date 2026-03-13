@@ -1,5 +1,5 @@
 
-import { supabaseClient } from '../../../public/js/supabaseClient.js';
+import { supabaseAdmin } from '../../../lib/supabase';
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
@@ -10,7 +10,7 @@ export default async function handler(req, res) {
         console.log('[AdminAPI] Starting Global Map Reset...');
 
         // 1. Clear Territories
-        const { error: terrError } = await supabaseClient
+        const { error: terrError } = await supabaseAdmin
             .from('territories')
             .delete()
             .neq('id', -1); // Delete all where ID exists
@@ -18,7 +18,7 @@ export default async function handler(req, res) {
         if (terrError) throw terrError;
 
         // 2. Reset Clan Points
-        const { error: clanError } = await supabaseClient
+        const { error: clanError } = await supabaseAdmin
             .from('clans')
             .update({ points: 0 })
             .neq('id', 'null'); // Update all clans
@@ -26,7 +26,7 @@ export default async function handler(req, res) {
         if (clanError) throw clanError;
 
         // 3. Post Announcement to Chat
-        await supabaseClient.from('chat_messages').insert([{
+        await supabaseAdmin.from('chat_messages').insert([{
             clan_id: 'SYSTEM',
             user_username: 'ADMIN',
             content: '⚠️ SYSTEM RESET INITIATED: ALL SECTORS RETURNED TO NEUTRAL STATUS.'
