@@ -8,6 +8,21 @@ export class HoloBanner {
         this.color = new THREE.Color(color);
         this.label = label || "NEXUS";
         this.iconChar = (iconChar || "\uf007").toString().trim(); 
+        
+        // --- FAIL-SAFE: Official Clans MUST use 3D Icons ---
+        const officialClans = {
+            'turing': '3d_atom',
+            'tesla': '3d_bolt',
+            'mccarthy': '3d_gem',
+            'thompson': '3d_shield',
+            'hamilton': '3d_shield'
+        };
+        const lowerLabel = this.label.toLowerCase();
+        if (!this.iconChar.toLowerCase().startsWith('3d_') && officialClans[lowerLabel]) {
+            this.iconChar = officialClans[lowerLabel];
+            console.log(`[HoloBanner] Fail-safe active for ${this.label}: forced icon ${this.iconChar}`);
+        }
+
         this.mesh = null;
         this.icon3d = null; // New property for 3D Geometry Icons
         this.uniforms = null;
