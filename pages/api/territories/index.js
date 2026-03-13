@@ -34,19 +34,25 @@ export default async function handler(req, res) {
 
       // 3. Increment Points (Server-Side)
       // A. Increment New Clan (+100)
-      await supabase.rpc('increment_clan_points', { clan_id_v: clanId, amount_v: 100 });
+      const { data: clanData } = await supabase.from('clans').select('points').eq('id', clanId).single();
+      if (clanData) {
+        await supabase.from('clans').update({ points: (clanData.points || 0) + 100 }).eq('id', clanId);
+      }
 
       // B. Increment User (+100)
       if (username) {
-        await supabase
-          .from('users')
-          .update({ points: (await supabase.from('users').select('points').eq('username', username).single()).data.points + 100 })
-          .eq('username', username);
+        const { data: userData } = await supabase.from('users').select('points').eq('username', username).single();
+        if (userData) {
+          await supabase.from('users').update({ points: (userData.points || 0) + 100 }).eq('username', username);
+        }
       }
 
       // C. Decrement Old Clan (-50) if it wasn't neutral
       if (prevOwner && prevOwner !== 'neutral' && prevOwner !== clanId) {
-        await supabase.rpc('increment_clan_points', { clan_id_v: prevOwner, amount_v: -50 });
+        const { data: oldClanData } = await supabase.from('clans').select('points').eq('id', prevOwner).single();
+        if (oldClanData) {
+          await supabase.from('clans').update({ points: Math.max(0, (oldClanData.points || 0) - 50) }).eq('id', prevOwner);
+        }
       }
 
       return res.status(200).json({ success: true });
