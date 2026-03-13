@@ -29,7 +29,8 @@ class Store {
                 { id: 'border_shimmer', name: 'SHIMMER BORDER', cost: 2500, type: 'border', color: '#ffffff' },
                 { id: 'border_obsidian', name: 'OBSIDIAN BORDER', cost: 3500, type: 'border', color: '#1a1a1a' },
                 { id: 'shield_plasma', name: 'PLASMA SHIELD', cost: 4000, type: 'shield', color: '#7b61ff' }
-            ]
+            ],
+            syncError: false
         };
         this.listeners = [];
 
@@ -72,25 +73,30 @@ class Store {
                 fetch('/api/territories')
             ]);
             
-            this.state.clans = (clansRes.ok) ? await clansRes.json() : {};
-            const rawTerritories = (territoriesRes.ok) ? await territoriesRes.json() : [];
-
-            // If we have no territories in DB, but we have clans, maybe this is a fresh start?
-            // However, we should be careful about auto-generating here during sync.
-            
-            // Map territories to local structure
-            if (Array.isArray(rawTerritories)) {
-                this.state.territories = rawTerritories.map(t => ({
-                    id: parseInt(t.id),
-                    owner: t.owner_id || 'neutral',
-                    type: t.type || 'code',
-                    biome: t.biome || 'city',
-                    difficulty: t.difficulty || 1,
-                    question: t.question || this.getMockQuestion(t.type || 'code')
-                }));
+            if (clansRes.ok) {
+                const clansData = await clansRes.json();
+                this.state.clans = clansData;
+                this.state.syncError = false;
             } else {
-                console.error('Expected territories array, got:', rawTerritories);
-                this.state.territories = [];
+                console.warn('Clans sync failed, keeping local state');
+                this.state.syncError = true;
+            }
+
+            if (territoriesRes.ok) {
+                const rawTerritories = await territoriesRes.json();
+                if (Array.isArray(rawTerritories) && rawTerritories.length > 0) {
+                    this.state.territories = rawTerritories.map(t => ({
+                        id: parseInt(t.id),
+                        owner: t.owner_id || 'neutral',
+                        type: t.type || 'code',
+                        biome: t.biome || 'city',
+                        difficulty: t.difficulty || 1,
+                        question: t.question || this.getMockQuestion(t.type || 'code')
+                    }));
+                }
+            } else {
+                console.warn('Territories sync failed, keeping local state');
+                this.state.syncError = true;
             }
 
             // Sync User profile if logged in
@@ -98,10 +104,12 @@ class Store {
                 await this.syncUserProfile();
             }
 
-            console.log('Database sync complete');
+            console.log('Database sync complete. Error status:', this.state.syncError);
             this.notify();
         } catch (error) {
             console.error('CRITICAL: Sync failed', error);
+            this.state.syncError = true;
+            this.notify();
         }
     }
 

@@ -442,6 +442,8 @@ function buildTacticalGrid() {
             const ownerId = hex.owner.toLowerCase().replace(/\s+/g, '');
             const clanData = clans[ownerId] || clans[hex.owner];
             hex.color = clanData ? clanData.color : COLORS.neutral;
+        } else if (dbTerritory) {
+            console.warn(`[HexGrid] DB Territory ${i} found but has no valid owner or is neutral:`, dbTerritory);
         }
 
         // Strip out excess neutral hexes that are too far into deep space
