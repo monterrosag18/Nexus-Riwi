@@ -71,7 +71,15 @@ export default function createNewsTicker() {
         // Add game events after admin news
         events.forEach(e => allItems.push(e));
 
-        content.innerHTML = allItems.map(e => {
+        // Deduplicate items to prevent "crazy" repeating news
+        const seenMsg = new Set();
+        const filteredItems = allItems.filter(item => {
+            if (seenMsg.has(item.msg)) return false;
+            seenMsg.add(item.msg);
+            return true;
+        });
+
+        content.innerHTML = filteredItems.map(e => {
             const color = typeColors[e.type] || '#8b9bb4';
             return `<span class="ticker-item" style="color:${color}">${e.msg}</span>`;
         }).join('<span class="ticker-separator">◆</span>');

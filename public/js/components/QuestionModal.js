@@ -100,6 +100,7 @@ export default async function createQuestionModal(hexData, hitMesh) {
     const timerFill = modalOverlay.querySelector('#timer-fill');
     const timerText = modalOverlay.querySelector('#timer-secs');
     const statusMsgText = modalOverlay.querySelector('#status-text');
+    let failedAttempts = 0;
 
     const startTimer = () => {
         const interval = setInterval(() => {
@@ -120,6 +121,7 @@ export default async function createQuestionModal(hexData, hitMesh) {
 
     const handleFailure = (msg) => {
         timerActive = false;
+        failedAttempts++;
         statusMsgText.textContent = msg;
         statusMsgText.style.color = '#ff0000';
         
@@ -128,6 +130,12 @@ export default async function createQuestionModal(hexData, hitMesh) {
         
         // Disable buttons
         optionBtns.forEach(b => b.style.pointerEvents = 'none');
+
+        if (failedAttempts >= 3) {
+            statusMsgText.textContent = "CRITICAL FAILURE - CONNECTION TERMINATED.";
+            setTimeout(closeModal, 2000);
+            return;
+        }
 
         // Wait 2 seconds then reload question
         setTimeout(async () => {
@@ -168,11 +176,20 @@ export default async function createQuestionModal(hexData, hitMesh) {
             btn.classList.add('correct-choice');
             statusMsgText.textContent = 'ACCESS GRANTED. OVERRIDING PROTOCOLS...';
             statusMsgText.style.color = '#00ff44';
+            
+            // OPTIMISTIC UPDATE: Paint hex immediately for "Speed"
+            executeConquest(hexData, hitMesh, user.clan);
+            
             setTimeout(async () => {
-                const success = await executeConquest(hexData, hitMesh, user.clan);
-                if (success) closeModal();
-                else statusMsgText.textContent = 'SYNC ERROR. TRY AGAIN.';
-            }, 1500);
+                const success = await store.conquerTerritory(hexData.id, user.clan);
+                if (success) {
+                    closeModal();
+                } else {
+                    statusMsgText.textContent = 'SYNC ERROR. TRY AGAIN.';
+                    btn.classList.remove('correct-choice');
+                    allBtns.forEach(b => b.style.pointerEvents = 'auto');
+                }
+            }, 800);
         } else {
             btn.classList.add('wrong-choice');
             allBtns[qData.correct].classList.add('correct-choice');

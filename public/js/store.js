@@ -274,12 +274,16 @@ class Store {
             });
             const result = await response.json();
             if (result.success) {
-                // Optimistic Update locally
+                // Confirm state locally (should already be done by optimistic call in UI, but safe to repeat)
                 const terr = this.state.territories.find(t => t.id == id);
-                if (terr) {
-                    if (terr.owner !== 'neutral') this.addPoints(terr.owner, -50); // Loss to other clan
+                if (terr && terr.owner !== clan) {
+                    if (terr.owner !== 'neutral') this.addPoints(terr.owner, -50);
                     terr.owner = clan;
-                    this.addPoints(clan, 100); // Give 100 to clan
+                    this.addPoints(clan, 100);
+                    this.notify();
+                }
+                return true;
+            }
                     
                     // NEW: Sync puntos to individual user profile
                     if (this.state.currentUser) {
