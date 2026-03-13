@@ -315,26 +315,38 @@ document.addEventListener('DOMContentLoaded', () => {
         const id = name.toLowerCase().replace(/\s+/g, '');
         if (!name || !color || !id) return;
 
-        const currentClans = await getClans();
+        try {
+            const currentClans = await getClans();
 
-        // Validate duplicates
-        if (currentClans[id] && editingClanId !== id) {
-            alert('A faction with this designation already exists.'); return;
-        }
-
-        let clanData = { name, color, icon };
-        if (editingClanId) {
-            if (editingClanId !== id) {
-                 // Rename (delete old, create new with same points)
-                 clanData.points = currentClans[editingClanId].points;
-                 await deleteClan(editingClanId);
+            // Validate duplicates
+            if (currentClans[id] && editingClanId !== id) {
+                alert('A faction with this designation already exists.'); return;
             }
-        }
 
-        await saveClan(id, clanData);
-        resetCreateForm();
-        await renderRoster();
-        showView('roster');
+            let clanData = { name, color, icon };
+            if (editingClanId) {
+                if (editingClanId !== id) {
+                    // Rename (create new with same points, then delete old)
+                    clanData.points = currentClans[editingClanId].points;
+                    await saveClan(id, clanData);
+                    await deleteClan(editingClanId);
+                } else {
+                    // Simple update
+                    clanData.points = currentClans[editingClanId].points;
+                    await saveClan(id, clanData);
+                }
+            } else {
+                // New clan
+                await saveClan(id, clanData);
+            }
+
+            resetCreateForm();
+            await renderRoster();
+            showView('roster');
+        } catch (err) {
+            console.error('Faction update failed:', err);
+            alert('CRITICAL ERROR: Faction update failed. Check console for details.');
+        }
     });
 
     // Reset all points

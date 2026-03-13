@@ -8,7 +8,7 @@ export default async function handler(req, res) {
         .from('clans')
         .select(`
           *,
-          users(id)
+          profiles(id)
         `)
         .order('points', { ascending: false });
 
@@ -21,7 +21,7 @@ export default async function handler(req, res) {
           name: clan.name,
           color: clan.color,
           points: clan.points,
-          members: clan.users ? clan.users.length : 0,
+          members: clan.profiles ? clan.profiles.length : 0,
           icon: clan.icon
         };
       });
