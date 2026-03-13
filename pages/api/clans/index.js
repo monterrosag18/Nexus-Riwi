@@ -4,17 +4,30 @@ export default async function handler(req, res) {
   try {
     if (req.method === 'GET') {
       try {
-        const { data: clans, error } = await supabaseAdmin
+        // 1. Fetch all clans
+        const { data: clans, error: clanError } = await supabaseAdmin
           .from('clans')
-          .select(`
-            *,
-            profiles(id)
-          `)
+          .select('*')
           .order('points', { ascending: false });
 
-        if (error) {
-          console.error('[ClansAPI] Supabase Fetch Error:', error);
-          throw error;
+        if (clanError) throw clanError;
+
+        // 2. Fetch member counts (distinct counts from profiles table)
+        // We do this separately to avoid "relationship not found" schema errors
+        const { data: memberCounts, error: memberError } = await supabaseAdmin
+          .from('profiles')
+          .select('clan_id');
+
+        if (memberError) {
+            console.warn('[ClansAPI] Member fetch fail (continuing with 0):', memberError.message);
+        }
+
+        // Count members per clan
+        const counts = {};
+        if (memberCounts) {
+            memberCounts.forEach(p => {
+                if (p.clan_id) counts[p.clan_id] = (counts[p.clan_id] || 0) + 1;
+            });
         }
 
         const clansMap = {};
@@ -24,13 +37,13 @@ export default async function handler(req, res) {
             name: clan.name,
             color: clan.color,
             points: clan.points,
-            members: clan.profiles ? clan.profiles.length : 0,
+            members: counts[clan.id] || 0,
             icon: clan.icon
           };
         });
         return res.status(200).json(clansMap);
       } catch (err) {
-        console.error('[ClansAPI] GET handler nested failure:', err);
+        console.error('[ClansAPI] GET handler failure:', err);
         return res.status(500).json({ message: 'Error fetching clans', details: err.message });
       }
     }
