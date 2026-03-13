@@ -1,9 +1,14 @@
 import { supabaseAdmin } from '../../../lib/supabase';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.SUPABASE_JWT_SECRET || 'your-secret-key';
+import { verifyToken } from '../../../lib/auth';
+import rateLimit from '../../../lib/rateLimit';
 
 export default async function handler(req, res) {
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  if (req.method === 'POST') {
+     if (!rateLimit(ip, 20, 60000)) {
+        return res.status(429).json({ message: 'NEURAL LINK OVERLOADED. PLEASE WAIT.' });
+     }
+  }
   try {
     if (req.method === 'GET') {
       const { data: territories, error } = await supabaseAdmin
@@ -23,13 +28,9 @@ export default async function handler(req, res) {
       }
 
       const token = authHeader.split(' ')[1];
-      try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        if (decoded.username !== username) {
-          return res.status(403).json({ message: 'FORBIDDEN: NEURAL MISMATCH' });
-        }
-      } catch (err) {
-        return res.status(401).json({ message: 'UNAUTHORIZED: INVALID TOKEN' });
+      const decoded = verifyToken(token);
+      if (!decoded || decoded.username !== username) {
+        return res.status(403).json({ message: 'FORBIDDEN: NEURAL MISMATCH' });
       }
 
       if (id === undefined || !clanId) return res.status(400).json({ message: 'Missing fields' });

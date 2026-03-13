@@ -11,14 +11,14 @@ export async function getSupabaseClient() {
         initPromise = (async () => {
             try {
                 const res = await fetch('/api/config');
-                const config = await res.json();
+                const { data } = await res.json();
+                const config = JSON.parse(atob(data));
                 
                 if (typeof supabase === 'undefined') {
-                    throw new Error("Supabase CDN not loaded.");
+                    throw new Error("Neural Link CDN not loaded.");
                 }
                 
                 client = supabase.createClient(config.url, config.anonKey);
-                console.log('[Supabase] Neural Link Established via Secure Config');
                 return client;
             } catch (err) {
                 console.error('[Supabase] Init Failed:', err.message);

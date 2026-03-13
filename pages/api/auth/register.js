@@ -1,13 +1,30 @@
 import { supabase } from '../../../lib/supabase';
 import bcrypt from 'bcrypt';
+import rateLimit from '../../../lib/rateLimit';
 
 export default async function handler(req, res) {
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  if (!rateLimit(ip, 5, 60000)) {
+    return res.status(429).json({ message: 'TOO MANY ATTEMPTS. COOL DOWN, HACKER.' });
+  }
+
   try {
     if (req.method !== 'POST') {
       return res.status(405).json({ message: 'Method not allowed' });
     }
 
     const { username, clan, password } = req.body;
+    
+    // VALIDATION SHIELD
+    const usernameRegex = /^[a-zA-Z0-9_]{3,15}$/;
+    if (!usernameRegex.test(username)) {
+      return res.status(400).json({ message: 'INVALID CODENAME: 3-15 ALPHANUMERIC CHARS ONLY' });
+    }
+
+    if (!password || password.length < 8) {
+      return res.status(400).json({ message: 'WEAK SECURITY KEY: MINIMUM 8 CHARACTERS REQUIRED' });
+    }
+
     if (!username || !clan || !password) {
       return res.status(400).json({ message: 'Missing fields' });
     }

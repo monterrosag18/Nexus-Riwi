@@ -1,10 +1,14 @@
 import { supabase } from '../../../lib/supabase';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.SUPABASE_JWT_SECRET || 'your-secret-key';
+import { signToken } from '../../../lib/auth';
+import rateLimit from '../../../lib/rateLimit';
 
 export default async function handler(req, res) {
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  if (!rateLimit(ip, 10, 60000)) {
+    return res.status(429).json({ message: 'TOO MANY ATTEMPTS. NEURAL LINK THROTTLED.' });
+  }
+
   try {
     if (req.method !== 'POST') {
       return res.status(405).json({ message: 'Method not allowed' });
@@ -31,18 +35,14 @@ export default async function handler(req, res) {
       return res.status(401).json({ message: 'INVALID SECURITY KEY' });
     }
 
-    // Create session ID
-    const sessionId = jwt.sign({ sub: user.id, rand: Math.random() }, JWT_SECRET).slice(-10);
+    // Create secure session ID
+    const sessionId = Math.random().toString(36).substring(2, 12);
 
     // Update session in DB
     await supabase.from('users').update({ last_session_id: sessionId }).eq('id', user.id);
 
-    // Create token with session_id
-    const token = jwt.sign(
-      { id: user.id, username: user.username, clan: user.clan_id, sessionId },
-      JWT_SECRET,
-      { expiresIn: '1d' }
-    );
+    // Create token with modular auth
+    const token = signToken({ id: user.id, username: user.username, clan: user.clan_id, sessionId });
 
     return res.status(200).json({ 
       success: true, 
