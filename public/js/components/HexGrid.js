@@ -66,14 +66,13 @@ export default function renderMap() {
     hud.appendChild(renderMiniLeaderboard());
 
     // 1b. Inject Weekly Countdown (top-left, offset past sidebar)
-    const mapUI = container.querySelector('#map-ui');
     const countdown = createWeeklyCountdown();
     countdown.style.cssText = 'position:absolute;top:15px;left:85px;pointer-events:auto;z-index:60;';
-    mapUI.appendChild(countdown);
+    container.querySelector('#map-ui').appendChild(countdown);
 
     // 1c. Inject News Ticker (bottom, offset past sidebar)
     const ticker = createNewsTicker();
-    mapUI.appendChild(ticker);
+    container.querySelector('#map-ui').appendChild(ticker);
 
     // 2. Initialize 3D Engine
     setTimeout(() => {
@@ -217,7 +216,8 @@ function initSolarSystem() {
     // 6. REALTIME REACTION
     store.subscribe((state) => {
         // A. REBUILD GRID IF FIRST LOAD (Data arrived after init)
-        if (state.clans && Object.keys(state.clans).length > 0 && interactableHexes.length === 0) {
+        const hasClansLoaded = state.clans && Object.keys(state.clans).length > 0;
+        if (hasClansLoaded && clanBanners.length === 0) {
             console.log("[HexGrid] Data detected - Building Tactical Grid...");
             buildTacticalGrid();
             return;
@@ -247,9 +247,10 @@ function initSolarSystem() {
                         
                         const line = mesh.parent.children.find(c => c.type === 'LineLoop' && c.position.distanceToSquared(mesh.position) < 0.1);
                         if (line) {
+                            line.material = line.material.clone();
                             line.material.color.set(color);
                             line.material.linewidth = (newOwner !== 'neutral') ? 3 : 1;
-                            line.material.opacity = (newOwner !== 'neutral') ? 1.0 : 0.4;
+                            line.material.opacity = (newOwner !== 'neutral') ? 1.0 : 0.6;
                         }
                     }
                 }
@@ -402,7 +403,8 @@ function buildTacticalGrid() {
         }
     });
 
-    const ringSize = Math.ceil(mapRadius / hexWidth) + 3;
+    // FIXED GRID SIZE for Deterministic Mapping
+    const ringSize = 12;
     const allHexes = [];
 
     for (let q = -ringSize; q <= ringSize; q++) {
@@ -418,21 +420,40 @@ function buildTacticalGrid() {
 
     allHexes.forEach((hex, i) => {
         const dbTerritory = territories.find(t => parseInt(t.id) === i);
+        let currentOwner = null;
+        
         if (dbTerritory && dbTerritory.owner && dbTerritory.owner !== 'neutral') {
-            hex.owner = dbTerritory.owner;
-            const ownerId = hex.owner.toLowerCase();
-            const clanData = clans[ownerId];
+            currentOwner = dbTerritory.owner.toLowerCase();
+            const clanData = clans[currentOwner];
             hex.color = clanData ? clanData.color : COLORS.neutral;
+        } else {
+            // INITIAL CLUSTER LOGIC: 
+            // If the sector is unowned in DB, check if it's one of the 5 closest to a banner
+            const distances = [];
+            clanIds.forEach(cid => {
+                const banner = bannerDistributions[cid];
+                const d = Math.sqrt((hex.x - banner.vec.x) ** 2 + (hex.z - banner.vec.z) ** 2);
+                distances.push({ id: cid, d });
+            });
+            distances.sort((a, b) => a.d - b.d);
+            
+            const closest = distances[0];
+            // If within starting range and unowned, assign to closest clan
+            if (closest.d < hexRadius * 3.5) {
+                currentOwner = closest.id;
+                const clanData = clans[currentOwner];
+                hex.color = clanData ? clanData.color : COLORS.neutral;
+            }
         }
 
         const distFromCenter = Math.sqrt(hex.x * hex.x + hex.z * hex.z);
-        if (hex.owner === null && distFromCenter > mapRadius * 1.1) return;
+        if (!currentOwner && distFromCenter > mapRadius * 1.1) return;
 
-        const isTerritory = hex.owner !== null;
+        const isTerritory = currentOwner !== null;
         const type = dbTerritory ? dbTerritory.type : 'code';
         const difficulty = dbTerritory ? dbTerritory.difficulty : 1;
 
-        createHexagon(hex.x, hex.z, hexRadius * 0.95, hex.color, isTerritory, hex.owner, i, type, difficulty);
+        createHexagon(hex.x, hex.z, hexRadius * 0.95, hex.color, isTerritory, currentOwner, i, type, difficulty);
     });
 }
 
@@ -447,7 +468,7 @@ function createHexagon(x, z, r, color, isTerritory, ownerId, id, type, difficult
         color: color,
         linewidth: isTerritory ? 3 : 1,
         transparent: true,
-        opacity: isTerritory ? 1.0 : 0.4
+        opacity: isTerritory ? 1.0 : 0.6 // Increased base visibility
     });
     const hex = new THREE.LineLoop(geometry, lineMat);
     hex.position.set(x, 0, z);
