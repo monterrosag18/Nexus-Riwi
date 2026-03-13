@@ -38,6 +38,11 @@ export default async function handler(req, res) {
             env: {
                 url: currentUrl,
                 serviceKey: hasServiceKey ? 'PRESENT' : 'MISSING',
+                // Masked keys to verify they aren't mangled or have spaces
+                serviceKeyMask: process.env.SUPABASE_SERVICE_ROLE_KEY ? 
+                    `${process.env.SUPABASE_SERVICE_ROLE_KEY.substring(0, 10)}...${process.env.SUPABASE_SERVICE_ROLE_KEY.slice(-5)}` : 'NONE',
+                anonKeyMask: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 
+                    `${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.substring(0, 10)}...${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.slice(-5)}` : 'NONE'
             },
             clansCheck: clansError ? clansError : 'OK',
             gameSettingsCheck: settingsError ? settingsError : 'OK',
