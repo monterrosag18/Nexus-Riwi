@@ -212,10 +212,13 @@ select.form-control option {
     background: conic-gradient(
         from 0deg,
         transparent 0deg,
-        #00f0ff 60deg,
-        #00c8e0 120deg,
         transparent 180deg,
-        transparent 360deg
+        rgba(0,200,224,0.08) 220deg,
+        rgba(0,220,240,0.25) 260deg,
+        rgba(0,230,255,0.5)  300deg,
+        #00f0ff              345deg,
+        #00eeff              355deg,
+        transparent          360deg
     );
     animation: rotateBtn 3s linear infinite;
     z-index: -2;
