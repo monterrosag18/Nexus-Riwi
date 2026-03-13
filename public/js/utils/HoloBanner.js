@@ -128,42 +128,40 @@ export class HoloBanner {
 
     create3DIcon() {
         let geometry;
-        const mat = new THREE.MeshStandardMaterial({ 
+        const mat = new THREE.MeshBasicMaterial({ 
             color: this.color, 
-            emissive: this.color, 
-            emissiveIntensity: 0.5,
-            metalness: 0.8,
-            roughness: 0.2,
             transparent: true,
-            opacity: 0.8
+            opacity: 0.9
         });
+        
+        // Emissive-like glow group
+        const glowGroup = new THREE.Group();
 
         if (this.iconChar === '3d_shield') {
-            geometry = new THREE.BoxGeometry(4, 5, 1);
+            geometry = new THREE.BoxGeometry(6, 8, 2); // Bigger
         } else if (this.iconChar === '3d_gem') {
-            geometry = new THREE.OctahedronGeometry(3);
+            geometry = new THREE.OctahedronGeometry(5); // Bigger
         } else if (this.iconChar === '3d_atom') {
-            geometry = new THREE.SphereGeometry(1.5, 16, 16);
+            geometry = new THREE.SphereGeometry(2.5, 16, 16);
             // Add Rings for Atom
-            const ringGeo = new THREE.TorusGeometry(3.5, 0.15, 8, 32);
+            const ringGeo = new THREE.TorusGeometry(5.5, 0.2, 8, 32);
             const ring1 = new THREE.Mesh(ringGeo, mat);
             const ring2 = new THREE.Mesh(ringGeo, mat);
             ring2.rotation.x = Math.PI / 2;
-            const atomGroup = new THREE.Group();
-            atomGroup.add(new THREE.Mesh(geometry, mat));
-            atomGroup.add(ring1);
-            atomGroup.add(ring2);
-            this.icon3d = atomGroup;
+            glowGroup.add(new THREE.Mesh(geometry, mat));
+            glowGroup.add(ring1);
+            glowGroup.add(ring2);
+            this.icon3d = glowGroup;
         } else if (this.iconChar === '3d_bolt') {
             const shape = new THREE.Shape();
-            shape.moveTo(0, 4);
-            shape.lineTo(2, 0);
-            shape.lineTo(0.5, 0);
-            shape.lineTo(1.5, -4);
-            shape.lineTo(-0.5, 0);
+            shape.moveTo(0, 6);
+            shape.lineTo(3, 0);
             shape.lineTo(1, 0);
-            shape.lineTo(0, 4);
-            geometry = new THREE.ExtrudeGeometry(shape, { depth: 1, bevelEnabled: false });
+            shape.lineTo(2, -6);
+            shape.lineTo(-1, 0);
+            shape.lineTo(1, 0);
+            shape.lineTo(0, 6);
+            geometry = new THREE.ExtrudeGeometry(shape, { depth: 1.5, bevelEnabled: false });
             this.icon3d = new THREE.Mesh(geometry, mat);
         }
 
@@ -173,8 +171,13 @@ export class HoloBanner {
 
         if (this.icon3d) {
             this.icon3d.position.copy(this.position);
-            this.icon3d.position.y += 28; // Above the banner
+            this.icon3d.position.y += 35; // Higher to avoid overlap
             this.scene.add(this.icon3d);
+            
+            // Add a point light to the icon itself so it illuminates the flag
+            const light = new THREE.PointLight(this.color, 2, 30);
+            light.position.set(0, 0, 0);
+            this.icon3d.add(light);
         }
     }
 

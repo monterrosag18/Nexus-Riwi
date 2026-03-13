@@ -324,8 +324,19 @@ async function onMouseClick(event) {
 
         if (!isAdjacent && targetOwner !== null) {
             console.warn("OUT OF RANGE! Connection unstable.");
-            // We allow the click but maybe show a warning in HUD? 
-            // For now, let's just trigger the modal anyway to let them "see" the system
+            // Mandatory adjacency: Show feedback and return
+            const feedback = document.createElement('div');
+            feedback.style.cssText = `
+                position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                color: #ff3b5c; font-family: 'Share Tech Mono', monospace;
+                font-size: 1.5rem; text-shadow: 0 0 10px #ff3b5c;
+                background: rgba(0,0,0,0.8); padding: 10px 20px; border: 2px solid #ff3b5c;
+                z-index: 9999; pointer-events: none; animation: nexus-fade-out 2s forwards;
+            `;
+            feedback.textContent = "⚠ CONNECTION FAILED: SECTOR OUT OF RANGE";
+            document.body.appendChild(feedback);
+            setTimeout(() => feedback.remove(), 2000);
+            return;
         }
 
         // Trigger visual "Under Attack"

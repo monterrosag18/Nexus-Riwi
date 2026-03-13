@@ -188,7 +188,9 @@ document.addEventListener('DOMContentLoaded', () => {
         '\uf0c3': 'fa-solid fa-flask', '\uf21e': 'fa-solid fa-heartbeat',
         '\uf5d2': 'fa-solid fa-atom', '\uf0eb': 'fa-solid fa-lightbulb',
         '\uf2db': 'fa-solid fa-microchip', '\uf544': 'fa-solid fa-brain',
-        '\uf085': 'fa-solid fa-gears'
+        '\uf085': 'fa-solid fa-gears',
+        '3d_shield': 'fa-solid fa-shield-halved', '3d_gem': 'fa-solid fa-gem',
+        '3d_atom': 'fa-solid fa-atom', '3d_bolt': 'fa-solid fa-bolt'
     };
 
     function getIcon(unicode) { return iconMap[unicode] || 'fa-solid fa-shield-halved'; }
