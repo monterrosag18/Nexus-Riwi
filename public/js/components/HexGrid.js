@@ -322,7 +322,7 @@ async function onMouseClick(event) {
         const totalOwnedByMe = interactableHexes.filter(h => (h.userData.owner || '').toUpperCase() === clanId).length;
         if (totalOwnedByMe === 0) isAdjacent = true;
 
-        if (!isAdjacent && targetOwner !== null) {
+        if (!isAdjacent) {
             console.warn("OUT OF RANGE! Connection unstable.");
             // Mandatory adjacency: Show feedback and return
             const feedback = document.createElement('div');
