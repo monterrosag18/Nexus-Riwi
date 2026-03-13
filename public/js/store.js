@@ -110,7 +110,12 @@ class Store {
             
             if (clansRes.ok) {
                 const clansData = await clansRes.json();
-                this.state.clans = clansData;
+                // Normalize clan keys to lowercase
+                const normalizedClans = {};
+                Object.keys(clansData).forEach(key => {
+                    normalizedClans[key.toLowerCase()] = clansData[key];
+                });
+                this.state.clans = normalizedClans;
                 this.state.syncError = false;
             } else {
                 console.warn('Clans sync failed, keeping local state');
@@ -404,6 +409,7 @@ class Store {
     }
 
     setUser(user) {
+        if (user && user.clan) user.clan = user.clan.toLowerCase();
         this.state.currentUser = user;
         localStorage.setItem('riwi_user', JSON.stringify(user));
         this.notify();

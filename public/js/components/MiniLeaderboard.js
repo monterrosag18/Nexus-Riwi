@@ -10,8 +10,9 @@ export default function renderMiniLeaderboard() {
 
         // Convert object to array and sort by points descending
         const sortedClans = Object.keys(clans).map(key => {
+            const cleanKey = key.toLowerCase();
             return {
-                id: key,
+                id: cleanKey,
                 ...clans[key]
             };
         }).sort((a, b) => b.points - a.points);
