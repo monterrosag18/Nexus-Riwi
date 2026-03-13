@@ -328,32 +328,31 @@ class Store {
 
     // Check if a target hex ID is adjacent to any hex owned by the clan
     checkAdjacency(targetId, clan) {
+        if (!clan) return false;
         const clanId = clan.toLowerCase();
         
-        // 1. Get neighbors using the geometric coordinate system (HexGrid uses deterministic ringSize: 12)
         const neighbors = this.getNeighbors(targetId);
         
-        // 2. See if any neighbor is owned by me
+        // Ensure we handle territories correctly from state
         const ownedIds = this.state.territories
             .filter(t => t.owner && t.owner.toLowerCase() === clanId)
-            .map(t => t.id);
+            .map(t => parseInt(t.id));
 
-        return neighbors.some(nId => ownedIds.includes(nId));
+        const isAdjacent = neighbors.some(nId => ownedIds.includes(nId));
+        console.log(`[Adjacency] Target ${targetId} neighbors:`, neighbors, "Owned:", ownedIds, "Result:", isAdjacent);
+        return isAdjacent;
     }
 
     getNeighbors(id) {
-        // HexGrid.js uses a "Ring" algorithm (Deterministic). 
-        // We must replicate the same (q, r) generation to find neighbors correctly.
         const ringSize = 12;
         const allHexes = [];
         
-        // RE-GENERATE COORDINATE MAP (Exactly as HexGrid.js does)
         for (let q = -ringSize; q <= ringSize; q++) {
             for (let r = -ringSize; r <= ringSize; r++) {
                 if (Math.abs(q + r) <= ringSize) {
                     const x = (Math.sqrt(3) * 8) * (q + r / 2);
                     const z = (2 * 8) * (3 / 4) * r;
-                    if (Math.sqrt(x * x + z * z) < 25) continue; // Void center
+                    if (Math.sqrt(x * x + z * z) < 25) continue; 
                     allHexes.push({ id: allHexes.length, q, r });
                 }
             }
