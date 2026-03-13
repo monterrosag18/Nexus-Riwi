@@ -280,10 +280,6 @@ class Store {
                     if (terr.owner !== 'neutral') this.addPoints(terr.owner, -50);
                     terr.owner = clan;
                     this.addPoints(clan, 100);
-                    this.notify();
-                }
-                return true;
-            }
                     
                     // NEW: Sync puntos to individual user profile
                     if (this.state.currentUser) {
@@ -300,7 +296,6 @@ class Store {
                             })
                         }).catch(err => console.error('Failed to sync user points', err));
                     }
-
                     this.notify();
                 }
                 return true;
