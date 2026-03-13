@@ -11,25 +11,23 @@ export default async function handler(req, res) {
 
         // Test connection to the new table
         const { data: settings, error: settingsError } = await supabaseAdmin
-            .from('game_settings')
-            .select('*')
-            .limit(1);
-            
         // Check if we are using the service key
         const hasServiceKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+        const currentUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'NONE';
 
         return res.status(200).json({
             timestamp: new Date().toISOString(),
+            info: "Diagnostic Deep Dive",
             env: {
-                url: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'PRESENT' : 'MISSING',
-                serviceKey: process.env.SUPABASE_SERVICE_ROLE_KEY ? 'PRESENT' : 'MISSING',
+                url: currentUrl,
+                serviceKey: hasServiceKey ? 'PRESENT' : 'MISSING',
                 anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'PRESENT' : 'MISSING',
             },
             clansCheck: clansError ? clansError : 'OK',
             gameSettingsCheck: settingsError ? settingsError : 'OK',
-            keysSummary: {
-                serviceKeyStart: process.env.SUPABASE_SERVICE_ROLE_KEY ? process.env.SUPABASE_SERVICE_ROLE_KEY.substring(0, 10) + '...' : 'NONE'
-            }
+            // Try to see what else is in the schema to identify project mismatch
+            schemaHint: settingsError?.hint || "NONE",
+            diagnosticTip: "Check if the URL above matches exactly your Supabase Project URL in the dashboard."
         });
     } catch (e) {
         return res.status(500).json({ error: e.message });
