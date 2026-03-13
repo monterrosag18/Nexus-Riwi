@@ -13,7 +13,7 @@ export default async function handler(req, res) {
 
     const { data: user, error } = await supabase
       .from('users')
-      .select('username, clan_id, credits, active_skin, active_chat_color, active_border_color, active_shield_color, owned_cosmetics')
+      .select('username, clan_id, credits, points, active_skin, active_chat_color, active_border_color, active_shield_color, owned_cosmetics')
       .eq('username', username)
       .single();
 
@@ -25,6 +25,7 @@ export default async function handler(req, res) {
       name: user.username,
       clan: user.clan_id,
       credits: user.credits,
+      points: user.points || 0,
       activeSkin: user.active_skin,
       activeChatColor: user.active_chat_color,
       activeBorderColor: user.active_border_color,

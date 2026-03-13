@@ -1,4 +1,4 @@
-import { supabase } from '../../../lib/supabase';
+import { supabase, supabaseAdmin } from '../../../lib/supabase';
 
 export default async function handler(req, res) {
   try {
@@ -12,7 +12,7 @@ export default async function handler(req, res) {
     }
 
     // Get current points
-    const { data: clan, error: fetchError } = await supabase
+    const { data: clan, error: fetchError } = await supabaseAdmin
       .from('clans')
       .select('points')
       .eq('id', clanId)
@@ -21,7 +21,7 @@ export default async function handler(req, res) {
     if (fetchError) throw fetchError;
 
     // Update with new points
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from('clans')
       .update({ points: (clan.points || 0) + amount })
       .eq('id', clanId);

@@ -17,6 +17,8 @@ export default async function handler(req, res) {
     if (updates.active_chat_color) updateData.active_chat_color = updates.active_chat_color;
     if (updates.active_border_color) updateData.active_border_color = updates.active_border_color;
     if (updates.active_shield_color) updateData.active_shield_color = updates.active_shield_color;
+    if (updates.points !== undefined) updateData.points = updates.points;
+    if (updates.credits !== undefined) updateData.credits = updates.credits;
 
     if (Object.keys(updateData).length === 0) {
       return res.status(200).json({ success: true, message: 'No updates provided' });
