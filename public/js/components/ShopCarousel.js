@@ -1,6 +1,14 @@
 import { store } from '../store.js';
 import { ShopScene } from './ShopScene.js';
 
+// --- MODULE STATE ---
+let shopMode = 'CARDS';
+let spinState = 'READY';
+let activeCard = null; // Initialized in renderShop
+let lastResult = null;
+let spinInterval = null;
+let shopScene = null;
+
 // ═══════════════════════════════════════════════
 //  THE 8 NEXUS CARDS — 4 GOOD / 4 BAD
 // ═══════════════════════════════════════════════
@@ -178,6 +186,12 @@ const NEXUS_CARDS = [
 //  MAIN RENDER FUNCTION
 // ═══════════════════════════════════════════════
 export default function renderShop() {
+    const container = document.createElement('div');
+    container.className = 'shop-container fade-in';
+    
+    // Set initial active card if not set
+    if (!activeCard) activeCard = NEXUS_CARDS[0];
+
     // STABLE CANVAS LAYER (Doesn't get wiped by render)
     const canvasLayer = document.createElement('div');
     canvasLayer.id = 'shop-3d-canvas';
