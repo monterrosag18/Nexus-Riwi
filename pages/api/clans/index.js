@@ -5,14 +5,20 @@ export default async function handler(req, res) {
 
   try {
     if (req.method === 'GET') {
-      const result = await client.sql`SELECT * FROM clans ORDER BY points DESC;`;
+      const result = await client.sql`
+        SELECT c.*, COUNT(u.id) as real_member_count
+        FROM clans c
+        LEFT JOIN users u ON LOWER(c.id) = LOWER(u.clan_id)
+        GROUP BY c.id
+        ORDER BY c.points DESC;
+      `;
       const clansMap = {};
       result.rows.forEach(clan => {
         clansMap[clan.id] = {
           name: clan.name,
           color: clan.color,
           points: clan.points,
-          members: clan.members_count,
+          members: parseInt(clan.real_member_count) || 0,
           icon: clan.icon
         };
       });

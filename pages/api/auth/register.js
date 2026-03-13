@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     // Insert user
     await client.sql`
       INSERT INTO users (username, password_hash, clan_id, credits)
-      VALUES (${username}, ${hashedPassword}, ${clan}, 2000);
+      VALUES (${username}, ${hashedPassword}, ${clan.toLowerCase()}, 2000);
     `;
 
     return res.status(200).json({ success: true });

@@ -11,9 +11,10 @@ export default async function handler(req, res) {
     const result = await client.sql`
       SELECT username as name, clan_id as clan, points 
       FROM users 
-      WHERE LOWER(clan_id) = LOWER(${clanId})
+      WHERE clan_id = ${clanId}
       ORDER BY points DESC;
     `;
+ Joe:
     
     return res.status(200).json(result.rows);
   } catch (error) {
