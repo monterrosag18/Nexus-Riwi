@@ -4,7 +4,7 @@
         <!-- Meta Tags -->
         <meta charset="utf-8" />
         <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-        <title>NEXUS PROTOCOLS: FIELD MANUAL</title>
+        <title>RIWI-NEXUS:  FIELD MANUAL</title>
 
         <!-- External Scripts & Styles -->
         <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -67,130 +67,139 @@
         </script>
     </head>
 
-    <body class="dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen bg-background-dark">
-        <!-- ================================
-            MAIN CONTENT
-            ================================ -->
-        <main class="relative px-6 py-12 max-w-6xl mx-auto">
-        <!-- Scanline Overlay -->
-        <div class="fixed inset-0 scanline opacity-10 pointer-events-none"></div>
-
-        <!-- ===== HERO SECTION ===== -->
-        <div class="text-center mb-16 relative">
-            <div class="absolute -top-10 left-1/2 -translate-x-1/2 w-32 h-32 bg-primary/10 blur-3xl rounded-full"></div>
-            <h1 class="text-4xl md:text-6xl font-black text-slate-900 dark:text-slate-100 tracking-tighter uppercase mb-4 relative inline-block rgb-split glitch-title" data-text="Protocol Decrypted: Field Manual">
-            Protocol Decrypted: <span class="text-primary italic">Field Manual</span>
-            </h1>
-            <p class="text-slate-600 dark:text-slate-400 font-mono text-sm max-w-2xl mx-auto border-y border-primary/10 py-2">
-            // SYSTEM STATUS: AUTHORIZED ACCESS // ESTABLISHING CLAN DATA FEED...
-            </p>
+    <body class="dark bg-background-dark font-display text-slate-100 min-h-screen shared-theme space-body">
+        <div class="space-bg" aria-hidden="true">
+            <canvas id="starfield"></canvas>
+            <div class="space-glow"></div>
+            <div class="space-nebula-left"></div>
+            <div class="space-vignette"></div>
         </div>
+        <div class="rules-modal relative page-content">
+            <!-- Scanline Overlay -->
+            <div class="fixed inset-0 scanline opacity-10 pointer-events-none"></div>
 
-        <!-- ===== CARDS GRID (3x2) ===== -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-            <!-- Card 1: The 9 Clans -->
-            <div class="card group relative bg-white dark:bg-slate-900 p-6 rounded-xl !bg-transparent glitch-card" data-text="THE 9 CLANS">
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="w-12 h-12 bg-primary/10 text-primary rounded-lg flex items-center justify-center">
-                        <span class="material-symbols-outlined text-3xl">groups_3</span>
-                    </div>
-                    <h3 class="text-xl font-bold uppercase tracking-tight">The 9 Clans</h3>
+            <!-- MAIN CONTENT -->
+            <main class="relative px-6 py-12 max-w-6xl mx-auto">
+                <!-- HERO SECTION -->
+                <div class="text-center mb-16 relative mt-8">
+                    <div class="absolute -top-10 left-1/2 -translate-x-1/2 w-32 h-32 bg-primary/10 blur-3xl rounded-full"></div>
+                    <h1 class="text-4xl md:text-6xl font-black text-slate-100 tracking-tighter uppercase mb-4 relative inline-block rgb-split glitch-title" data-text="Protocol Decrypted: Field Manual">
+                    Protocol Decrypted: <span class="text-primary italic">Field Manual</span>
+                    </h1>
+                    <p class="text-slate-400 font-mono text-sm max-w-2xl mx-auto border-y border-primary/10 py-2">
+                    // SYSTEM STATUS: AUTHORIZED ACCESS // ESTABLISHING CLAN DATA FEED...
+                    </p>
                 </div>
-                <div class="w-full h-40 bg-slate-100 dark:bg-slate-800 rounded-lg mb-4 overflow-hidden relative">
-                    <img src="./img/clanes.jpg" alt="imgen de los 9 clanes" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform glitch-img glitch-img-effect" data-alt="Collage of 9 distinct hacker clans with unique colors and symbols" />
-                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
-                </div>
-                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
-                    Global dominance struggle between 9 elite factions. Align with your brothers-in-arms and coordinate strikes to seize the digital landscape.
-                </p>
-            </div>
-            <!-- Card 2: Territory Conquest -->
-            <div class="card group relative bg-white dark:bg-slate-900 p-6 rounded-xl !bg-transparent glitch-card" data-text="HEX-TERRITORY">
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="w-12 h-12 bg-cyan-500/10 text-cyan-500 rounded-lg flex items-center justify-center">
-                        <span class="material-symbols-outlined text-3xl">hexagon</span>
-                    </div>
-                    <h3 class="text-xl font-bold uppercase tracking-tight">Hex-Territory</h3>
-                </div>
-                <div class="w-full h-40 bg-slate-100 dark:bg-slate-800 rounded-lg mb-4 overflow-hidden relative">
-                    <img src="./img/mapa_clanes.jpg" alt="imgen del mapa de los clanes" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform glitch-img glitch-img-effect" data-alt="Global map with hexagonal sectors representing clan territories in neon colors" /> 
-                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
-                </div>
-                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
-                    Win quizzes and tactical games to capture hexagonal sectors. Each hex expands your clan's influence across the global mainframe.
-                </p>
-            </div>
 
-            <!-- Card 3: Points & Scoring -->
-            <div class="card group relative bg-white dark:bg-slate-900 p-6 rounded-xl !bg-transparent glitch-card" data-text="PASSIVE YIELD">
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="w-12 h-12 bg-yellow-500/10 text-yellow-500 rounded-lg flex items-center justify-center">
-                        <span class="material-symbols-outlined text-3xl">monitoring</span>
+                <!-- CARDS GRID (3x2) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+                    <!-- Card 1: The Clans -->
+                    <div class="card group relative bg-slate-900 p-6 rounded-xl !bg-transparent glitch-card" data-text="THECLANS">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-12 h-12 bg-primary/10 text-primary rounded-lg flex items-center justify-center">
+                                <span class="material-symbols-outlined text-3xl">groups_3</span>
+                            </div>
+                            <h3 class="text-xl font-bold uppercase tracking-tight">The Clans</h3>
+                        </div>
+                        <div class="w-full h-40 bg-slate-800 rounded-lg mb-4 overflow-hidden relative">
+                            <img src="./img/clanes.jpg" alt="Imagen de los 9 clanes" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform glitch-img" loading="lazy" />
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
+                        </div>
+                        <p class="text-slate-400 text-sm leading-relaxed">
+                            Global dominance struggle between 9 elite factions. Align with your brothers-in-arms and coordinate strikes to seize the digital landscape.
+                        </p>
                     </div>
-                    <h3 class="text-xl font-bold uppercase tracking-tight">Passive Yield</h3>
-                </div>
-                <div class="w-full h-40 bg-slate-100 dark:bg-slate-800 rounded-lg mb-4 overflow-hidden relative">
-                    <img class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform glitch-img glitch-img-effect" data-alt="Digital stock market graph neon dashboard" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbZGdRzKmSPTmzcn_QO3lAe0b4z2NQAYYTWGIHu_icogmjrC9f2HPtcodWTAefs2XG_lhdlwJWJhRICj-TUZDN7EJx-PkF7Lxf4b1c2DJKmCP_KTwMEMtdLRsZ2NsXJIJG1c0RApDNUekqg__zxt8pAujXlASknLqC2VlY6JfeljzyqLIb4xryZFwjQuFmiTc-iedcgZMwFlBwJidhxypVM7t3VJgQApCK9_zk9DuViK2IUUHJBiI9rInuWtuyks-YzA77FWglRps" />
-                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
-                </div>
-                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
-                    More hexagons = higher points-per-hour yield. Maximize your territory to fund your clan's expensive technological upgrades.
-                </p>
-            </div>
 
-            <!-- Card 4: The Tech Shop -->
-            <div class="card group relative bg-white dark:bg-slate-900 p-6 rounded-xl !bg-transparent glitch-card" data-text="THE ARSENAL">
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="w-12 h-12 bg-purple-500/10 text-purple-500 rounded-lg flex items-center justify-center">
-                        <span class="material-symbols-outlined text-3xl">shopping_cart</span>
+                    <!-- Card 2: Territory Conquest -->
+                    <div class="card group relative bg-slate-900 p-6 rounded-xl !bg-transparent glitch-card" data-text="HEX-TERRITORY">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-12 h-12 bg-cyan-500/10 text-cyan-500 rounded-lg flex items-center justify-center">
+                                <span class="material-symbols-outlined text-3xl">hexagon</span>
+                            </div>
+                            <h3 class="text-xl font-bold uppercase tracking-tight">Hex-Territory</h3>
+                        </div>
+                        <div class="w-full h-40 bg-slate-800 rounded-lg mb-4 overflow-hidden relative">
+                            <img src="./img/mapa_clanes.jpg" alt="Imagen del mapa de los clanes" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform glitch-img" loading="lazy" />
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
+                        </div>
+                        <p class="text-slate-400 text-sm leading-relaxed">
+                            Win quizzes and tactical games to capture hexagonal sectors. Each hex expands your clan's influence across the global mainframe.
+                        </p>
+                        <a class="shop-button" href="index.html">¡GO!</a>
                     </div>
-                    <h3 class="text-xl font-bold uppercase tracking-tight">The Arsenal</h3>
-                </div>
-                <div class="w-full h-40 bg-slate-100 dark:bg-slate-800 rounded-lg mb-4 overflow-hidden relative">
-                    <img src="./img/poderes.jpg" alt="Imagen de los poderes del juego" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform glitch-img glitch-img-effect" data-alt="Futuristic glowing weapons and chips display" />
-                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
-                </div>
-                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
-                    Spend points on <span class="text-primary font-bold">Hacks</span>, <span class="text-cyan-500 font-bold">Shields</span>, and <span class="text-purple-500 font-bold">Overrides</span>. Tactical items can turn the tide of any confrontation.
-                </p>
-            </div>
 
-            <!-- Card 5: Inactivity Decay -->
-            <div class="card group relative bg-white dark:bg-slate-900 p-6 rounded-xl overflow-hidden !bg-transparent glitch-card" data-text="DECAY SYSTEM">
-                <div class="absolute top-0 right-0 bg-primary text-white text-[10px] font-bold px-3 py-1 uppercase tracking-widest -rotate-45 translate-x-4 translate-y-2">Warning</div>
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="w-12 h-12 bg-primary/20 text-primary rounded-lg flex items-center justify-center animate-pulse">
-                        <span class="material-symbols-outlined text-3xl">warning</span>
+                    <!-- Card 3: Points & Scoring -->
+                    <div class="card group relative bg-slate-900 p-6 rounded-xl !bg-transparent glitch-card" data-text="PASSIVE YIELD">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-12 h-12 bg-yellow-500/10 text-yellow-500 rounded-lg flex items-center justify-center">
+                                <span class="material-symbols-outlined text-3xl">monitoring</span>
+                            </div>
+                            <h3 class="text-xl font-bold uppercase tracking-tight">Passive Yield</h3>
+                        </div>
+                        <div class="w-full h-40 bg-slate-800 rounded-lg mb-4 overflow-hidden relative">
+                            <img class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform glitch-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbZGdRzKmSPTmzcn_QO3lAe0b4z2NQAYYTWGIHu_icogmjrC9f2HPtcodWTAefs2XG_lhdlwJWJhRICj-TUZDN7EJx-PkF7Lxf4b1c2DJKmCP_KTwMEMtdLRsZ2NsXJIJG1c0RApDNUekqg__zxt8pAujXlASknLqC2VlY6JfeljzyqLIb4xryZFwjQuFmiTc-iedcgZMwFlBwJidhxypVM7t3VJgQApCK9_zk9DuViK2IUUHJBiI9rInuWtuyks-YzA77FWglRps" loading="lazy" />
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
+                        </div>
+                        <p class="text-slate-400 text-sm leading-relaxed">
+                            More hexagons = higher points-per-hour yield. Maximize your territory to fund your clan's expensive technological upgrades.
+                        </p>
                     </div>
-                    <h3 class="text-xl font-bold uppercase tracking-tight">Decay System</h3>
-                </div>
-                <div class="w-full h-40 bg-slate-100 dark:bg-slate-800 rounded-lg mb-4 overflow-hidden relative">
-                    <img src="./img/ausencia.jpg" alt="Imagen de ausencia de actividad" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform glitch-img glitch-img-effect" data-alt="Dark digital void with fading hexagons representing inactivity" />
-                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
-                </div>
-                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
-                    <span class="text-primary font-bold">CRITICAL:</span> Absenteeism leads to sector vulnerability. If a clan goes quiet, their hexagons weaken and become ripe for hostile takeover.
-                </p>
-            </div>
 
-            <!-- Card 6: Mission Types -->
-            <div class="card group relative bg-white dark:bg-slate-900 p-6 rounded-xl !bg-transparent glitch-card" data-text="MISSIONS">
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="w-12 h-12 bg-emerald-500/10 text-emerald-500 rounded-lg flex items-center justify-center">
-                        <span class="material-symbols-outlined text-3xl">task_alt</span>
+                    <!-- Card 4: The Tech Shop -->
+                    <div class="card group relative bg-slate-900 p-6 rounded-xl !bg-transparent glitch-card" data-text="Tech Shop">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-12 h-12 bg-purple-500/10 text-purple-500 rounded-lg flex items-center justify-center">
+                                <span class="material-symbols-outlined text-3xl">shopping_cart</span>
+                            </div>
+                            <h3 class="text-xl font-bold uppercase tracking-tight">Tech Shop</h3>
+                        </div>
+                        <div class="w-full h-40 bg-slate-800 rounded-lg mb-4 overflow-hidden relative">
+                            <img src="./img/poderes.jpg" alt="Imagen de los poderes" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform glitch-img" loading="lazy" />
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
+                        </div>
+                        <p class="text-slate-400 text-sm leading-relaxed">
+                            Spend points on <span class="text-primary font-bold">Hacks</span>, <span class="text-cyan-500 font-bold">Shields</span>, and <span class="text-purple-500 font-bold">Overrides</span>. Tactical items can turn the tide of any confrontation.
+                        </p>
+                        <a class="shop-button" href="shoppingesteres.html">¡GO!</a>
                     </div>
-                    <h3 class="text-xl font-bold uppercase tracking-tight">Missions</h3>
+
+                    <!-- Card 5: Inactivity Decay -->
+                    <div class="card group relative bg-slate-900 p-6 rounded-xl overflow-hidden !bg-transparent glitch-card" data-text="DECAY SYSTEM">
+                        <div class="absolute top-0 right-0 bg-primary text-white text-[10px] font-bold px-3 py-1 uppercase tracking-widest -rotate-45 translate-x-4 translate-y-2" style="z-index: 20;">Warning</div>
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-12 h-12 bg-primary/20 text-primary rounded-lg flex items-center justify-center animate-pulse">
+                                <span class="material-symbols-outlined text-3xl">warning</span>
+                            </div>
+                            <h3 class="text-xl font-bold uppercase tracking-tight">Decay System</h3>
+                        </div>
+                        <div class="w-full h-40 bg-slate-800 rounded-lg mb-4 overflow-hidden relative">
+                            <img src="./img/ausencia.jpg" alt="Imagen de ausencia" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform glitch-img" loading="lazy" />
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
+                        </div>
+                        <p class="text-slate-400 text-sm leading-relaxed">
+                            <span class="text-primary font-bold">CRITICAL:</span> Absenteeism leads to sector vulnerability. If a clan goes quiet, their hexagons weaken and become ripe for hostile takeover.
+                        </p>
+                    </div>
+
+                    <!-- Card 6: Mission Types -->
+                    <div class="card group relative bg-slate-900 p-6 rounded-xl !bg-transparent glitch-card" data-text="MISSIONS">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-12 h-12 bg-emerald-500/10 text-emerald-500 rounded-lg flex items-center justify-center">
+                                <span class="material-symbols-outlined text-3xl">task_alt</span>
+                            </div>
+                            <h3 class="text-xl font-bold uppercase tracking-tight">Missions</h3>
+                        </div>
+                        <div class="w-full h-40 bg-slate-800 rounded-lg mb-4 overflow-hidden relative">
+                            <img src="./img/conquista.jpg" alt="Imagen de conquista" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform glitch-img" loading="lazy" />
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
+                        </div>
+                        <p class="text-slate-400 text-sm leading-relaxed">
+                            <span class="text-emerald-500 font-bold uppercase">Primary Objective: Data Quizzes</span>. The foundational method for resource extraction and territory expansion.
+                        </p>
+                    </div>
                 </div>
-                <div class="w-full h-40 bg-slate-100 dark:bg-slate-800 rounded-lg mb-4 overflow-hidden relative">
-                    <img src="./img/conquista.jpg" alt="Imagen de conquista de territorios" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform glitch-img glitch-img-effect" data-alt="Neon-lit digital battlefield with hackers conquering hexagonal territories" />
-                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
-                </div>
-                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
-                    <span class="text-emerald-500 font-bold uppercase">Primary Objective: Data Quizzes</span>. The foundational method for resource extraction and territory expansion.
-                </p>
-            </div>
+            </main>
         </div>
-        </main>
         <script src="script.js"></script>
     </body>
     </html>

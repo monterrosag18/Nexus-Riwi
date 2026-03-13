@@ -1,152 +1,116 @@
-# NEXUS PROTOCOLS -- Field Manual
+# RIWI NEXUS -- Field Manual (Tech README)
 
-Interfaz web temática estilo **cyberpunk / sci-fi** que presenta
-información sobre los clanes, poderes y eventos dentro del universo **Riwi-Nexus**.
+## Proposito
+Construir una experiencia web sci-fi de alto impacto visual (cards + glitch + background espacial) con el menor costo de complejidad posible, priorizando:
+- Entrega rapida (sin build step)
+- Control artistico directo
+- Performance estable en navegadores modernos
+- Facilidad de mantenimiento y extension
 
-El proyecto utiliza **HTML, CSS, JavaScript y TailwindCSS** para crear
-una experiencia visual interactiva con efectos **glitch**, animaciones y
-tarjetas dinámicas.
+## Decisiones tecnicas (y por que)
 
-------------------------------------------------------------------------
+### 1) HTML + CSS + JS vanilla (sin framework)
+**Decision:** Se uso HTML/CSS/JS nativo en vez de React/Vue/Svelte.
+**Por que:**
+- No hay estado complejo ni routing avanzado que justifique un framework.
+- Menos dependencias y menor bundle => mejor performance y carga inicial.
+- Iteracion visual mas rapida (ideal para un pitch/demo).
+**Tradeoff:** Si la app crece a un sistema con datos/estado complejo, podria migrarse a un framework.
 
-# Vista del Proyecto
+### 2) Tailwind via CDN
+**Decision:** Tailwind por CDN en vez de build con PostCSS.
+**Por que:**
+- Prototipado rapido y consistente sin configurar tooling.
+- Reduce CSS manual y acelera iteraciones de UI.
+**Tradeoff:** No hay purge autom�tico; para produccion real, conviene build con purge para reducir CSS.
 
-La aplicación muestra un **manual visual** donde cada
-tarjeta representa información sobre el universo del juego,
-como:
+### 3) Canvas 2D para starfield
+**Decision:** Canvas 2D para las estrellas en vez de SVG o im�genes est�ticas.
+**Por que:**
+- Rendimiento mejor para cientos de particulas animadas.
+- Permite twinkle y movimiento suave con requestAnimationFrame.
+- Control total de densidad y comportamiento.
+**Tradeoff:** No es accesible por DOM; se complementa con overlays CSS para atm�sfera.
 
--   Clanes
--   Conquista
--   Poderes
--   Ausencia
--   Mapas
+### 4) Overlays de fondo en CSS (glow, nebulosa, vignette)
+**Decision:** Capas CSS para la atm�sfera, no im�genes de fondo pesadas.
+**Por que:**
+- Menor peso de red, sin assets extra.
+- Ajuste r�pido de color/posici�n por variables CSS.
+- Compatible con distintos tama�os de pantalla.
+**Tradeoff:** Requiere afinaci�n manual para lograr un look consistente.
 
-Cada sección está acompañada de **imágenes y efectos visuales glitch**
-para dar una estética futurista.
+### 5) Variables CSS para tema
+**Decision:** Definir colores en :root (tema compartido).
+**Por que:**
+- Consistencia en cards, botones, glow y glitch.
+- Cambios globales de paleta sin tocar muchos selectores.
+- Base para futuros temas (dark/light) si se requiere.
 
-------------------------------------------------------------------------
+### 6) Animaciones CSS para hover y glitch
+**Decision:** Usar CSS para hover/efectos en cards, JS solo para timings.
+**Por que:**
+- CSS es m�s eficiente para transiciones y evita reflows grandes.
+- JS se limita a delays aleatorios (mejor control sin saturar el main thread).
+**Tradeoff:** Efectos muy complejos pueden requerir JS o WebGL.
 
-# Tecnologías utilizadas
+### 7) Lazy loading en imagenes
+**Decision:** `loading="lazy"` en im�genes de cards.
+**Por que:**
+- Reduce carga inicial.
+- Mejora performance en dispositivos lentos.
 
--   HTML5
--   CSS3
--   JavaScript (Vanilla)
--   TailwindCSS
--   Google Fonts
--   Material Symbols
+### 8) Preferencias de movimiento
+**Decision:** Respetar `prefers-reduced-motion` en el starfield.
+**Por que:**
+- Mejor accesibilidad sin sacrificar el dise�o.
 
-------------------------------------------------------------------------
+## Rol de cada archivo
 
-# Estructura del proyecto
+### index.html
+- Estructura principal: hero, grid de cards y CTAs (shop/map).
+- Contenedor del background: `space-bg` + canvas + overlays.
+- Navegaci�n sencilla sin routing complejo.
 
-    project/
-    │
-    ├── index.html        # Estructura principal de la página
-    ├── style.css         # Estilos personalizados y animaciones glitch
-    ├── script.js         # Lógica de efectos visuales
-    │
-    ├── img/              # Imágenes utilizadas en las tarjetas
-    │   ├── ausencia.jpg
-    │   ├── clanes.jpg
-    │   ├── conquista.jpg
-    │   ├── mapa_clanes.jpg
-    │   └── poderes.jpg
-    │
-    └── README.md
+### style.css
+- Sistema de variables de tema.
+- Estilos de cards (hover con zoom, sombras, fondo negro para legibilidad).
+- Overlays del fondo (glow, nebulosa sutil, vignette).
+- Botones CTA (shop/map) con estilo consistente.
 
-------------------------------------------------------------------------
+### script.js
+- Starfield en Canvas 2D.
+- Densidad de estrellas ajustada por viewport.
+- Twinkle con fase individual para parpadeo natural.
+- requestAnimationFrame y devicePixelRatio para rendimiento y nitidez.
 
-# Funcionalidades
+## Performance (resumen)
+- Un solo canvas (O(N) por frame), con limites de densidad.
+- Animaciones CSS para hover, sin JS pesado.
+- Sin dependencias de runtime externas.
 
-## Tarjetas interactivas
+## Extensibilidad
+- Nuevas cards: duplicar bloque HTML.
+- Nuevas paginas: agregar carpeta + index.html simple.
+- Cambios de est�tica: ajustar variables y overlays en CSS.
 
-Cada tarjeta contiene:
-
--   Imagen
--   Información
--   Animaciones visuales
--   Efectos glitch
-
-Las tarjetas usan **CSS animations y JavaScript** para generar efectos
-visuales aleatorios.
-
-------------------------------------------------------------------------
-
-## Efecto Glitch Dinámico
-
-El archivo `script.js` genera efectos glitch automáticamente.
-
-Características:
-
--   Delay aleatorio en cada tarjeta
--   Activación periódica del glitch
--   Animaciones del borde
--   Animación del título
-
-Ejemplo:
-
-``` javascript
-const randomDelay = (Math.random() * 3).toFixed(2);
-card.style.setProperty('--glitch-delay', `${randomDelay}s`);
+## Estructura del proyecto
+```
+Nexus-Riwi/
+  index.html
+  style.css
+  script.js
+  img/
+  shop/index.html
+  map/index.html
+  README.md
 ```
 
-------------------------------------------------------------------------
+## Preguntas tipicas (y respuestas cortas)
+- Por que no framework? Porque no hay estado complejo; se priorizo velocidad de entrega y performance.
+- Por que Canvas y no SVG? Canvas escala mejor con muchas particulas animadas.
+- Como escalar? Separar componentes y migrar a build con Tailwind purge si se crece.
+- Que pasa con accesibilidad? Se respeta prefers-reduced-motion y se mantiene contraste alto.
 
-## Animaciones CSS
-
-El archivo `style.css` define animaciones como:
-
--   glitch-border-pulse
--   vibración
--   flicker
--   efectos de recorte tipo glitch
-
-Ejemplo:
-
-``` css
-.glitch-card.active-glitch-border {
- animation: glitch-border-pulse 0.6s steps(3, end);
-}
-```
-
-------------------------------------------------------------------------
-
-# Personalización
-
-## Colores
-
-En configuración de Tailwind:
-
-``` javascript
-colors: {
- primary: "#ec5b13",
- "neon-cyan": "#00f3ff",
- "neon-magenta": "#ff00ff",
-}
-```
-
-------------------------------------------------------------------------
-
-## Animaciones
-
-En `style.css` puedes cambiar:
-
--   velocidad del glitch
--   intensidad del borde
--   colores de los efectos
-
-------------------------------------------------------------------------
-
-## Contenido
-
-Las tarjetas pueden editarse directamente en:
-
-    index.html
-
-Cambiando:
-
--   texto
--   imágenes
--   títulos
-
-------------------------------------------------------------------------
+## Ejecucion local
+Usar servidor local (Live Server) para rutas consistentes y carga de assets.
