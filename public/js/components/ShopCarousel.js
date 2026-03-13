@@ -178,15 +178,11 @@ const NEXUS_CARDS = [
 //  MAIN RENDER FUNCTION
 // ═══════════════════════════════════════════════
 export default function renderShop() {
-    const container = document.createElement('div');
-    container.className = 'cockpit-wrapper fade-in';
-
-    let activeCard = NEXUS_CARDS[0];
-    let shopScene = null;
-    let spinState = 'READY'; // READY -> SPINNING -> RESULT
-    let spinInterval = null;
-    let shopMode = 'CARDS'; // 'CARDS' or 'COSMETICS'
-    let lastResult = null;
+    // STABLE CANVAS LAYER (Doesn't get wiped by render)
+    const canvasLayer = document.createElement('div');
+    canvasLayer.id = 'shop-3d-canvas';
+    canvasLayer.style.cssText = 'position:absolute;inset:0;z-index:0;';
+    container.appendChild(canvasLayer);
 
     function render() {
         const state = store.getState();
@@ -197,10 +193,8 @@ export default function renderShop() {
         const userClan = user.clan || 'neutral';
         const clanData = (state.clans && state.clans[userClan]) || { name: 'Unknown', points: 0 };
 
-        container.innerHTML = `
-            <!-- THREE.JS CANVAS LAYER -->
-            <div id="shop-3d-canvas" style="position:absolute;inset:0;z-index:0;"></div>
-
+        // Define content (excluding the canvas which is now stable)
+        const contentHTML = `
             <!-- VIGNETTE OVERLAY -->
             <div style="position:absolute;inset:0;z-index:1;pointer-events:none;
                 background:radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.85) 100%);"></div>
@@ -361,9 +355,18 @@ export default function renderShop() {
                         <div class="intel-label">OWNED SKINS</div>
                         <div class="intel-value">${user.ownedCosmetics?.length || 0} ITEMS</div>
                     </div>
-                </div>
             </div>
         `;
+
+        // Update UI layer without touching the canvas
+        let uiLayer = container.querySelector('#shop-ui-layer');
+        if (!uiLayer) {
+            uiLayer = document.createElement('div');
+            uiLayer.id = 'shop-ui-layer';
+            uiLayer.style.cssText = 'position:relative; z-index:10;';
+            container.appendChild(uiLayer);
+        }
+        uiLayer.innerHTML = contentHTML;
 
         attachEvents();
 
@@ -378,15 +381,22 @@ export default function renderShop() {
     }
 
     async function handleSpin() {
-        const user = store.getState().currentUser;
+        const state = store.getState();
+        const user = state.currentUser;
         if (!user || user.credits < 100 || spinState !== 'READY') return;
 
-        // Charge spin cost (sync with DB)
+        // Charge spin cost (sync with DB - ATOMIC DELTA)
         try {
             await fetch('/api/user/update', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: user.name, updates: { credits: user.credits - 100 } })
+                body: JSON.stringify({ 
+                    username: user.name, 
+                    updates: { 
+                        creditsDelta: -100,
+                        incrementSpins: true 
+                    } 
+                })
             });
             await store.syncUserProfile();
         } catch (e) { 
@@ -403,10 +413,21 @@ export default function renderShop() {
         // Reset counters for every spin
         let cycleCount = 0;
         const maxCycles = 30 + Math.floor(Math.random() * 15);
+        
+        // ROULETTE REWARD LOGIC: Every 10th spin is a guaranteed GOOD card
+        const currentSpins = user.total_spins || 0;
+        const isGuaranteedReward = (currentSpins + 1) % 10 === 0;
 
         const runCycle = () => {
             cycleCount++;
-            const rndCard = NEXUS_CARDS[Math.floor(Math.random() * NEXUS_CARDS.length)];
+            
+            // Filter cards if it's a guaranteed reward
+            let pool = NEXUS_CARDS;
+            if (isGuaranteedReward && cycleCount > maxCycles * 0.8) {
+                pool = NEXUS_CARDS.filter(c => c.type === 'good');
+            }
+
+            const rndCard = pool[Math.floor(Math.random() * pool.length)];
             activeCard = rndCard;
 
             // Update card display without full re-render
@@ -440,6 +461,12 @@ export default function renderShop() {
                 // Execute effect
                 activeCard.execute().then(result => {
                     lastResult = result;
+                    
+                    // Add extra reward label if it was a 10th spin
+                    if (isGuaranteedReward) {
+                        lastResult.msg = "[10-SPIN BONUS] " + lastResult.msg;
+                    }
+
                     spinState = 'READY';
 
                     const logUser = store.getState().currentUser;

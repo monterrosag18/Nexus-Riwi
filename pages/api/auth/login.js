@@ -31,9 +31,15 @@ export default async function handler(req, res) {
       return res.status(401).json({ message: 'INVALID SECURITY KEY' });
     }
 
-    // Create token
+    // Create session ID
+    const sessionId = jwt.sign({ sub: user.id, rand: Math.random() }, JWT_SECRET).slice(-10);
+
+    // Update session in DB
+    await supabase.from('users').update({ last_session_id: sessionId }).eq('id', user.id);
+
+    // Create token with session_id
     const token = jwt.sign(
-      { id: user.id, username: user.username, clan: user.clan_id },
+      { id: user.id, username: user.username, clan: user.clan_id, sessionId },
       JWT_SECRET,
       { expiresIn: '1d' }
     );

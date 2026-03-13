@@ -76,11 +76,53 @@ class Store {
             .channel('public:chat_messages')
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, payload => {
                 console.log('New Message Signal:', payload.new);
-                // We notify the UI that a change happened in the DB. 
-                // Components like FactionChat will re-fetch or we could push directly to a cache.
                 this.notify(); 
             })
             .subscribe();
+
+        // 3. Listen for Current User Profile Changes (Atomic Sync & Single Session)
+        if (this.state.currentUser) {
+            const userId = this.state.currentUser.id || this.state.currentUser.name; // Fallback if id missing
+            supabaseClient
+                .channel(`public:users:id=${userId}`)
+                .on('postgres_changes', { 
+                    event: 'UPDATE', 
+                    schema: 'public', 
+                    table: 'users',
+                    filter: `username=eq.${this.state.currentUser.name}` 
+                }, payload => {
+                    const updatedUser = payload.new;
+                    console.log('Neural Profile Update:', updatedUser);
+
+                    // A. SINGLE SESSION CHECK
+                    if (updatedUser.last_session_id && this.state.currentUser.sessionId && 
+                        updatedUser.last_session_id !== this.state.currentUser.sessionId) {
+                        console.warn('Simultaneous session detected. Terminating connection...');
+                        this.logout('SESSION_OVERWRITE');
+                        return;
+                    }
+
+                    // B. ATOMIC SYNC: Update points/credits if changed elsewhere
+                    this.state.currentUser.credits = updatedUser.credits;
+                    this.state.currentUser.points = updatedUser.points;
+                    this.state.currentUser.total_spins = updatedUser.total_spins || 0;
+                    
+                    // Save to local storage for persistence
+                    localStorage.setItem('riwi_user', JSON.stringify(this.state.currentUser));
+                    this.notify();
+                })
+                .subscribe();
+        }
+    }
+
+    logout(reason = 'USER_INITIATED') {
+        localStorage.removeItem('riwi_user');
+        this.state.currentUser = null;
+        this.state.currentView = 'login';
+        this.notify();
+        if (reason === 'SESSION_OVERWRITE') {
+            alert("⚠ SESSION TERMINATED: You have logged in from another device.");
+        }
     }
 
     // --- EVENT LOG METHODS ---
