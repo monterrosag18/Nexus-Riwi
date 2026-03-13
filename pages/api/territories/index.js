@@ -1,4 +1,7 @@
-import { supabase, supabaseAdmin } from '../../../lib/supabase';
+import { supabaseAdmin } from '../../../lib/supabase';
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.SUPABASE_JWT_SECRET || 'your-secret-key';
 
 export default async function handler(req, res) {
   try {
@@ -13,6 +16,22 @@ export default async function handler(req, res) {
     
     if (req.method === 'POST') {
       const { id, clanId, username } = req.body;
+      const authHeader = req.headers.authorization;
+
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ message: 'UNAUTHORIZED: TOKEN MISSING' });
+      }
+
+      const token = authHeader.split(' ')[1];
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        if (decoded.username !== username) {
+          return res.status(403).json({ message: 'FORBIDDEN: NEURAL MISMATCH' });
+        }
+      } catch (err) {
+        return res.status(401).json({ message: 'UNAUTHORIZED: INVALID TOKEN' });
+      }
+
       if (id === undefined || !clanId) return res.status(400).json({ message: 'Missing fields' });
 
       const targetId = parseInt(id);

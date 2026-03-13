@@ -1,11 +1,34 @@
 // Supabase Client for the Frontend (Browser)
-// Using credentials from .env.local
+// Dynamically initialized via /api/config
 
-const SUPABASE_URL = "https://jxlddvrcmjaknvizzngi.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp4bGRkdnJjbWpha252aXp6bmdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNjM2MjIsImV4cCI6MjA4ODkzOTYyMn0.rdxaEQvFY6O0CeXNKef209uLyYFQWUNS_L6IvtMr2pc";
+let client = null;
+let initPromise = null;
 
-if (typeof supabase === 'undefined') {
-    console.error("Supabase CDN not loaded. Realtime features will be disabled.");
+export async function getSupabaseClient() {
+    if (client) return client;
+    
+    if (!initPromise) {
+        initPromise = (async () => {
+            try {
+                const res = await fetch('/api/config');
+                const config = await res.json();
+                
+                if (typeof supabase === 'undefined') {
+                    throw new Error("Supabase CDN not loaded.");
+                }
+                
+                client = supabase.createClient(config.url, config.anonKey);
+                console.log('[Supabase] Neural Link Established via Secure Config');
+                return client;
+            } catch (err) {
+                console.error('[Supabase] Init Failed:', err.message);
+                return null;
+            }
+        })();
+    }
+    
+    return initPromise;
 }
 
-export const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// For legacy compatibility during transition
+export const supabaseClient = null; 

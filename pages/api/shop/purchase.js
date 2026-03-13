@@ -1,4 +1,7 @@
-import { supabase } from '../../../lib/supabase';
+import { supabaseAdmin } from '../../../lib/supabase';
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.SUPABASE_JWT_SECRET || 'your-secret-key';
 
 export default async function handler(req, res) {
   try {
@@ -7,12 +10,29 @@ export default async function handler(req, res) {
     }
 
     const { username, itemId, cost, type, color } = req.body;
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'UNAUTHORIZED: TOKEN MISSING' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      if (decoded.username !== username) {
+        return res.status(403).json({ message: 'FORBIDDEN: UNAUTHORIZED TRANSACTION' });
+      }
+    } catch (err) {
+      return res.status(401).json({ message: 'UNAUTHORIZED: INVALID TOKEN' });
+    }
+
     if (!username || !itemId || cost === undefined) {
       return res.status(400).json({ message: 'Missing fields' });
     }
 
     // 1. Check user exists and has enough credits
-    const { data: user, error: userError } = await supabase
+    const { data: user, error: userError } = await supabaseAdmin
       .from('users')
       .select('credits, owned_cosmetics')
       .eq('username', username)
@@ -49,7 +69,7 @@ export default async function handler(req, res) {
       updateData.active_shield_color = color;
     }
 
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from('users')
       .update(updateData)
       .eq('username', username);

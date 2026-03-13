@@ -1,4 +1,7 @@
-import { supabase } from '../../../lib/supabase';
+import { supabaseAdmin } from '../../../lib/supabase';
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.SUPABASE_JWT_SECRET || 'your-secret-key';
 
 export default async function handler(req, res) {
   try {
@@ -7,13 +10,30 @@ export default async function handler(req, res) {
     }
 
     const { username, updates } = req.body;
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'UNAUTHORIZED: TOKEN MISSING' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      if (decoded.username !== username) {
+        return res.status(403).json({ message: 'FORBIDDEN: NEURAL IMPRINT MISMATCH' });
+      }
+    } catch (err) {
+      return res.status(401).json({ message: 'UNAUTHORIZED: INVALID TOKEN' });
+    }
+
     if (!username) {
       return res.status(400).json({ message: 'Missing username' });
     }
 
     // ATOMIC UPDATES LOGIC
     // We fetch current values first to ensure we don't overwrite with stale data
-    const { data: currentUser, error: fetchError } = await supabase
+    const { data: currentUser, error: fetchError } = await supabaseAdmin
       .from('users')
       .select('points, credits, total_spins')
       .eq('username', username)
@@ -57,7 +77,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true, message: 'No updates provided' });
     }
 
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('users')
       .update(updateData)
       .eq('username', username);

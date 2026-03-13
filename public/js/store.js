@@ -1,4 +1,4 @@
-import { supabaseClient } from './supabaseClient.js';
+import { getSupabaseClient } from './supabaseClient.js';
 
 /**
  * Simple Pub/Sub State Management
@@ -53,11 +53,16 @@ class Store {
         this.chatDB = {}; // Will be handled via API
     }
 
-    initRealtimeListeners() {
+    async initRealtimeListeners() {
         console.log('Initializing Realtime Neural Link...');
+        const client = await getSupabaseClient();
+        if (!client) {
+            console.error('[Supabase] Failed to initialize Realtime.');
+            return;
+        }
         
         // 1. Listen for Territory Changes (Conquests)
-        supabaseClient
+        client
             .channel('public:territories')
             .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'territories' }, payload => {
                 console.log('Territory Update Received:', payload.new);
@@ -72,7 +77,7 @@ class Store {
             .subscribe();
 
         // 2. Listen for Chat Messages
-        supabaseClient
+        client
             .channel('public:chat_messages')
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, payload => {
                 console.log('New Message Signal:', payload.new);
@@ -83,7 +88,7 @@ class Store {
         // 3. Listen for Current User Profile Changes (Atomic Sync & Single Session)
         if (this.state.currentUser) {
             const userId = this.state.currentUser.id || this.state.currentUser.name; // Fallback if id missing
-            supabaseClient
+            client
                 .channel(`public:users:id=${userId}`)
                 .on('postgres_changes', { 
                     event: 'UPDATE', 
@@ -380,7 +385,10 @@ class Store {
         try {
             const response = await fetch('/api/territories', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('riwi_token')}`
+                },
                 body: JSON.stringify({ 
                     id, 
                     clanId, 
@@ -490,7 +498,10 @@ class Store {
             try {
                 const response = await fetch('/api/user/update', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('riwi_token')}`
+                    },
                     body: JSON.stringify({ username: oldName, updates: { newName } })
                 });
                 const result = await response.json();
@@ -511,7 +522,10 @@ class Store {
         try {
             const response = await fetch('/api/shop/purchase', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('riwi_token')}`
+                },
                 body: JSON.stringify({
                     username: user.name,
                     itemId: item.id,
@@ -550,7 +564,10 @@ class Store {
             
             await fetch('/api/user/update', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('riwi_token')}`
+                },
                 body: JSON.stringify({ 
                     username: this.state.currentUser.name, 
                     updates: { credits: newCredits } 
@@ -614,7 +631,10 @@ class Store {
             
             await fetch('/api/chat', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('riwi_token')}`
+                },
                 body: JSON.stringify({ clanId, username: user.name, content: cleanMsg })
             });
             

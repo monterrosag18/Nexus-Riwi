@@ -110,7 +110,10 @@ export default function createGachaModal() {
             const user = store.getState().currentUser;
             const res = await fetch('/api/user/update', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('riwi_token')}`
+                },
                 body: JSON.stringify({ 
                     username: user.name, 
                     updates: { creditsDelta: -100, incrementSpins: true } 
