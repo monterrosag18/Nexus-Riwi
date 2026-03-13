@@ -403,7 +403,7 @@ function buildTacticalGrid() {
         }
     });
 
-    // FIXED GRID SIZE for Deterministic Mapping
+    // FIXED GRID SIZE for Deterministic Mapping (Ensures Sectors are always in same spot)
     const ringSize = 12;
     const allHexes = [];
 
@@ -412,6 +412,7 @@ function buildTacticalGrid() {
             if (Math.abs(q + r) <= ringSize) {
                 const x = hexWidth * (q + r / 2);
                 const z = hexHeight * (3 / 4) * r;
+                // Leave a void for the tower
                 if (Math.sqrt(x * x + z * z) < 25) continue;
                 allHexes.push({ x, z, owner: null, color: COLORS.neutral });
             }
@@ -421,14 +422,14 @@ function buildTacticalGrid() {
     allHexes.forEach((hex, i) => {
         const dbTerritory = territories.find(t => parseInt(t.id) === i);
         let currentOwner = null;
+        let isVisuallyTinted = false;
         
         if (dbTerritory && dbTerritory.owner && dbTerritory.owner !== 'neutral') {
             currentOwner = dbTerritory.owner.toLowerCase();
             const clanData = clans[currentOwner];
             hex.color = clanData ? clanData.color : COLORS.neutral;
         } else {
-            // INITIAL CLUSTER LOGIC: 
-            // If the sector is unowned in DB, check if it's one of the 5 closest to a banner
+            // INITIAL VISUAL TINT LOGIC (Not owners in the DB)
             const distances = [];
             clanIds.forEach(cid => {
                 const banner = bannerDistributions[cid];
@@ -438,16 +439,18 @@ function buildTacticalGrid() {
             distances.sort((a, b) => a.d - b.d);
             
             const closest = distances[0];
-            // If within starting range and unowned, assign to closest clan
-            if (closest.d < hexRadius * 3.5) {
-                currentOwner = closest.id;
-                const clanData = clans[currentOwner];
+            // Tightened radius to 2.5 for exactly ~5-6 hexes
+            if (closest.d < hexRadius * 2.8) {
+                // IMPORTANT: We tint the color, but currentOwner remains null
+                // so the store allows "conquering" them to earn points.
+                const clanData = clans[closest.id];
                 hex.color = clanData ? clanData.color : COLORS.neutral;
+                isVisuallyTinted = true;
             }
         }
 
         const distFromCenter = Math.sqrt(hex.x * hex.x + hex.z * hex.z);
-        if (!currentOwner && distFromCenter > mapRadius * 1.1) return;
+        if (!currentOwner && !isVisuallyTinted && distFromCenter > mapRadius * 1.1) return;
 
         const isTerritory = currentOwner !== null;
         const type = dbTerritory ? dbTerritory.type : 'code';

@@ -316,27 +316,14 @@ class Store {
             });
             const result = await response.json();
             if (result.success) {
+                // FORCE RESYNC: Get total points from server to avoid local drift
+                await this.syncUserProfile();
+                await this.loadInitialData(); // Fetches clans points too
+                
+                // Locally acknowledge territory change for immediate rendering
                 const terr = this.state.territories.find(t => t.id == id);
-                if (terr && terr.owner.toLowerCase() !== clanId) {
-                    if (terr.owner !== 'neutral') this.addPoints(terr.owner, -50);
+                if (terr) {
                     terr.owner = clanId;
-                    this.addPoints(clanId, 100);
-                    
-                    // NEW: Sync puntos to individual user profile
-                    if (this.state.currentUser) {
-                        const oldPoints = this.state.currentUser.points || 0;
-                        const newPoints = oldPoints + 100;
-                        this.state.currentUser.points = newPoints;
-                        
-                        fetch('/api/user/update', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ 
-                                username: this.state.currentUser.name, 
-                                updates: { points: newPoints } 
-                            })
-                        }).catch(err => console.error('Failed to sync user points', err));
-                    }
                     this.notify();
                 }
                 return true;
@@ -526,6 +513,10 @@ class Store {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ clanId, amount })
                 });
+
+                // RE-FETCH GLOBAL TRUTH
+                await this.syncUserProfile();
+                await this.loadInitialData();
             } catch (e) {
                 console.error('Points increment failed', e);
                 // Rollback on failure if needed, but for game points we often just let it sync next load
