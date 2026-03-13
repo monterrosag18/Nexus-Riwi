@@ -297,8 +297,19 @@ async function onMouseClick(event) {
         const clanId = userState.clan.toLowerCase();
         const targetOwner = hexData.owner ? hexData.owner.toLowerCase() : null;
 
+        // BLOCK CLICKS ON OWNED TERRITORY
         if (targetOwner === clanId) {
-            console.log("Already owned by your clan.");
+            const feedback = document.createElement('div');
+            feedback.style.cssText = `
+                position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                color: #00ff44; font-family: 'Share Tech Mono', monospace;
+                font-size: 1.5rem; text-shadow: 0 0 10px #00ff44;
+                background: rgba(0,0,0,0.8); padding: 10px 20px; border: 2px solid #00ff44;
+                z-index: 9999; pointer-events: none; animation: nexus-fade-out 2s forwards;
+            `;
+            feedback.textContent = "✔ SECTOR SECURED: CONNECTION ESTABLISHED";
+            document.body.appendChild(feedback);
+            setTimeout(() => feedback.remove(), 2000);
             return;
         }
 
