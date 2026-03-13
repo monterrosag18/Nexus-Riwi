@@ -622,14 +622,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // ═══════════════════════════════════════════
     // 8. GLOBAL MAP RESET
     // ═══════════════════════════════════════════
-    const resetBtn = document.getElementById('reset-map-btn');
-    if (resetBtn) {
-        resetBtn.addEventListener('click', async () => {
+    const globalMapResetBtn = document.getElementById('reset-map-btn');
+    if (globalMapResetBtn) {
+        globalMapResetBtn.addEventListener('click', async () => {
             const confirmed = confirm("⚠️ ATTENTION: This will wipe ALL territory ownership and reset points for ALL clans. This action is irreversible. Proceed?");
             if (!confirmed) return;
 
-            resetBtn.disabled = true;
-            resetBtn.textContent = "RESETTING...";
+            globalMapResetBtn.disabled = true;
+            globalMapResetBtn.textContent = "RESETTING...";
 
             try {
                 const res = await fetch('/api/admin/reset-map', { method: 'POST' });
@@ -644,8 +644,8 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (e) {
                 alert("❌ CRITICAL ERROR: Network link broken.");
             } finally {
-                resetBtn.disabled = false;
-                resetBtn.textContent = "RESET GLOBAL MAP";
+                globalMapResetBtn.disabled = false;
+                globalMapResetBtn.textContent = "RESET GLOBAL MAP";
             }
         });
     }
