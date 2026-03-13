@@ -649,4 +649,43 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // ═══════════════════════════════════════════
+    // 9. TOURNAMENT OPERATIONS
+    // ═══════════════════════════════════════════
+    const finalizeBtn = document.getElementById('finalize-tournament-btn');
+    if (finalizeBtn) {
+        finalizeBtn.addEventListener('click', async () => {
+            const leader = await getLeaderFromState(); // Helper to show who wins
+            const confirmed = confirm(`🏆 CROWN CHAMPION: This will set ${leader.name.toUpperCase()} as the official Weekly Champion on the central tower. Proceed?`);
+            if (!confirmed) return;
+
+            finalizeBtn.disabled = true;
+            finalizeBtn.textContent = "CROWNING...";
+
+            try {
+                const res = await fetch('/api/tournament/champion', { method: 'POST' });
+                const result = await res.json();
+                
+                if (result.success) {
+                    alert(`🎊 TRIUMPH! ${result.champion.name} has been immortalized on the tower.`);
+                    window.location.reload();
+                } else {
+                    alert("❌ ERROR: Coronation failed - " + result.error);
+                }
+            } catch (e) {
+                alert("❌ CRITICAL ERROR: Nexus link broken.");
+            } finally {
+                finalizeBtn.disabled = false;
+                finalizeBtn.textContent = "FINALIZE TOURNAMENT WEEK";
+            }
+        });
+    }
+
+    async function getLeaderFromState() {
+        // Fetch current points from DB to be accurate
+        const res = await fetch('/api/clans');
+        const clans = await res.json();
+        return Object.values(clans).sort((a,b) => b.points - a.points)[0];
+    }
 });

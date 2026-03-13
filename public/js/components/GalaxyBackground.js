@@ -42,6 +42,24 @@ export class GalaxyBackground {
         this.tower.group.position.set(0, -5, 0); // Positioned inside the center hole (y=-5 places base correctly)
         this.tower.group.scale.set(0.6, 0.6, 0.6); // Scale adjusted to look massive but fit the camera comfortably
         this.group.add(this.tower.group);
+
+        // 4. FETCH WEEKLY CHAMPION
+        this.updateChampion();
+    }
+
+    async updateChampion() {
+        try {
+            const res = await fetch('/api/tournament/champion');
+            const data = await res.json();
+            if (data.champion) {
+                this.tower.setChampion(data.champion);
+                // Also update lighting to match champion
+                const color = new THREE.Color(data.champion.color);
+                this.directionalLight.color.copy(color);
+            }
+        } catch (e) {
+            console.error("[Galaxy] Failed to fetch weekly champion:", e);
+        }
     }
 
     update() {

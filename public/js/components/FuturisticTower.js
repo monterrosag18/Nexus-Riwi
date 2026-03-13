@@ -1,4 +1,5 @@
 const THREE = window.THREE;
+import { HoloBanner } from '../utils/HoloBanner.js';
 
 export class FuturisticTower {
     constructor() {
@@ -23,6 +24,8 @@ export class FuturisticTower {
                 blending: THREE.AdditiveBlending
             })
         };
+
+        this.championBanner = null;
 
         this.buildTower();
     }
@@ -163,6 +166,38 @@ export class FuturisticTower {
             anchor.add(sign);
             this.group.add(anchor);
         }
+    }
+
+    setChampion(clanData) {
+        if (!clanData) {
+            console.log("[Tower] No champion data. Setting default Nexus glow.");
+            this.materials.glow.color.setHex(0x00ffff);
+            return;
+        }
+
+        console.log(`[Tower] Setting Weekly Champion: ${clanData.name}`);
+        
+        // 1. Change Glow Color
+        const clanColor = new THREE.Color(clanData.color);
+        this.materials.glow.color.copy(clanColor);
+
+        // 2. Add HoloBanner at the top
+        if (this.championBanner) {
+            this.group.remove(this.championBanner.standGroup || this.championBanner.mesh);
+        }
+
+        const bannerPos = new THREE.Vector3(0, 240, -5); // Above the antenna base
+        this.championBanner = new HoloBanner(
+            this.group, 
+            bannerPos, 
+            clanData.color, 
+            clanData.name, 
+            clanData.icon || '3d_shield'
+        );
+        
+        // Scale up the banner for the tower
+        if (this.championBanner.mesh) this.championBanner.mesh.scale.set(1.5, 1.5, 1.5);
+        if (this.championBanner.standGroup) this.championBanner.standGroup.scale.set(1.5, 1.5, 1.5);
     }
 
     update(time) {
