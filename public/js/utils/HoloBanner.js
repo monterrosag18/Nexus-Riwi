@@ -197,8 +197,8 @@ export class HoloBanner {
                 this.scene.add(this.icon3d);
             }
             
-            // Add a point light to the icon itself
-            const light = new THREE.PointLight(this.color, 2, 30);
+            // Add a point light to the icon itself - Lowered intensity (2.0 -> 0.8)
+            const light = new THREE.PointLight(this.color, 0.8, 30);
             this.icon3d.add(light);
             console.log(`[HoloBanner] 3D Icon Attached: ${this.iconChar}`);
         }
@@ -271,10 +271,14 @@ export class HoloBanner {
             ctx.fillText(this.iconChar, 256, 400);
         }
 
-        // Draw Label (Below icon)
-        ctx.font = '700 80px "Rajdhani"';
-        // Reset shadow for cleaner text
-        ctx.shadowBlur = 10;
+        // Draw Label (Below icon) - Increased size and contrast
+        ctx.font = '700 100px "Rajdhani"';
+        // Stroke for contrast
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
+        ctx.lineWidth = 15;
+        ctx.strokeText(this.label, 256, 700);
+
+        ctx.shadowBlur = 15;
         ctx.fillText(this.label, 256, 700);
 
         // Create Texture
