@@ -15,7 +15,7 @@ export class HoloBanner {
             'tesla': '3d_bolt',
             'mccarthy': '3d_gem',
             'thompson': '3d_shield',
-            'hamilton': '3d_shield'
+            'hamilton': '3d_pyramid'
         };
         const lowerLabel = this.label.toLowerCase();
         if (!this.iconChar.toLowerCase().startsWith('3d_') && officialClans[lowerLabel]) {
@@ -163,6 +163,8 @@ export class HoloBanner {
 
         if (this.iconChar === '3d_shield') {
             geometry = new THREE.BoxGeometry(6, 8, 2); // Bigger
+        } else if (this.iconChar === '3d_pyramid') {
+            geometry = new THREE.ConeGeometry(5, 8, 4); // Square base pyramid
         } else if (this.iconChar === '3d_gem') {
             geometry = new THREE.OctahedronGeometry(5); // Bigger
         } else if (this.iconChar === '3d_atom') {

@@ -20,9 +20,9 @@ const COLORS = {
     turing: 0x00c3ff,   // Deep Cyan
     tesla: 0xff0000,    // Pure Red
     mccarthy: 0x00ff44, // Matrix Green
-    lovelace: 0xaa00ff, // Deep Violet (Was too white)
-    neumann: 0xff6600,  // Safety Orange (Was too yellow/white)
-    neutral: 0x666666   // Medium Grey (Much brighter for visibility)
+    hamilton: 0xF2C94C, // Gold/Yellow
+    thompson: 0x9B51E0, // Purple
+    neutral: 0x666666   // Medium Grey
 };
 
 export default function renderMap() {
@@ -511,10 +511,8 @@ export function executeConquest(hexData, hitMesh, winningClan) {
         'turing': 0x00c3ff,
         'tesla': 0xff0000,
         'mccarthy': 0x00ff44,
-        'lovelace': 0xaa00ff,
-        'neumann': 0xff6600,
-        'thompson': 0x9B51E0,
-        'halmiton': 0xF2C94C
+        'hamilton': 0xF2C94C,
+        'thompson': 0x9B51E0
     };
 
     const newColorHex = clanColors[winningClan.toLowerCase()] || 0x00f0ff;
