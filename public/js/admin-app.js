@@ -17,11 +17,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Default Factions (all points at 0 for fresh start)
     const defaultClans = {
-        turing:   { name: 'Turing',   color: '#2D9CDB', points: 0, members: 0, icon: '\uf2db' },
-        tesla:    { name: 'Tesla',    color: '#EB5757', points: 0, members: 0, icon: '\uf0e7' },
-        mccarthy: { name: 'McCarthy', color: '#27AE60', points: 0, members: 0, icon: '\uf544' },
-        thompson: { name: 'Thompson', color: '#9B51E0', points: 0, members: 0, icon: '\uf085' },
-        halmiton: { name: 'Halmiton', color: '#F2C94C', points: 0, members: 0, icon: '\uf06d' }
+        turing:   { name: 'Turing',   color: '#2D9CDB', points: 0, members: 0, icon: '3d_atom' },
+        tesla:    { name: 'Tesla',    color: '#EB5757', points: 0, members: 0, icon: '3d_bolt' },
+        mccarthy: { name: 'McCarthy', color: '#27AE60', points: 0, members: 0, icon: '3d_gem' },
+        thompson: { name: 'Thompson', color: '#9B51E0', points: 0, members: 0, icon: '3d_shield' },
+        halmiton: { name: 'Hamilton', color: '#F2C94C', points: 0, members: 0, icon: '3d_shield' }
     };
 
     // ═══════════════════════════════════════════
@@ -193,7 +193,10 @@ document.addEventListener('DOMContentLoaded', () => {
         '3d_atom': 'fa-solid fa-atom', '3d_bolt': 'fa-solid fa-bolt'
     };
 
-    function getIcon(unicode) { return iconMap[unicode] || 'fa-solid fa-shield-halved'; }
+    function getIcon(unicode) { 
+        if (unicode && unicode.startsWith('3d_')) return iconMap[unicode] || 'fa-solid fa-cube';
+        return iconMap[unicode] || 'fa-solid fa-shield-halved'; 
+    }
 
     // Color picker
     if (colorSwatches.length > 0) {
