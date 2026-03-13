@@ -1,9 +1,9 @@
-import { supabase } from '../../../lib/supabase';
+import { supabaseAdmin } from '../../../lib/supabase';
 
 export default async function handler(req, res) {
   try {
     if (req.method === 'GET') {
-      const { data: news, error } = await supabase
+      const { data: news, error } = await supabaseAdmin
         .from('announcements')
         .select('*')
         .order('created_at', { ascending: false })
@@ -17,7 +17,7 @@ export default async function handler(req, res) {
       const { msg, type } = req.body;
       if (!msg) return res.status(400).json({ message: 'Missing msg' });
 
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('announcements')
         .insert({ msg, type: type || 'info' });
 
@@ -29,7 +29,7 @@ export default async function handler(req, res) {
       const { id } = req.query;
       if (!id) return res.status(400).json({ message: 'Missing id' });
 
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('announcements')
         .delete()
         .eq('id', id);

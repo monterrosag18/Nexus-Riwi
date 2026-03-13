@@ -32,7 +32,7 @@ export default async function handler(req, res) {
       const { id, name, color, icon, points, members } = req.body;
       if (!id || !name || !color) return res.status(400).json({ message: 'Missing fields' });
 
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('clans')
         .upsert({ id, name, color, icon, points: points || 0, members_count: members || 0 });
 
@@ -44,7 +44,7 @@ export default async function handler(req, res) {
       const { id } = req.query;
       if (!id) return res.status(400).json({ message: 'Missing id' });
 
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('clans')
         .delete()
         .eq('id', id);
