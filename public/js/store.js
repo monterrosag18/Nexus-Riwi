@@ -387,7 +387,14 @@ class Store {
                     username: this.state.currentUser ? this.state.currentUser.name : null 
                 })
             });
+
             const result = await response.json();
+            
+            if (!response.ok) {
+                console.warn("[Store] Conquest rejected:", result.message);
+                return { success: false, message: result.message };
+            }
+
             if (result.success) {
                 // FORCE RESYNC: Get total points from server to avoid local drift
                 await this.syncUserProfile();
@@ -399,12 +406,13 @@ class Store {
                     terr.owner = clanId;
                     this.notify();
                 }
-                return true;
+                return { success: true };
             }
         } catch (error) {
             console.error('Conquest sync failed', error);
+            return { success: false, message: 'NETWORK ERROR' };
         }
-        return false;
+        return { success: false, message: 'UNKNOWN ERROR' };
     }
 
     getState() {

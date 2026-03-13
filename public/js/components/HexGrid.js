@@ -217,20 +217,22 @@ function initSolarSystem() {
     store.subscribe((state) => {
         // A. REBUILD GRID IF FIRST LOAD (Data arrived after init)
         const hasClansLoaded = state.clans && Object.keys(state.clans).length > 0;
-        if (hasClansLoaded && clanBanners.length === 0) {
+        if (hasClansLoaded && interactableHexes.length === 0) {
             console.log("[HexGrid] Data detected - Building Tactical Grid...");
             buildTacticalGrid();
             return;
         }
 
-        // B. Update existing hexes
+        // B. Update existing hexes and banners
         if (state.territories && interactableHexes.length > 0) {
             state.territories.forEach(t => {
-                const mesh = interactableHexes.find(m => m.userData.id === t.id);
+                const mesh = interactableHexes.find(m => m.userData.id == t.id);
                 if (mesh) {
                     const newOwner = (t.owner || 'neutral').toLowerCase();
-                    if ((mesh.userData.owner || '').toLowerCase() !== newOwner) {
-                        console.log(`[RealtimeMap] Updating Hex ${t.id} -> ${newOwner}`);
+                    const oldOwner = (mesh.userData.owner || '').toLowerCase();
+                    
+                    if (oldOwner !== newOwner) {
+                        console.log(`[RealtimeMap] Syncing Hex ${t.id} -> ${newOwner}`);
                         
                         // Update Data
                         mesh.userData.owner = newOwner;
@@ -245,9 +247,9 @@ function initSolarSystem() {
                         mesh.material.emissiveIntensity = (newOwner !== 'neutral') ? 0.4 : 0;
                         mesh.material.opacity = (newOwner !== 'neutral') ? 0.3 : 0.12;
                         
+                        // Find and update the LineLoop (border)
                         const line = mesh.parent.children.find(c => c.type === 'LineLoop' && c.position.distanceToSquared(mesh.position) < 0.1);
                         if (line) {
-                            line.material = line.material.clone();
                             line.material.color.set(color);
                             line.material.linewidth = (newOwner !== 'neutral') ? 3 : 1;
                             line.material.opacity = (newOwner !== 'neutral') ? 1.0 : 0.6;
@@ -255,6 +257,9 @@ function initSolarSystem() {
                     }
                 }
             });
+
+            // Ensure standards/banners are in sync
+            // (Standard updates could be added here if needed, but banners are typically fixed positions)
         }
     });
 

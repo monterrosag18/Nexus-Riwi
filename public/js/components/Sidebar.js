@@ -27,12 +27,8 @@ export function renderSidebar() {
 
         // Handle specific actions
         if (item.route === 'shop') {
-            link.href = '#';
-            link.onclick = (e) => {
-                e.preventDefault();
-                const modal = createGachaModal();
-                document.body.appendChild(modal);
-            };
+            link.href = '#shop';
+            // No custom onclick needed, router handles #shop -> renderShop()
         }
 
         if (item.route === 'chat') {
