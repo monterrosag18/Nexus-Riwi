@@ -199,7 +199,9 @@ async function executeConquest(hexData, hitMesh, winningClan) {
         'tesla': 0xff0000,
         'mccarthy': 0x00ff44,
         'lovelace': 0xaa00ff,
-        'neumann': 0xff6600
+        'neumann': 0xff6600,
+        'thompson': 0x9B51E0,
+        'halmiton': 0xF2C94C
     };
 
     const newColorHex = clanColors[winningClan.toLowerCase()] || 0x00f0ff;

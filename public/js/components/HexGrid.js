@@ -453,11 +453,14 @@ function buildTacticalGrid() {
         }
 
         const isTerritory = hex.owner !== null;
-        createHexagon(hex.x, hex.z, hexRadius * 0.95, hex.color, isTerritory, hex.owner);
+        const type = dbTerritory ? dbTerritory.type : hex.type || 'code';
+        const difficulty = dbTerritory ? dbTerritory.difficulty : hex.difficulty || 1;
+
+        createHexagon(hex.x, hex.z, hexRadius * 0.95, hex.color, isTerritory, hex.owner, i, type, difficulty);
     });
 }
 
-function createHexagon(x, z, r, color, isTerritory, ownerId) {
+function createHexagon(x, z, r, color, isTerritory, ownerId, id, type, difficulty) {
     // 1. Line Loop (The glowing border)
     const points = [];
     for (let i = 0; i <= 6; i++) {
@@ -491,6 +494,9 @@ function createHexagon(x, z, r, color, isTerritory, ownerId) {
 
     // Bind metadata for Raycaster and logic
     fill.userData = {
+        id: id,
+        type: type,
+        difficulty: difficulty,
         isTerritory: isTerritory,
         owner: ownerId,
         baseColor: color,
