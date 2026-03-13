@@ -198,24 +198,24 @@ export class HoloBanner {
         const barMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.9, roughness: 0.1 });
         const bar = new THREE.Mesh(barGeo, barMat);
         bar.position.y = 27.5; // Top of banner (15 base + 12.5 half height)
-        group.add(bar);
+        this.standGroup.add(bar);
 
         // Vertical Poles (Frame)
         const poleGeo = new THREE.CylinderGeometry(0.3, 0.3, 30, 8);
 
         const pole1 = new THREE.Mesh(poleGeo, barMat);
         pole1.position.set(-8, 15, 0);
-        group.add(pole1);
+        this.standGroup.add(pole1);
 
         const pole2 = new THREE.Mesh(poleGeo, barMat);
         pole2.position.set(8, 15, 0);
-        group.add(pole2);
+        this.standGroup.add(pole2);
 
         // Base
         const baseGeo = new THREE.CylinderGeometry(3, 5, 2, 16);
         const baseMesh = new THREE.Mesh(baseGeo, barMat);
         baseMesh.position.y = 1;
-        group.add(baseMesh);
+        this.standGroup.add(baseMesh);
 
         // Clan Light Hologram Emitter
         const emitterGeo = new THREE.ConeGeometry(2, 4, 32, 1, true);
@@ -223,7 +223,7 @@ export class HoloBanner {
         const emitter = new THREE.Mesh(emitterGeo, emitterMat);
         emitter.position.y = 3;
         emitter.rotation.x = Math.PI; // Point up
-        group.add(emitter);
+        this.standGroup.add(emitter);
 
         this.scene.add(this.standGroup);
     }
