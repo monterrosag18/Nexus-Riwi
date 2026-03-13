@@ -5,9 +5,11 @@ export const dynamic = 'force-dynamic';
 export default async function handler(req, res) {
     try {
         if (!supabaseAdmin) {
+            const envKeys = Object.keys(process.env).filter(k => k.startsWith('NEXT_PUBLIC_') || k.startsWith('SUPABASE_'));
             return res.status(500).json({ 
                 error: "Supabase Client failed to initialize.",
                 hint: "Check if NEXT_PUBLIC_SUPABASE_URL is valid.",
+                availableEnvKeys: envKeys,
                 env: {
                     url: process.env.NEXT_PUBLIC_SUPABASE_URL || 'MISSING',
                     hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY
