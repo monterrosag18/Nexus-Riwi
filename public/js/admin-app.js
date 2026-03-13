@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tesla:    { name: 'Tesla',    color: '#EB5757', points: 0, members: 0, icon: '3d_bolt' },
         mccarthy: { name: 'McCarthy', color: '#27AE60', points: 0, members: 0, icon: '3d_gem' },
         thompson: { name: 'Thompson', color: '#9B51E0', points: 0, members: 0, icon: '3d_shield' },
-        halmiton: { name: 'Hamilton', color: '#F2C94C', points: 0, members: 0, icon: '3d_shield' }
+        hamilton: { name: 'Hamilton', color: '#F2C94C', points: 0, members: 0, icon: '3d_shield' }
     };
 
     // ═══════════════════════════════════════════
@@ -261,7 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="card-header">
                     <div class="faction-identity">
                         <i class="${htmlIcon}" style="color: ${clan.color}; font-size: 1.5rem;"></i>
-                        <h4 style="margin:0;">${clan.name.toUpperCase()}</h4>
+                        <h4 style="margin:0;">${(clan.name || id).toUpperCase()}</h4>
                     </div>
                 </div>
                 <div class="card-stats">
