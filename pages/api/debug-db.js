@@ -11,6 +11,10 @@ export default async function handler(req, res) {
 
         // Test connection to the new table
         const { data: settings, error: settingsError } = await supabaseAdmin
+            .from('game_settings')
+            .select('*')
+            .limit(1);
+            
         // Check if we are using the service key
         const hasServiceKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
         const currentUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'NONE';
