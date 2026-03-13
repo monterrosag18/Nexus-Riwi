@@ -1,8 +1,6 @@
-import { db } from '@vercel/postgres';
+import { supabase } from '../../../lib/supabase';
 
 export default async function handler(req, res) {
-  const client = await db.connect();
-
   try {
     if (req.method !== 'POST') {
       return res.status(405).json({ message: 'Method not allowed' });
@@ -14,12 +12,16 @@ export default async function handler(req, res) {
     }
 
     // 1. Check user exists and has enough credits
-    const userResult = await client.sql`SELECT credits, owned_cosmetics FROM users WHERE username = ${username} LIMIT 1;`;
-    if (userResult.rowCount === 0) {
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('credits, owned_cosmetics')
+      .eq('username', username)
+      .single();
+
+    if (userError || !user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const user = userResult.rows[0];
     if (user.credits < cost) {
       return res.status(400).json({ message: 'INSUFFICIENT CREDITS' });
     }
@@ -31,29 +33,32 @@ export default async function handler(req, res) {
     }
 
     // 3. Update user: deduct credits, update owned list
-    await client.sql`
-      UPDATE users 
-      SET credits = credits - ${cost}, 
-          owned_cosmetics = ${JSON.stringify(owned)}
-      WHERE username = ${username}
-    `;
+    const updateData = {
+      credits: user.credits - cost,
+      owned_cosmetics: owned
+    };
 
     // 4. Auto-apply based on type
     if (type === 'skin') {
-      await client.sql`UPDATE users SET active_skin = ${itemId} WHERE username = ${username};`;
+      updateData.active_skin = itemId;
     } else if (type === 'chat') {
-      await client.sql`UPDATE users SET active_chat_color = ${color} WHERE username = ${username};`;
+      updateData.active_chat_color = color;
     } else if (type === 'border') {
-      await client.sql`UPDATE users SET active_border_color = ${color} WHERE username = ${username};`;
+      updateData.active_border_color = color;
     } else if (type === 'shield') {
-      await client.sql`UPDATE users SET active_shield_color = ${color} WHERE username = ${username};`;
+      updateData.active_shield_color = color;
     }
+
+    const { error: updateError } = await supabase
+      .from('users')
+      .update(updateData)
+      .eq('username', username);
+
+    if (updateError) throw updateError;
 
     return res.status(200).json({ success: true });
   } catch (error) {
     console.error('Purchase API Error:', error);
     return res.status(500).json({ message: 'Internal server error' });
-  } finally {
-    await client.end();
   }
 }

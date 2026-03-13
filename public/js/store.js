@@ -1,3 +1,5 @@
+import { supabaseClient } from './supabaseClient.js';
+
 /**
  * Simple Pub/Sub State Management
  */
@@ -35,9 +37,10 @@ class Store {
         this.listeners = [];
 
         // --- ASYNC INIT ---
-        // We start loading immediately, but we don't block the UI threads.
-        // Views that need this data should await store.initialLoadPromise if necessary.
         this.initialLoadPromise = this.loadInitialData();
+
+        // --- REALTIME LISTENERS ---
+        this.initRealtimeListeners();
 
         // --- EVENT LOG SYSTEM ---
         try {
@@ -46,6 +49,36 @@ class Store {
 
         // --- CHAT SYSTEM ---
         this.chatDB = {}; // Will be handled via API
+    }
+
+    initRealtimeListeners() {
+        console.log('Initializing Realtime Neural Link...');
+        
+        // 1. Listen for Territory Changes (Conquests)
+        supabaseClient
+            .channel('public:territories')
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'territories' }, payload => {
+                console.log('Territory Update Received:', payload.new);
+                const updatedTerr = payload.new;
+                const index = this.state.territories.findIndex(t => t.id === parseInt(updatedTerr.id));
+                if (index !== -1) {
+                    this.state.territories[index].owner = updatedTerr.owner_id || 'neutral';
+                    this.notify();
+                    this.logEvent(`Territory ${updatedTerr.id} captured by ${updatedTerr.owner_id || 'neutral'}`, 'warning');
+                }
+            })
+            .subscribe();
+
+        // 2. Listen for Chat Messages
+        supabaseClient
+            .channel('public:chat_messages')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, payload => {
+                console.log('New Message Signal:', payload.new);
+                // We notify the UI that a change happened in the DB. 
+                // Components like FactionChat will re-fetch or we could push directly to a cache.
+                this.notify(); 
+            })
+            .subscribe();
     }
 
     // --- EVENT LOG METHODS ---

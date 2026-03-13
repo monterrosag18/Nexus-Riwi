@@ -1,24 +1,27 @@
-import { db } from '@vercel/postgres';
+import { supabaseAdmin } from '../../../lib/supabase';
 
 export default async function handler(req, res) {
-  const client = await db.connect();
-
   try {
     if (req.method === 'GET') {
-      const result = await client.sql`
-        SELECT c.*, COUNT(u.id) as real_member_count
-        FROM clans c
-        LEFT JOIN users u ON LOWER(c.id) = LOWER(u.clan_id)
-        GROUP BY c.id
-        ORDER BY c.points DESC;
-      `;
+      // Fetch clans with member count from users table using Admin client to bypass RLS
+      const { data: clans, error } = await supabaseAdmin
+        .from('clans')
+        .select(`
+          *,
+          users(id)
+        `)
+        .order('points', { ascending: false });
+
+      if (error) throw error;
+
       const clansMap = {};
-      result.rows.forEach(clan => {
+      clans.forEach(clan => {
         clansMap[clan.id] = {
+          id: clan.id,
           name: clan.name,
           color: clan.color,
           points: clan.points,
-          members: parseInt(clan.real_member_count) || 0,
+          members: clan.users ? clan.users.length : 0,
           icon: clan.icon
         };
       });
@@ -29,12 +32,11 @@ export default async function handler(req, res) {
       const { id, name, color, icon, points, members } = req.body;
       if (!id || !name || !color) return res.status(400).json({ message: 'Missing fields' });
 
-      await client.sql`
-        INSERT INTO clans (id, name, color, icon, points, members_count)
-        VALUES (${id}, ${name}, ${color}, ${icon}, ${points || 0}, ${members || 0})
-        ON CONFLICT (id) DO UPDATE 
-        SET name = EXCLUDED.name, color = EXCLUDED.color, icon = EXCLUDED.icon;
-      `;
+      const { error } = await supabase
+        .from('clans')
+        .upsert({ id, name, color, icon, points: points || 0, members_count: members || 0 });
+
+      if (error) throw error;
       return res.status(200).json({ success: true });
     }
 
@@ -42,7 +44,12 @@ export default async function handler(req, res) {
       const { id } = req.query;
       if (!id) return res.status(400).json({ message: 'Missing id' });
 
-      await client.sql`DELETE FROM clans WHERE id = ${id};`;
+      const { error } = await supabase
+        .from('clans')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
       return res.status(200).json({ success: true });
     }
 
@@ -50,7 +57,5 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('Clans API Error:', error);
     return res.status(500).json({ message: 'Internal server error' });
-  } finally {
-    await client.end();
   }
 }

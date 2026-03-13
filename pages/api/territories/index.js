@@ -1,21 +1,24 @@
-import { db } from '@vercel/postgres';
+import { supabase } from '../../../lib/supabase';
 
 export default async function handler(req, res) {
-  const client = await db.connect();
-
   try {
     if (req.method === 'GET') {
-      const result = await client.sql`SELECT * FROM territories;`;
-      return res.status(200).json(result.rows);
+      const { data: territories, error } = await supabase
+        .from('territories')
+        .select('*');
+      
+      if (error) throw error;
+      return res.status(200).json(territories);
     }
     
     if (req.method === 'POST') {
       const { id, clanId } = req.body;
-      await client.sql`
-        UPDATE territories 
-        SET owner_id = ${clanId} 
-        WHERE id = ${id};
-      `;
+      const { error } = await supabase
+        .from('territories')
+        .update({ owner_id: clanId })
+        .eq('id', id);
+
+      if (error) throw error;
       return res.status(200).json({ success: true });
     }
 
@@ -23,7 +26,5 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('Territories API Error:', error);
     return res.status(500).json({ message: 'Internal server error' });
-  } finally {
-    await client.end();
   }
 }

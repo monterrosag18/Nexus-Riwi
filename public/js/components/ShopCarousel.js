@@ -372,8 +372,9 @@ export default function renderShop() {
             const canvas = container.querySelector('#shop-3d-canvas');
             if (canvas && !shopScene) {
                 shopScene = new ShopScene('shop-3d-canvas');
+                console.log("[Shop] 3D Scene Initialized");
             }
-        }, 100);
+        }, 50);
     }
 
     async function handleSpin() {
@@ -506,10 +507,12 @@ export default function renderShop() {
 
         // Result overlay dismiss
         const btnDismiss = container.querySelector('#btn-dismiss');
-        if (btnDismiss) btnDismiss.addEventListener('click', () => {
-            lastResult = null;
-            render();
-        });
+        if (btnDismiss) {
+            btnDismiss.onclick = () => {
+                lastResult = null;
+                render();
+            };
+        }
     }
 
     function showItemPreview(item) {

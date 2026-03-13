@@ -1,8 +1,6 @@
-import { db } from '@vercel/postgres';
+import { supabase } from '../../../lib/supabase';
 
 export default async function handler(req, res) {
-  const client = await db.connect();
-
   try {
     if (req.method !== 'POST') {
       return res.status(405).json({ message: 'Method not allowed' });
@@ -13,16 +11,26 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: 'Missing fields' });
     }
 
-    await client.sql`
-      UPDATE clans 
-      SET points = points + ${amount} 
-      WHERE id = ${clanId};
-    `;
+    // Get current points
+    const { data: clan, error: fetchError } = await supabase
+      .from('clans')
+      .select('points')
+      .eq('id', clanId)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    // Update with new points
+    const { error: updateError } = await supabase
+      .from('clans')
+      .update({ points: (clan.points || 0) + amount })
+      .eq('id', clanId);
+
+    if (updateError) throw updateError;
+    
     return res.status(200).json({ success: true });
   } catch (error) {
     console.error('Points sync error:', error);
     return res.status(500).json({ message: 'Internal server error' });
-  } finally {
-    await client.end();
   }
 }

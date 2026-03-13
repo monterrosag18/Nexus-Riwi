@@ -1,9 +1,7 @@
-import { db } from '@vercel/postgres';
+import { supabase } from '../../../lib/supabase';
 import bcrypt from 'bcrypt';
 
 export default async function handler(req, res) {
-  const client = await db.connect();
-
   try {
     if (req.method !== 'POST') {
       return res.status(405).json({ message: 'Method not allowed' });
@@ -15,8 +13,13 @@ export default async function handler(req, res) {
     }
 
     // Check if user exists
-    const userCheck = await client.sql`SELECT id FROM users WHERE username = ${username} LIMIT 1;`;
-    if (userCheck.rowCount > 0) {
+    const { data: existingUser, error: checkError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('username', username)
+      .maybeSingle();
+
+    if (existingUser) {
       return res.status(400).json({ message: 'CODENAME ALREADY TAKEN' });
     }
 
@@ -25,16 +28,20 @@ export default async function handler(req, res) {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     // Insert user
-    await client.sql`
-      INSERT INTO users (username, password_hash, clan_id, credits)
-      VALUES (${username}, ${hashedPassword}, ${clan.toLowerCase()}, 2000);
-    `;
+    const { error: insertError } = await supabase
+      .from('users')
+      .insert({
+        username,
+        password_hash: hashedPassword,
+        clan_id: clan.toLowerCase(),
+        credits: 2000
+      });
+
+    if (insertError) throw insertError;
 
     return res.status(200).json({ success: true });
   } catch (error) {
     console.error('Registration API Error:', error);
     return res.status(500).json({ message: 'Internal server error', error: error.message });
-  } finally {
-    await client.end();
   }
 }

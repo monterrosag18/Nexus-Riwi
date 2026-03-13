@@ -214,6 +214,45 @@ function initSolarSystem() {
     }
     animate();
 
+    // 6. REALTIME REACTION
+    store.subscribe((state) => {
+        // We only care if territories changed. 
+        // We can optimize this by checking last update timestamp if we had it,
+        // but for now, we'll sync the colors of all hexes to match the state.
+        if (state.territories && interactableHexes.length > 0) {
+            state.territories.forEach(t => {
+                const mesh = interactableHexes.find(m => m.userData.id === t.id);
+                if (mesh) {
+                    const newOwner = t.owner;
+                    if (mesh.userData.owner !== newOwner) {
+                        console.log(`[RealtimeMap] Updating Hex ${t.id} -> ${newOwner}`);
+                        
+                        // Update Data
+                        mesh.userData.owner = newOwner;
+                        mesh.userData.isTerritory = newOwner !== 'neutral';
+                        
+                        // Update Visuals
+                        const clanData = state.clans[newOwner];
+                        const color = clanData ? clanData.color : 0x666666; // Neutral color
+                        
+                        mesh.material.color.set(color);
+                        mesh.material.emissive.set(color);
+                        mesh.material.emissiveIntensity = (newOwner !== 'neutral') ? 0.4 : 0;
+                        mesh.material.opacity = (newOwner !== 'neutral') ? 0.3 : 0.12;
+                        
+                        // Also update the line loop (sibling)
+                        const line = mesh.parent.children.find(c => c instanceof THREE.LineLoop && c.position.equals(mesh.position));
+                        if (line) {
+                            line.material.color.set(color);
+                            line.material.linewidth = (newOwner !== 'neutral') ? 3 : 1;
+                            line.material.opacity = (newOwner !== 'neutral') ? 1.0 : 0.4;
+                        }
+                    }
+                }
+            });
+        }
+    });
+
     // Resize
     window.addEventListener('resize', onWindowResize, false);
 }

@@ -1,12 +1,10 @@
-import { db } from '@vercel/postgres';
+import { supabase } from '../../../lib/supabase';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.SUPABASE_JWT_SECRET || 'your-secret-key';
 
 export default async function handler(req, res) {
-  const client = await db.connect();
-
   try {
     if (req.method !== 'POST') {
       return res.status(405).json({ message: 'Method not allowed' });
@@ -17,15 +15,16 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: 'Missing fields' });
     }
 
-    const result = await client.sql`
-      SELECT * FROM users WHERE username = ${username} LIMIT 1;
-    `;
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('username', username)
+      .single();
 
-    if (result.rowCount === 0) {
+    if (error || !user) {
       return res.status(401).json({ message: 'CODENAME NOT FOUND' });
     }
 
-    const user = result.rows[0];
     const passwordMatch = await bcrypt.compare(password, user.password_hash);
 
     if (!passwordMatch) {
@@ -53,7 +52,5 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('Login API Error:', error);
     return res.status(500).json({ message: 'Internal server error' });
-  } finally {
-    await client.end();
   }
 }

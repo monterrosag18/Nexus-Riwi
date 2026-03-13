@@ -1,26 +1,31 @@
-import { db } from '@vercel/postgres';
+import { supabaseAdmin } from '../../../lib/supabase';
 
 export default async function handler(req, res) {
-  const client = await db.connect();
-
   try {
     if (req.method === 'GET') {
       const { clanId } = req.query;
-      const result = await client.sql`
-        SELECT * FROM chat_messages 
-        WHERE clan_id = ${clanId} 
-        ORDER BY created_at DESC 
-        LIMIT 50;
-      `;
-      return res.status(200).json(result.rows.reverse());
+      const { data: messages, error } = await supabaseAdmin
+        .from('chat_messages')
+        .select('*')
+        .eq('clan_id', clanId)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+      return res.status(200).json((messages || []).reverse());
     }
 
     if (req.method === 'POST') {
       const { clanId, username, content } = req.body;
-      await client.sql`
-        INSERT INTO chat_messages (clan_id, user_username, content)
-        VALUES (${clanId}, ${username}, ${content});
-      `;
+      const { error } = await supabaseAdmin
+        .from('chat_messages')
+        .insert({
+          clan_id: clanId,
+          user_username: username,
+          content: content
+        });
+
+      if (error) throw error;
       return res.status(200).json({ success: true });
     }
 
@@ -28,7 +33,5 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('Chat API Error:', error);
     return res.status(500).json({ message: 'Internal server error' });
-  } finally {
-    await client.end();
   }
 }

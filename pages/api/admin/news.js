@@ -1,22 +1,27 @@
-import { db } from '@vercel/postgres';
+import { supabase } from '../../../lib/supabase';
 
 export default async function handler(req, res) {
-  const client = await db.connect();
-
   try {
     if (req.method === 'GET') {
-      const result = await client.sql`SELECT * FROM announcements ORDER BY created_at DESC LIMIT 20;`;
-      return res.status(200).json(result.rows);
+      const { data: news, error } = await supabase
+        .from('announcements')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(20);
+      
+      if (error) throw error;
+      return res.status(200).json(news);
     }
 
     if (req.method === 'POST') {
       const { msg, type } = req.body;
       if (!msg) return res.status(400).json({ message: 'Missing msg' });
 
-      await client.sql`
-        INSERT INTO announcements (msg, type)
-        VALUES (${msg}, ${type || 'info'});
-      `;
+      const { error } = await supabase
+        .from('announcements')
+        .insert({ msg, type: type || 'info' });
+
+      if (error) throw error;
       return res.status(200).json({ success: true });
     }
 
@@ -24,7 +29,12 @@ export default async function handler(req, res) {
       const { id } = req.query;
       if (!id) return res.status(400).json({ message: 'Missing id' });
 
-      await client.sql`DELETE FROM announcements WHERE id = ${id};`;
+      const { error } = await supabase
+        .from('announcements')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
       return res.status(200).json({ success: true });
     }
 
@@ -32,7 +42,5 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('Admin News API Error:', error);
     return res.status(500).json({ message: 'Internal server error' });
-  } finally {
-    await client.end();
   }
 }

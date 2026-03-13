@@ -1,12 +1,15 @@
-import { db } from '@vercel/postgres';
+import { supabase } from '../../../lib/supabase';
 
 export default async function handler(req, res) {
-  const client = await db.connect();
-
   try {
     if (req.method === 'GET') {
-      const result = await client.sql`SELECT * FROM questions ORDER BY created_at DESC;`;
-      return res.status(200).json(result.rows);
+      const { data: questions, error } = await supabase
+        .from('questions')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return res.status(200).json(questions);
     }
 
     if (req.method === 'POST') {
@@ -15,19 +18,21 @@ export default async function handler(req, res) {
         return res.status(400).json({ message: 'Missing fields' });
       }
 
+      const questionData = { type, difficulty, q, options, correct };
+
       if (id) {
         // Update
-        await client.sql`
-          UPDATE questions 
-          SET type = ${type}, difficulty = ${difficulty}, q = ${q}, options = ${JSON.stringify(options)}, correct = ${correct}
-          WHERE id = ${id};
-        `;
+        const { error } = await supabase
+          .from('questions')
+          .update(questionData)
+          .eq('id', id);
+        if (error) throw error;
       } else {
         // Create
-        await client.sql`
-          INSERT INTO questions (type, difficulty, q, options, correct)
-          VALUES (${type}, ${difficulty}, ${q}, ${JSON.stringify(options)}, ${correct});
-        `;
+        const { error } = await supabase
+          .from('questions')
+          .insert(questionData);
+        if (error) throw error;
       }
       return res.status(200).json({ success: true });
     }
@@ -36,7 +41,12 @@ export default async function handler(req, res) {
       const { id } = req.query;
       if (!id) return res.status(400).json({ message: 'Missing id' });
 
-      await client.sql`DELETE FROM questions WHERE id = ${id};`;
+      const { error } = await supabase
+        .from('questions')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
       return res.status(200).json({ success: true });
     }
 
@@ -44,7 +54,5 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('Admin Questions API Error:', error);
     return res.status(500).json({ message: 'Internal server error' });
-  } finally {
-    await client.end();
   }
 }

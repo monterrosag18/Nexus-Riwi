@@ -1,104 +1,36 @@
+const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config({ path: '.env.local' });
-const { db } = require('@vercel/postgres');
-const bcrypt = require('bcrypt');
 
-async function seedClans(client) {
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
+async function seedClans() {
   try {
-    await client.sql`
-      CREATE TABLE IF NOT EXISTS clans (
-        id VARCHAR(50) PRIMARY KEY,
-        name VARCHAR(100) NOT NULL,
-        color CHAR(7) NOT NULL,
-        points INTEGER DEFAULT 0,
-        members_count INTEGER DEFAULT 0,
-        icon VARCHAR(50)
-      );
-    `;
-
     const clans = [
-      ['turing', 'Turing', '#2D9CDB', 2606, 25, 'f2db'],
-      ['tesla', 'Tesla', '#EB5757', 1932, 28, 'f0e7'],
-      ['mccarthy', 'McCarthy', '#27AE60', 1373, 22, 'f544'],
-      ['thompson', 'Thompson', '#9B51E0', 1105, 18, 'f085'],
-      ['halmiton', 'Hamilton', '#F2C94C', 940, 15, 'f06d']
+      { id: 'turing', name: 'Turing', color: '#2D9CDB', points: 2606, members_count: 25, icon: 'f2db' },
+      { id: 'tesla', name: 'Tesla', color: '#EB5757', points: 1932, members_count: 28, icon: 'f0e7' },
+      { id: 'mccarthy', name: 'McCarthy', color: '#27AE60', points: 1373, members_count: 22, icon: 'f544' },
+      { id: 'thompson', name: 'Thompson', color: '#9B51E0', points: 1105, members_count: 18, icon: 'f085' },
+      { id: 'halmiton', name: 'Hamilton', color: '#F2C94C', points: 940, members_count: 15, icon: 'f06d' }
     ];
 
-    for (const clan of clans) {
-      await client.sql`
-        INSERT INTO clans (id, name, color, points, members_count, icon)
-        VALUES (${clan[0]}, ${clan[1]}, ${clan[2]}, ${clan[3]}, ${clan[4]}, ${clan[5]})
-        ON CONFLICT (id) DO NOTHING;
-      `;
-    }
+    const { error } = await supabase.from('clans').upsert(clans);
+    if (error) throw error;
     console.log('Seeded clans');
   } catch (error) {
     console.error('Error seeding clans:', error);
-    throw error;
   }
 }
 
-async function seedUsers(client) {
+async function seedTerritories() {
   try {
-    await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
-    await client.sql`
-      CREATE TABLE IF NOT EXISTS users (
-        id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-        username VARCHAR(50) NOT NULL UNIQUE,
-        password_hash TEXT NOT NULL,
-        clan_id VARCHAR(50) REFERENCES clans(id),
-        credits INTEGER DEFAULT 2000,
-        active_skin VARCHAR(50),
-        active_chat_color CHAR(7),
-        active_border_color CHAR(7),
-        active_shield_color CHAR(7),
-        owned_cosmetics JSONB DEFAULT '[]'::jsonb,
-        joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `;
-    console.log('Created users table');
-  } catch (error) {
-    console.error('Error seeding users:', error);
-    throw error;
-  }
-}
-
-async function seedChat(client) {
-  try {
-    await client.sql`
-      CREATE TABLE IF NOT EXISTS chat_messages (
-        id SERIAL PRIMARY KEY,
-        clan_id VARCHAR(50) REFERENCES clans(id),
-        user_username VARCHAR(50) NOT NULL,
-        content TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `;
-    console.log('Created chat_messages table');
-  } catch (error) {
-    console.error('Error seeding chat:', error);
-    throw error;
-  }
-}
-
-async function seedTerritories(client) {
-  try {
-    await client.sql`
-      CREATE TABLE IF NOT EXISTS territories (
-        id INTEGER PRIMARY KEY,
-        owner_id VARCHAR(50) REFERENCES clans(id),
-        type VARCHAR(20),
-        biome VARCHAR(20),
-        difficulty INTEGER,
-        question JSONB
-      );
-    `;
-
-    // Seed 100 hexes if table is empty
-    const check = await client.sql`SELECT count(*) FROM territories;`;
-    if (parseInt(check.rows[0].count) === 0) {
+    const { count } = await supabase.from('territories').select('*', { count: 'exact', head: true });
+    
+    if (count === 0) {
       console.log('Seeding 100 territories...');
-      
-      const values = [];
+      const territories = [];
       for (let i = 0; i < 100; i++) {
         let type = 'code';
         const r = Math.random();
@@ -107,74 +39,31 @@ async function seedTerritories(client) {
         else type = 'soft-skills';
 
         let biome = type === 'code' ? 'city' : (type === 'english' ? 'library' : 'park');
-        values.push(`(${i}, NULL, '${type}', '${biome}', ${Math.floor(Math.random() * 3) + 1})`);
+        territories.push({
+            id: i,
+            owner_id: null,
+            type: type,
+            biome: biome,
+            difficulty: Math.floor(Math.random() * 3) + 1
+        });
       }
 
-      await client.query(`
-        INSERT INTO territories (id, owner_id, type, biome, difficulty)
-        VALUES ${values.join(',')}
-      `);
+      const { error } = await supabase.from('territories').insert(territories);
+      if (error) throw error;
+      console.log('Seeded territories');
+    } else {
+      console.log('Territories already seeded.');
     }
-    console.log('Created and seeded territories table');
   } catch (error) {
     console.error('Error seeding territories:', error);
-    throw error;
-  }
-}
-
-async function seedQuestions(client) {
-  try {
-    await client.sql`
-      CREATE TABLE IF NOT EXISTS questions (
-        id SERIAL PRIMARY KEY,
-        type VARCHAR(20),
-        difficulty INTEGER,
-        q TEXT NOT NULL,
-        options JSONB NOT NULL,
-        correct INTEGER NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `;
-    console.log('Created questions table');
-  } catch (error) {
-    console.error('Error seeding questions:', error);
-    throw error;
-  }
-}
-
-async function seedAnnouncements(client) {
-  try {
-    await client.sql`
-      CREATE TABLE IF NOT EXISTS announcements (
-        id SERIAL PRIMARY KEY,
-        msg TEXT NOT NULL,
-        type VARCHAR(20),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `;
-    console.log('Created announcements table');
-  } catch (error) {
-    console.error('Error seeding announcements:', error);
-    throw error;
   }
 }
 
 async function main() {
-  const client = await db.connect();
-
-  await seedClans(client);
-  await seedUsers(client);
-  await seedChat(client);
-  await seedTerritories(client);
-  await seedQuestions(client);
-  await seedAnnouncements(client);
-
-  await client.end();
+  console.log('--- INITIALIZING SUPABASE SEED ---');
+  await seedClans();
+  await seedTerritories();
+  console.log('--- SEED COMPLETE ---');
 }
 
-main().catch((err) => {
-  console.error(
-    'An error occurred while attempting to seed the database:',
-    err,
-  );
-});
+main().catch(console.error);

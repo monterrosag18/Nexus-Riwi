@@ -1,8 +1,6 @@
-import { db } from '@vercel/postgres';
+import { supabase } from '../../../lib/supabase';
 
 export default async function handler(req, res) {
-  const client = await db.connect();
-
   try {
     if (req.method !== 'GET') {
       return res.status(405).json({ message: 'Method not allowed' });
@@ -13,18 +11,16 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: 'Missing username' });
     }
 
-    const result = await client.sql`
-      SELECT username, clan_id, credits, active_skin, active_chat_color, active_border_color, active_shield_color, owned_cosmetics 
-      FROM users 
-      WHERE username = ${username} 
-      LIMIT 1;
-    `;
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('username, clan_id, credits, active_skin, active_chat_color, active_border_color, active_shield_color, owned_cosmetics')
+      .eq('username', username)
+      .single();
 
-    if (result.rowCount === 0) {
+    if (error || !user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const user = result.rows[0];
     return res.status(200).json({
       name: user.username,
       clan: user.clan_id,
@@ -38,7 +34,5 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('Profile fetch API Error:', error);
     return res.status(500).json({ message: 'Internal server error' });
-  } finally {
-    await client.end();
   }
 }
