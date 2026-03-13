@@ -429,7 +429,7 @@ function buildTacticalGrid() {
             const clanData = clans[currentOwner];
             hex.color = clanData ? clanData.color : COLORS.neutral;
         } else {
-            // INITIAL VISUAL TINT LOGIC (Not owners in the DB)
+            // INITIAL VISUAL TINT LOGIC
             const distances = [];
             clanIds.forEach(cid => {
                 const banner = bannerDistributions[cid];
@@ -439,10 +439,7 @@ function buildTacticalGrid() {
             distances.sort((a, b) => a.d - b.d);
             
             const closest = distances[0];
-            // Tightened radius to 2.5 for exactly ~5-6 hexes
             if (closest.d < hexRadius * 2.8) {
-                // IMPORTANT: We tint the color, but currentOwner remains null
-                // so the store allows "conquering" them to earn points.
                 const clanData = clans[closest.id];
                 hex.color = clanData ? clanData.color : COLORS.neutral;
                 isVisuallyTinted = true;
@@ -456,11 +453,18 @@ function buildTacticalGrid() {
         const type = dbTerritory ? dbTerritory.type : 'code';
         const difficulty = dbTerritory ? dbTerritory.difficulty : 1;
 
-        createHexagon(hex.x, hex.z, hexRadius * 0.95, hex.color, isTerritory, currentOwner, i, type, difficulty);
+        // INCREASED VISIBILITY: 
+        // - Neutral/Tinted opacity: 0.25 (up from 0.12)
+        // - Owned opacity: 0.5 (up from 0.3)
+        // - Emissive for Tinted: 0.2
+        const visualOpacity = isTerritory ? 0.5 : (isVisuallyTinted ? 0.25 : 0.12);
+        const emissiveIntensity = isTerritory ? 0.4 : (isVisuallyTinted ? 0.2 : 0);
+
+        createHexagon(hex.x, hex.z, hexRadius * 0.95, hex.color, isTerritory, currentOwner, i, type, difficulty, visualOpacity, emissiveIntensity);
     });
 }
 
-function createHexagon(x, z, r, color, isTerritory, ownerId, id, type, difficulty) {
+function createHexagon(x, z, r, color, isTerritory, ownerId, id, type, difficulty, opacity, eIntensity) {
     const points = [];
     for (let i = 0; i <= 6; i++) {
         const angle = (i * Math.PI) / 3;
@@ -471,7 +475,7 @@ function createHexagon(x, z, r, color, isTerritory, ownerId, id, type, difficult
         color: color,
         linewidth: isTerritory ? 3 : 1,
         transparent: true,
-        opacity: isTerritory ? 1.0 : 0.6 // Increased base visibility
+        opacity: isTerritory ? 1.0 : 0.6
     });
     const hex = new THREE.LineLoop(geometry, lineMat);
     hex.position.set(x, 0, z);
@@ -480,9 +484,9 @@ function createHexagon(x, z, r, color, isTerritory, ownerId, id, type, difficult
     const fillMat = new THREE.MeshStandardMaterial({
         color: color,
         transparent: true,
-        opacity: isTerritory ? 0.3 : 0.12,
+        opacity: opacity,
         emissive: color,
-        emissiveIntensity: isTerritory ? 0.4 : 0
+        emissiveIntensity: eIntensity
     });
     const fill = new THREE.Mesh(fillGeo, fillMat);
     fill.position.set(x, 0, z);

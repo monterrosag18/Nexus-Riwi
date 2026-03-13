@@ -1,9 +1,9 @@
-import { supabase } from '../../../lib/supabase';
+import { supabase, supabaseAdmin } from '../../../lib/supabase';
 
 export default async function handler(req, res) {
   try {
     if (req.method === 'GET') {
-      const { data: territories, error } = await supabase
+      const { data: territories, error } = await supabaseAdmin
         .from('territories')
         .select('*');
       
@@ -15,8 +15,8 @@ export default async function handler(req, res) {
       const { id, clanId, username } = req.body;
       if (!id || !clanId) return res.status(400).json({ message: 'Missing fields' });
 
-      // 1. Get current territory state to identify previous owner
-      const { data: oldTerr, error: fetchError } = await supabase
+      // 1. Get current territory state (ADMIN)
+      const { data: oldTerr, error: fetchError } = await supabaseAdmin
         .from('territories')
         .select('owner_id')
         .eq('id', id)
@@ -24,34 +24,34 @@ export default async function handler(req, res) {
       
       const prevOwner = oldTerr ? oldTerr.owner_id : 'neutral';
 
-      // 2. Update owner
-      const { error: updateError } = await supabase
+      // 2. Update owner (ADMIN)
+      const { error: updateError } = await supabaseAdmin
         .from('territories')
         .update({ owner_id: clanId })
         .eq('id', id);
 
       if (updateError) throw updateError;
 
-      // 3. Increment Points (Server-Side)
+      // 3. Increment Points (ADMIN)
       // A. Increment New Clan (+100)
-      const { data: clanData } = await supabase.from('clans').select('points').eq('id', clanId).single();
+      const { data: clanData } = await supabaseAdmin.from('clans').select('points').eq('id', clanId).single();
       if (clanData) {
-        await supabase.from('clans').update({ points: (clanData.points || 0) + 100 }).eq('id', clanId);
+        await supabaseAdmin.from('clans').update({ points: (clanData.points || 0) + 100 }).eq('id', clanId);
       }
 
       // B. Increment User (+100)
       if (username) {
-        const { data: userData } = await supabase.from('users').select('points').eq('username', username).single();
+        const { data: userData } = await supabaseAdmin.from('users').select('points').eq('username', username).single();
         if (userData) {
-          await supabase.from('users').update({ points: (userData.points || 0) + 100 }).eq('username', username);
+          await supabaseAdmin.from('users').update({ points: (userData.points || 0) + 100 }).eq('username', username);
         }
       }
 
       // C. Decrement Old Clan (-50) if it wasn't neutral
       if (prevOwner && prevOwner !== 'neutral' && prevOwner !== clanId) {
-        const { data: oldClanData } = await supabase.from('clans').select('points').eq('id', prevOwner).single();
+        const { data: oldClanData } = await supabaseAdmin.from('clans').select('points').eq('id', prevOwner).single();
         if (oldClanData) {
-          await supabase.from('clans').update({ points: Math.max(0, (oldClanData.points || 0) - 50) }).eq('id', prevOwner);
+          await supabaseAdmin.from('clans').update({ points: Math.max(0, (oldClanData.points || 0) - 50) }).eq('id', prevOwner);
         }
       }
 

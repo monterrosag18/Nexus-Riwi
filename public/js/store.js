@@ -124,16 +124,15 @@ class Store {
 
             if (territoriesRes.ok) {
                 const rawTerritories = await territoriesRes.json();
-                if (Array.isArray(rawTerritories) && rawTerritories.length > 0) {
-                    this.state.territories = rawTerritories.map(t => ({
-                        id: parseInt(t.id),
-                        owner: (t.owner_id || 'neutral').toLowerCase(),
-                        type: t.type || 'code',
-                        biome: t.biome || 'city',
-                        difficulty: t.difficulty || 1,
-                        question: t.question || this.getMockQuestion(t.type || 'code')
-                    }));
-                }
+                // ALWAYS Update territories, even if empty (essential for resets)
+                this.state.territories = (Array.isArray(rawTerritories) ? rawTerritories : []).map(t => ({
+                    id: parseInt(t.id),
+                    owner: (t.owner_id || 'neutral').toLowerCase(),
+                    type: t.type || 'code',
+                    biome: t.biome || 'city',
+                    difficulty: t.difficulty || 1,
+                    question: t.question || this.getMockQuestion(t.type || 'code')
+                }));
             } else {
                 console.warn('Territories sync failed, keeping local state');
                 this.state.syncError = true;
