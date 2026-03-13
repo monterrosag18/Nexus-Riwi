@@ -7,11 +7,13 @@ export class HoloBanner {
         this.position = position;
         this.color = new THREE.Color(color);
         this.label = label || "NEXUS";
-        this.iconChar = iconChar || "\uf007"; // Default user icon if missing
+        this.iconChar = (iconChar || "\uf007").toString().trim(); 
         this.mesh = null;
         this.icon3d = null; // New property for 3D Geometry Icons
         this.uniforms = null;
+        this.standGroup = null; // Pivot for stand and 3D icons
 
+        console.log(`[HoloBanner] Init: ${label} | Icon: ${this.iconChar}`);
         this.init();
     }
 
@@ -118,7 +120,8 @@ export class HoloBanner {
         this.scene.add(this.mesh);
 
         // --- 2.5 REAL 3D ICON (Optional Highlight) ---
-        if (this.iconChar.startsWith('3d_')) {
+        const is3D = this.iconChar.toLowerCase().startsWith('3d_');
+        if (is3D) {
             this.create3DIcon();
         }
 
@@ -170,20 +173,25 @@ export class HoloBanner {
         }
 
         if (this.icon3d) {
-            this.icon3d.position.copy(this.position);
-            this.icon3d.position.y += 35; // Higher to avoid overlap
-            this.scene.add(this.icon3d);
+            // Adjust position relative to local center
+            this.icon3d.position.set(0, 38, 0); 
+            if (this.standGroup) {
+                this.standGroup.add(this.icon3d);
+            } else {
+                this.icon3d.position.add(this.position);
+                this.scene.add(this.icon3d);
+            }
             
-            // Add a point light to the icon itself so it illuminates the flag
+            // Add a point light to the icon itself
             const light = new THREE.PointLight(this.color, 2, 30);
-            light.position.set(0, 0, 0);
             this.icon3d.add(light);
+            console.log(`[HoloBanner] 3D Icon Attached: ${this.iconChar}`);
         }
     }
 
     createStand() {
-        const group = new THREE.Group();
-        group.position.copy(this.position);
+        this.standGroup = new THREE.Group();
+        this.standGroup.position.copy(this.position);
 
         // Crossbar (Top)
         const barGeo = new THREE.BoxGeometry(16, 0.5, 1);
@@ -217,7 +225,7 @@ export class HoloBanner {
         emitter.rotation.x = Math.PI; // Point up
         group.add(emitter);
 
-        this.scene.add(group);
+        this.scene.add(this.standGroup);
     }
 
     createIconTexture() {
@@ -242,7 +250,8 @@ export class HoloBanner {
         ctx.shadowBlur = 8;
 
         // Draw Icon (Centered in top half)
-        if (!this.iconChar.startsWith('3d_')) {
+        const is3D = this.iconChar.toLowerCase().startsWith('3d_');
+        if (!is3D) {
             ctx.font = '900 300px "Font Awesome 6 Free"';
             ctx.fillText(this.iconChar, 256, 400);
         }
