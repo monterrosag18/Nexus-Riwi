@@ -17,6 +17,32 @@ export default async function handler(req, res) {
 
         if (terrError) throw terrError;
 
+        // 1.5 Repopulate with 130 Neutral Sectors (The Map Structure)
+        console.log('[AdminAPI] Repopulating 130 neutral sectors...');
+        const newTerritories = [];
+        for (let i = 0; i < 130; i++) {
+            let type = 'code';
+            const r = Math.random();
+            if (r > 0.6) type = 'code';
+            else if (r > 0.3) type = 'english';
+            else type = 'soft-skills';
+
+            let biome = type === 'code' ? 'city' : (type === 'english' ? 'library' : 'park');
+            newTerritories.push({
+                id: i,
+                owner_id: null,
+                type: type,
+                biome: biome,
+                difficulty: Math.floor(Math.random() * 3) + 1
+            });
+        }
+
+        const { error: insertError } = await supabaseAdmin
+            .from('territories')
+            .insert(newTerritories);
+
+        if (insertError) throw insertError;
+
         // 2. Reset Clan Points
         const { error: clanError } = await supabaseAdmin
             .from('clans')

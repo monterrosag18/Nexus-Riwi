@@ -365,8 +365,8 @@ function buildTacticalGrid() {
     const clans = state.clans;
 
     // Defensive check: If no data, just show the background/empty scene
-    if (!territories || territories.length === 0 || !clans) {
-        console.warn("No Map Data Available. Showing Empty Sector.");
+    if (!clans) {
+        console.warn("No Clan Data Available. Showing Empty Sector.");
         return;
     }
 
