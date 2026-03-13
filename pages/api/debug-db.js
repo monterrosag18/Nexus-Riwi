@@ -4,6 +4,17 @@ export const dynamic = 'force-dynamic';
 
 export default async function handler(req, res) {
     try {
+        if (!supabaseAdmin) {
+            return res.status(500).json({ 
+                error: "Supabase Client failed to initialize.",
+                hint: "Check if NEXT_PUBLIC_SUPABASE_URL is valid.",
+                env: {
+                    url: process.env.NEXT_PUBLIC_SUPABASE_URL || 'MISSING',
+                    hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+                }
+            });
+        }
+
         // Test connection to a known table
         const { data: clans, error: clansError } = await supabaseAdmin
             .from('clans')
@@ -25,15 +36,12 @@ export default async function handler(req, res) {
             env: {
                 url: currentUrl,
                 serviceKey: hasServiceKey ? 'PRESENT' : 'MISSING',
-                anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'PRESENT' : 'MISSING',
             },
             clansCheck: clansError ? clansError : 'OK',
             gameSettingsCheck: settingsError ? settingsError : 'OK',
-            // Try to see what else is in the schema to identify project mismatch
-            schemaHint: settingsError?.hint || "NONE",
-            diagnosticTip: "Check if the URL above matches exactly your Supabase Project URL in the dashboard."
+            schemaHint: settingsError?.hint || "NONE"
         });
     } catch (e) {
-        return res.status(500).json({ error: e.message });
+        return res.status(500).json({ error: e.message, stack: e.stack });
     }
 }
