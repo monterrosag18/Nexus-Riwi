@@ -217,8 +217,6 @@ function initSolarSystem() {
     // 6. REALTIME REACTION
     store.subscribe((state) => {
         // We only care if territories changed. 
-        // We can optimize this by checking last update timestamp if we had it,
-        // but for now, we'll sync the colors of all hexes to match the state.
         if (state.territories && interactableHexes.length > 0) {
             state.territories.forEach(t => {
                 const mesh = interactableHexes.find(m => m.userData.id === t.id);
@@ -285,12 +283,12 @@ async function onMouseClick(event) {
         const hit = intersects[0].object;
         const hexData = hit.userData;
 
-        // Let's do a simple check. If it's your own territory, do nothing.
+        // User State
         const userState = store.getState().currentUser;
         if (!userState || !userState.clan) return;
 
-        const clanId = userState.clan.toUpperCase();
-        const targetOwner = hexData.owner ? hexData.owner.toUpperCase() : null;
+        const clanId = userState.clan.toLowerCase();
+        const targetOwner = hexData.owner ? hexData.owner.toLowerCase() : null;
 
         if (targetOwner === clanId) {
             console.log("Already owned by your clan.");
@@ -299,16 +297,15 @@ async function onMouseClick(event) {
 
         console.log(`Initiating breach sequence for Territory #${hexData.id} (Owner: ${targetOwner || 'NEUTRAL'})`);
 
-        // ADJACENCY RULE - Relaxed for playability, or at least better feedback
+        // ADJACENCY RULE
         let isAdjacent = false;
         const clickPos = hit.position;
         const hexRadiusValue = 8;
-        const maxAdjacencyDist = hexRadiusValue * 2.5; // Slightly more generous buffer
+        const maxAdjacencyDist = hexRadiusValue * 2.5;
 
-        // Find if this specific click is adjacent to ANY user territory
         for (let i = 0; i < interactableHexes.length; i++) {
             const h = interactableHexes[i];
-            const hOwner = h.userData.owner ? h.userData.owner.toUpperCase() : null;
+            const hOwner = h.userData.owner ? h.userData.owner.toLowerCase() : null;
             if (hOwner === clanId) {
                 const dist = Math.sqrt((clickPos.x - h.position.x) ** 2 + (clickPos.z - h.position.z) ** 2);
                 if (dist < maxAdjacencyDist) {
@@ -318,13 +315,11 @@ async function onMouseClick(event) {
             }
         }
 
-        // Check if map is empty (everyone starts somewhere)
-        const totalOwnedByMe = interactableHexes.filter(h => (h.userData.owner || '').toUpperCase() === clanId).length;
+        // Everyone starts somewhere
+        const totalOwnedByMe = interactableHexes.filter(h => (h.userData.owner || '').toLowerCase() === clanId).length;
         if (totalOwnedByMe === 0) isAdjacent = true;
 
         if (!isAdjacent) {
-            console.warn("OUT OF RANGE! Connection unstable.");
-            // Mandatory adjacency: Show feedback and return
             const feedback = document.createElement('div');
             feedback.style.cssText = `
                 position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -339,19 +334,14 @@ async function onMouseClick(event) {
             return;
         }
 
-        // Trigger visual "Under Attack"
         hit.material.emissiveIntensity = 1.0;
         hit.userData.isUnderAttack = true;
 
-        // Launch the Question Modal
         const modal = await createQuestionModal(hexData, hit);
         document.body.appendChild(modal);
     }
 }
 
-// ------------------------------------------------------------------
-// REVISED TACTICAL GRID BUILDER
-// ------------------------------------------------------------------
 function buildTacticalGrid() {
     interactableHexes = [];
     clanBanners = [];
@@ -364,26 +354,17 @@ function buildTacticalGrid() {
     const territories = state.territories;
     const clans = state.clans;
 
-    // Defensive check: If no data, just show the background/empty scene
-    if (!clans) {
-        console.warn("No Clan Data Available. Showing Empty Sector.");
-        return;
-    }
+    if (!clans) return;
 
-    // 1. Grid Parameters
     const hexRadius = 8;
     const hexWidth = Math.sqrt(3) * hexRadius;
     const hexHeight = 2 * hexRadius;
 
-    // 2. DEFINE CLANS & POSITIONS (Radial Layout)
     const clanIds = Object.keys(clans);
     const totalClans = clanIds.length;
-
-    // Scale map radius based on number of clans so it doesn't get crowded
     const mapRadius = Math.max(90, totalClans * 20);
 
-    // Create Banners in a perfect circle
-    const bannerDistributions = {}; // Map clanId to its orbital center
+    const bannerDistributions = {};
 
     clanIds.forEach((id, index) => {
         const angle = (360 / totalClans) * index;
@@ -393,16 +374,13 @@ function buildTacticalGrid() {
         const pos = new THREE.Vector3(x, 0, z);
 
         const clanData = clans[id];
-        // Ensure icon exists, fallback if not
         const icon = clanData.icon || '\uf544';
 
         createClanStandard(clanData.name, pos, clanData.color, icon);
-        bannerDistributions[id] = { vec: pos, color: clanData.color, assigned: 0 };
+        bannerDistributions[id] = { vec: pos, color: clanData.color };
 
-        // Add pulsing ground light for the user's own clan
         const currentUser = state.currentUser;
         if (currentUser && currentUser.clan === id) {
-            // Outer pulsing ring
             const ringGeo = new THREE.RingGeometry(12, 16, 64);
             const ringMat = new THREE.MeshBasicMaterial({
                 color: new THREE.Color(clanData.color),
@@ -415,159 +393,117 @@ function buildTacticalGrid() {
             ring.rotation.x = -Math.PI / 2;
             ring.position.set(x, 0.5, z);
             tacticalGroup.add(ring);
-
-            // Inner glow disk
-            const diskGeo = new THREE.CircleGeometry(12, 64);
-            const diskMat = new THREE.MeshBasicMaterial({
-                color: new THREE.Color(clanData.color),
-                transparent: true,
-                opacity: 0.08,
-                side: THREE.DoubleSide,
-                blending: THREE.AdditiveBlending
-            });
-            const disk = new THREE.Mesh(diskGeo, diskMat);
-            disk.rotation.x = -Math.PI / 2;
-            disk.position.set(x, 0.3, z);
-            tacticalGroup.add(disk);
-
-            // Point light for the user's clan
-            const clanLight = new THREE.PointLight(new THREE.Color(clanData.color), 3, 60);
-            clanLight.position.set(x, 8, z);
-            scene.add(clanLight);
-
-            // Store for animation
-            ring.userData.pulseRing = true;
-            ring.userData.baseMat = ringMat;
         }
     });
 
-    // 3. GENERATE HEXAGONS
-    // We will generate a hexagonal grid map large enough to cover the banners
     const ringSize = Math.ceil(mapRadius / hexWidth) + 3;
     const allHexes = [];
 
-    // Step A: Collect all valid grid coordinates
     for (let q = -ringSize; q <= ringSize; q++) {
         for (let r = -ringSize; r <= ringSize; r++) {
             if (Math.abs(q + r) <= ringSize) {
                 const x = hexWidth * (q + r / 2);
                 const z = hexHeight * (3 / 4) * r;
-
-                // Center Exclusion (Tower Safety)
                 if (Math.sqrt(x * x + z * z) < 25) continue;
-
                 allHexes.push({ x, z, owner: null, color: COLORS.neutral });
             }
         }
     }
 
-    // Step B: mathematically assign default owners ONLY for hexes that are neutral in the DB
-    // This maintains the "Initial Cluster" while allowing the rest of the map to be dynamic
-    Object.keys(bannerDistributions).forEach(clanId => {
-        const banner = bannerDistributions[clanId];
-
-        // Find neighbors for this banner
-        const availableHexes = allHexes.filter(h => h.owner === null);
-        availableHexes.sort((a, b) => {
-            const distA = Math.sqrt((a.x - banner.vec.x) ** 2 + (a.z - banner.vec.z) ** 2);
-            const distB = Math.sqrt((b.x - banner.vec.x) ** 2 + (b.z - banner.vec.z) ** 2);
-            return distA - distB;
-        });
-
-        // Claim the 5 closest ONLY if they aren't already owned by someone else in the DB
-        const closest5 = availableHexes.slice(0, 5);
-        closest5.forEach(hex => {
-            hex.owner = clanId;
-            const clanData = clans[clanId];
-            hex.color = clanData ? clanData.color : COLORS.neutral;
-        });
-    });
-
-    // Step C: Sync with DB Territories
     allHexes.forEach((hex, i) => {
         const dbTerritory = territories.find(t => parseInt(t.id) === i);
         if (dbTerritory && dbTerritory.owner && dbTerritory.owner !== 'neutral') {
             hex.owner = dbTerritory.owner;
-            // Robust color lookup
-            const ownerId = hex.owner.toLowerCase().replace(/\s+/g, '');
-            const clanData = clans[ownerId] || clans[hex.owner];
+            const ownerId = hex.owner.toLowerCase();
+            const clanData = clans[ownerId];
             hex.color = clanData ? clanData.color : COLORS.neutral;
-        } else if (dbTerritory) {
-            console.warn(`[HexGrid] DB Territory ${i} found but has no valid owner or is neutral:`, dbTerritory);
         }
 
-        // Strip out excess neutral hexes that are too far into deep space
-        if (hex.owner === null) {
-            const distFromCenter = Math.sqrt(hex.x * hex.x + hex.z * hex.z);
-            if (distFromCenter > mapRadius * 1.1) return;
-        }
+        const distFromCenter = Math.sqrt(hex.x * hex.x + hex.z * hex.z);
+        if (hex.owner === null && distFromCenter > mapRadius * 1.1) return;
 
         const isTerritory = hex.owner !== null;
-        const type = dbTerritory ? dbTerritory.type : hex.type || 'code';
-        const difficulty = dbTerritory ? dbTerritory.difficulty : hex.difficulty || 1;
+        const type = dbTerritory ? dbTerritory.type : 'code';
+        const difficulty = dbTerritory ? dbTerritory.difficulty : 1;
 
         createHexagon(hex.x, hex.z, hexRadius * 0.95, hex.color, isTerritory, hex.owner, i, type, difficulty);
     });
 }
 
 function createHexagon(x, z, r, color, isTerritory, ownerId, id, type, difficulty) {
-    // 1. Line Loop (The glowing border)
     const points = [];
     for (let i = 0; i <= 6; i++) {
         const angle = (i * Math.PI) / 3;
         points.push(new THREE.Vector3(Math.cos(angle) * r, 0, Math.sin(angle) * r));
     }
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
-
-    // Territory lines are thicker/brighter
     const lineMat = new THREE.LineBasicMaterial({
         color: color,
         linewidth: isTerritory ? 3 : 1,
         transparent: true,
-        opacity: isTerritory ? 1.0 : 0.4 // Slightly brighter lines (was 0.3)
+        opacity: isTerritory ? 1.0 : 0.4
     });
     const hex = new THREE.LineLoop(geometry, lineMat);
     hex.position.set(x, 0, z);
 
-    // 2. Interactable Fill
-    // Territory hexes have a slight glow fill
     const fillGeo = new THREE.CylinderGeometry(r * 0.9, r * 0.9, 0.5, 6);
     const fillMat = new THREE.MeshStandardMaterial({
         color: color,
         transparent: true,
-        opacity: isTerritory ? 0.3 : 0.12, // More visible neutral fill (was 0.05)
+        opacity: isTerritory ? 0.3 : 0.12,
         emissive: color,
         emissiveIntensity: isTerritory ? 0.4 : 0
     });
     const fill = new THREE.Mesh(fillGeo, fillMat);
     fill.position.set(x, 0, z);
 
-    // Bind metadata for Raycaster and logic
-    fill.userData = {
-        id: id,
-        type: type,
-        difficulty: difficulty,
-        isTerritory: isTerritory,
-        owner: ownerId,
-        baseColor: color,
-        isUnderAttack: false
-    };
-
-    // Store for raycaster
+    fill.userData = { id, type, difficulty, isTerritory, owner: ownerId, baseColor: color };
     interactableHexes.push(fill);
-
     tacticalGroup.add(hex);
     tacticalGroup.add(fill);
 }
 
 function createClanStandard(name, pos, color, icon) {
-    // NEW IMPLEMENTATION: Use HoloBanner Class
     const banner = new HoloBanner(scene, pos, color, name, icon);
-
-    // Rotate banners to face center (0,0,0) roughly
-    if (banner.mesh) {
-        banner.mesh.lookAt(0, 0, 0);
-    }
-
+    if (banner.mesh) banner.mesh.lookAt(0, 0, 0);
     clanBanners.push(banner);
+}
+
+export function executeConquest(hexData, hitMesh, winningClan) {
+    const clanColors = {
+        'turing': 0x00c3ff,
+        'tesla': 0xff0000,
+        'mccarthy': 0x00ff44,
+        'lovelace': 0xaa00ff,
+        'neumann': 0xff6600,
+        'thompson': 0x9B51E0,
+        'halmiton': 0xF2C94C
+    };
+
+    const newColorHex = clanColors[winningClan.toLowerCase()] || 0x00f0ff;
+    hitMesh.material = hitMesh.material.clone();
+    hitMesh.material.color.setHex(newColorHex);
+    hitMesh.material.emissive.setHex(newColorHex);
+    hitMesh.material.opacity = 0.3;
+    hitMesh.material.emissiveIntensity = 0.4;
+
+    hitMesh.parent.children.forEach(child => {
+        if (child.type === 'LineLoop' && child.position.distanceToSquared(hitMesh.position) < 0.1) {
+            child.material = child.material.clone();
+            child.material.color.setHex(newColorHex);
+            child.material.opacity = 1.0;
+            child.material.linewidth = 3;
+        }
+    });
+
+    hitMesh.userData.isTerritory = true;
+    hitMesh.userData.owner = winningClan;
+    hitMesh.userData.baseColor = newColorHex;
+
+    if (window.gsap) {
+        gsap.fromTo(hitMesh.scale,
+            { x: 1, y: 1, z: 1 },
+            { x: 1.5, y: 1.5, z: 1.5, duration: 0.3, yoyo: true, repeat: 1, ease: "power2.out" }
+        );
+    }
 }

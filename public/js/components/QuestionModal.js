@@ -177,12 +177,14 @@ export default async function createQuestionModal(hexData, hitMesh) {
             statusMsgText.textContent = 'ACCESS GRANTED. OVERRIDING PROTOCOLS...';
             statusMsgText.style.color = '#00ff44';
             
-            // OPTIMISTIC UPDATE: Paint hex immediately for "Speed"
-            executeConquest(hexData, hitMesh, user.clan);
-            
+            // ACCESS GRANTED. Now update server.
             setTimeout(async () => {
-                const success = await store.conquerTerritory(hexData.id, user.clan);
+                const winningClanId = user.clan.toLowerCase();
+                const success = await store.conquerTerritory(hexData.id, winningClanId);
                 if (success) {
+                    // Update visuals ONLY on success
+                    const { executeConquest } = await import('./HexGrid.js');
+                    executeConquest(hexData, hitMesh, winningClanId);
                     closeModal();
                 } else {
                     statusMsgText.textContent = 'SYNC ERROR. TRY AGAIN.';
@@ -206,52 +208,3 @@ export default async function createQuestionModal(hexData, hitMesh) {
     return modalOverlay;
 }
 
-async function executeConquest(hexData, hitMesh, winningClan) {
-    const success = await store.conquerTerritory(hexData.id, winningClan);
-    if (!success) return false;
-
-    // 2. Change Visuals in 3D Scene
-    const clanColors = {
-        'turing': 0x00c3ff,
-        'tesla': 0xff0000,
-        'mccarthy': 0x00ff44,
-        'lovelace': 0xaa00ff,
-        'neumann': 0xff6600,
-        'thompson': 0x9B51E0,
-        'halmiton': 0xF2C94C
-    };
-
-    const newColorHex = clanColors[winningClan.toLowerCase()] || 0x00f0ff;
-
-    // We expect hitMesh (Fill) and its parent group to contain the LineLoop
-
-    // CLONE the materials to prevent global coloring (BUG FIX)
-    hitMesh.material = hitMesh.material.clone();
-    hitMesh.material.color.setHex(newColorHex);
-    hitMesh.material.emissive.setHex(newColorHex);
-    hitMesh.material.opacity = 0.3;
-    hitMesh.material.emissiveIntensity = 0.4;
-
-    // Find sibling LineLoop by checking exact same position
-    hitMesh.parent.children.forEach(child => {
-        if (child.type === 'LineLoop' && child.position.distanceToSquared(hitMesh.position) < 0.1) {
-            child.material = child.material.clone(); // CLONE LINE
-            child.material.color.setHex(newColorHex);
-            child.material.opacity = 1.0;
-            child.material.linewidth = 3;
-        }
-    });
-
-    // Update Metadata
-    hitMesh.userData.isTerritory = true;
-    hitMesh.userData.owner = winningClan;
-    hitMesh.userData.baseColor = newColorHex;
-
-    // Victory Visual Flair
-    if (window.gsap) {
-        gsap.fromTo(hitMesh.scale,
-            { x: 1, y: 1, z: 1 },
-            { x: 1.5, y: 1.5, z: 1.5, duration: 0.3, yoyo: true, repeat: 1, ease: "power2.out" }
-        );
-    }
-}
