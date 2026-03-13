@@ -312,7 +312,11 @@ class Store {
             const response = await fetch('/api/territories', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id, clanId })
+                body: JSON.stringify({ 
+                    id, 
+                    clanId, 
+                    username: this.state.currentUser ? this.state.currentUser.name : null 
+                })
             });
             const result = await response.json();
             if (result.success) {
