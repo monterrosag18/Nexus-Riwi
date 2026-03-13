@@ -34,7 +34,9 @@ export default async function handler(req, res) {
         username,
         password_hash: hashedPassword,
         clan_id: clan.toLowerCase(),
-        credits: 2000
+        credits: 2000,
+        total_spins: 0,
+        points: 0
       });
 
     if (insertError) throw insertError;

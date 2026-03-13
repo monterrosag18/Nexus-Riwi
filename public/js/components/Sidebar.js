@@ -1,5 +1,7 @@
 import { store } from '../store.js';
 import createRulesModal from './RulesModal.js';
+import createGachaModal from './GachaModal.js';
+import createProfilePanel from './ProfilePanel.js';
 
 export function renderSidebar() {
     const nav = document.createElement('nav');
@@ -24,6 +26,15 @@ export function renderSidebar() {
         `;
 
         // Handle specific actions
+        if (item.route === 'shop') {
+            link.href = '#';
+            link.onclick = (e) => {
+                e.preventDefault();
+                const modal = createGachaModal();
+                document.body.appendChild(modal);
+            };
+        }
+
         if (item.route === 'chat') {
             link.href = '#';
             link.onclick = (e) => {
@@ -43,6 +54,18 @@ export function renderSidebar() {
 
         nav.appendChild(link);
     });
+
+    // Profile Trigger (Pinned to bottom-ish)
+    const profileLink = document.createElement('a');
+    profileLink.href = '#';
+    profileLink.className = 'nav-item';
+    profileLink.innerHTML = `<i class="fa-solid fa-user-gear"></i><span class="tooltip">PROFILE</span>`;
+    profileLink.onclick = (e) => {
+        e.preventDefault();
+        const modal = createProfilePanel();
+        document.body.appendChild(modal);
+    };
+    nav.appendChild(profileLink);
 
     // Spacer
     const spacer = document.createElement('div');

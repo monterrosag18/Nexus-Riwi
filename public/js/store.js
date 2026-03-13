@@ -329,22 +329,51 @@ class Store {
     // Check if a target hex ID is adjacent to any hex owned by the clan
     checkAdjacency(targetId, clan) {
         const clanId = clan.toLowerCase();
+        
+        // 1. Get neighbors using the geometric coordinate system (HexGrid uses deterministic ringSize: 12)
         const neighbors = this.getNeighbors(targetId);
+        
+        // 2. See if any neighbor is owned by me
         const ownedIds = this.state.territories
-            .filter(t => t.owner.toLowerCase() === clanId)
+            .filter(t => t.owner && t.owner.toLowerCase() === clanId)
             .map(t => t.id);
 
         return neighbors.some(nId => ownedIds.includes(nId));
     }
 
-    getNeighbors(index) {
-        const width = 9;
-        const candidates = [
-            index - 1, index + 1,
-            index - width, index - width + 1, index - width - 1,
-            index + width, index + width + 1, index + width - 1
+    getNeighbors(id) {
+        // HexGrid.js uses a "Ring" algorithm (Deterministic). 
+        // We must replicate the same (q, r) generation to find neighbors correctly.
+        const ringSize = 12;
+        const allHexes = [];
+        
+        // RE-GENERATE COORDINATE MAP (Exactly as HexGrid.js does)
+        for (let q = -ringSize; q <= ringSize; q++) {
+            for (let r = -ringSize; r <= ringSize; r++) {
+                if (Math.abs(q + r) <= ringSize) {
+                    const x = (Math.sqrt(3) * 8) * (q + r / 2);
+                    const z = (2 * 8) * (3 / 4) * r;
+                    if (Math.sqrt(x * x + z * z) < 25) continue; // Void center
+                    allHexes.push({ id: allHexes.length, q, r });
+                }
+            }
+        }
+
+        const target = allHexes.find(h => h.id === id);
+        if (!target) return [];
+
+        const directions = [
+            {q: 1, r: 0}, {q: 1, r: -1}, {q: 0, r: -1},
+            {q: -1, r: 0}, {q: -1, r: 1}, {q: 0, r: 1}
         ];
-        return candidates.filter(c => c >= 0 && c < 100); // Expanded boundary
+
+        const neighborIds = [];
+        directions.forEach(d => {
+            const neighbor = allHexes.find(h => h.q === target.q + d.q && h.r === target.r + d.r);
+            if (neighbor) neighborIds.push(neighbor.id);
+        });
+
+        return neighborIds;
     }
 
     async conquerTerritory(id, clan) {
@@ -403,12 +432,13 @@ class Store {
                 body: JSON.stringify({ username, clan, password })
             });
             const result = await response.json();
-            if (result.success) {
+            if (response.ok && result.success) {
                 // For now, auto-login after register (simplified)
                 return await this.loginUser(username, password);
             }
             return { success: false, message: result.message || 'REGISTRATION FAILED' };
         } catch (error) {
+            console.error('Registration error:', error);
             return { success: false, message: 'NETWORK/SYSTEM ERROR' };
         }
     }
@@ -572,10 +602,13 @@ class Store {
     // --- CHAT SYSTEM METHODS ---
     async addChatMessage(clanId, user, msg) {
         try {
+            const { filterChat } = await import('./utils/filter.js');
+            const cleanMsg = filterChat(msg);
+            
             await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ clanId, username: user.name, content: msg })
+                body: JSON.stringify({ clanId, username: user.name, content: cleanMsg })
             });
             
             // Polling will handle getting the message back

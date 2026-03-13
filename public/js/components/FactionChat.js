@@ -70,7 +70,9 @@ export default function createFactionChat() {
 
         return messages.map(m => {
             const time = new Date(m.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const isMe = m.user === store.getState().currentUser?.name;
+            const myName = (store.getState().currentUser?.name || '').toLowerCase();
+            const msgUser = (m.user || '').toLowerCase();
+            const isMe = msgUser === myName;
             const chatColor = (isMe && store.getState().currentUser?.active_chat_color) || '';
             
             return `

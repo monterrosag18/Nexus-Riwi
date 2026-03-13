@@ -316,28 +316,13 @@ async function onMouseClick(event) {
         console.log(`Initiating breach sequence for Territory #${hexData.id} (Owner: ${targetOwner || 'NEUTRAL'})`);
 
         // ADJACENCY RULE
-        let isAdjacent = false;
-        const clickPos = hit.position;
-        const hexRadiusValue = 8;
-        const maxAdjacencyDist = hexRadiusValue * 2.5;
+        const isAdjacent = store.checkAdjacency(hexData.id, clanId);
 
-        for (let i = 0; i < interactableHexes.length; i++) {
-            const h = interactableHexes[i];
-            const hOwner = h.userData.owner ? h.userData.owner.toLowerCase() : null;
-            if (hOwner === clanId) {
-                const dist = Math.sqrt((clickPos.x - h.position.x) ** 2 + (clickPos.z - h.position.z) ** 2);
-                if (dist < maxAdjacencyDist) {
-                    isAdjacent = true;
-                    break;
-                }
-            }
-        }
+        // Everyone starts somewhere (Check if has territories)
+        const myTerritories = store.getState().territories.filter(t => (t.owner || '').toLowerCase() === clanId);
+        const canStartAnywhere = myTerritories.length === 0;
 
-        // Everyone starts somewhere
-        const totalOwnedByMe = interactableHexes.filter(h => (h.userData.owner || '').toLowerCase() === clanId).length;
-        if (totalOwnedByMe === 0) isAdjacent = true;
-
-        if (!isAdjacent) {
+        if (!isAdjacent && !canStartAnywhere) {
             const feedback = document.createElement('div');
             feedback.style.cssText = `
                 position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
