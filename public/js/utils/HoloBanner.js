@@ -9,6 +9,7 @@ export class HoloBanner {
         this.label = label || "NEXUS";
         this.iconChar = iconChar || "\uf007"; // Default user icon if missing
         this.mesh = null;
+        this.icon3d = null; // New property for 3D Geometry Icons
         this.uniforms = null;
 
         this.init();
@@ -116,8 +117,65 @@ export class HoloBanner {
         // Add to Scene
         this.scene.add(this.mesh);
 
+        // --- 2.5 REAL 3D ICON (Optional Highlight) ---
+        if (this.iconChar.startsWith('3d_')) {
+            this.create3DIcon();
+        }
+
         // --- 3. THE STAND (POLE) ---
         this.createStand();
+    }
+
+    create3DIcon() {
+        let geometry;
+        const mat = new THREE.MeshStandardMaterial({ 
+            color: this.color, 
+            emissive: this.color, 
+            emissiveIntensity: 0.5,
+            metalness: 0.8,
+            roughness: 0.2,
+            transparent: true,
+            opacity: 0.8
+        });
+
+        if (this.iconChar === '3d_shield') {
+            geometry = new THREE.BoxGeometry(4, 5, 1);
+        } else if (this.iconChar === '3d_gem') {
+            geometry = new THREE.OctahedronGeometry(3);
+        } else if (this.iconChar === '3d_atom') {
+            geometry = new THREE.SphereGeometry(1.5, 16, 16);
+            // Add Rings for Atom
+            const ringGeo = new THREE.TorusGeometry(3.5, 0.15, 8, 32);
+            const ring1 = new THREE.Mesh(ringGeo, mat);
+            const ring2 = new THREE.Mesh(ringGeo, mat);
+            ring2.rotation.x = Math.PI / 2;
+            const atomGroup = new THREE.Group();
+            atomGroup.add(new THREE.Mesh(geometry, mat));
+            atomGroup.add(ring1);
+            atomGroup.add(ring2);
+            this.icon3d = atomGroup;
+        } else if (this.iconChar === '3d_bolt') {
+            const shape = new THREE.Shape();
+            shape.moveTo(0, 4);
+            shape.lineTo(2, 0);
+            shape.lineTo(0.5, 0);
+            shape.lineTo(1.5, -4);
+            shape.lineTo(-0.5, 0);
+            shape.lineTo(1, 0);
+            shape.lineTo(0, 4);
+            geometry = new THREE.ExtrudeGeometry(shape, { depth: 1, bevelEnabled: false });
+            this.icon3d = new THREE.Mesh(geometry, mat);
+        }
+
+        if (!this.icon3d && geometry) {
+            this.icon3d = new THREE.Mesh(geometry, mat);
+        }
+
+        if (this.icon3d) {
+            this.icon3d.position.copy(this.position);
+            this.icon3d.position.y += 28; // Above the banner
+            this.scene.add(this.icon3d);
+        }
     }
 
     createStand() {
@@ -181,8 +239,10 @@ export class HoloBanner {
         ctx.shadowBlur = 8;
 
         // Draw Icon (Centered in top half)
-        ctx.font = '900 300px "Font Awesome 6 Free"';
-        ctx.fillText(this.iconChar, 256, 400);
+        if (!this.iconChar.startsWith('3d_')) {
+            ctx.font = '900 300px "Font Awesome 6 Free"';
+            ctx.fillText(this.iconChar, 256, 400);
+        }
 
         // Draw Label (Below icon)
         ctx.font = '700 80px "Rajdhani"';
@@ -199,6 +259,12 @@ export class HoloBanner {
     update(time) {
         if (this.uniforms) {
             this.uniforms.time.value = time;
+        }
+        if (this.icon3d) {
+            this.icon3d.rotation.y = time * 2;
+            if (this.iconChar === '3d_atom') {
+                this.icon3d.rotation.z = time;
+            }
         }
     }
 }

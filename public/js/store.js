@@ -11,6 +11,8 @@ class Store {
             if (stored) {
                 savedUser = JSON.parse(stored);
                 if (typeof savedUser.credits === 'undefined') savedUser.credits = 2000;
+                // Ensure ownedCosmetics exists
+                if (!savedUser.ownedCosmetics) savedUser.ownedCosmetics = [];
             }
         } catch (e) {
             console.error('Error loading user', e);
@@ -186,8 +188,8 @@ class Store {
 
         const baseHexesPerClan = 5;
         const totalBaseHexes = totalClans * baseHexesPerClan;
-        // The outer ring needs to grow significantly as more factions pile in
-        const totalBufferHexes = Math.max(30, totalClans * 10);
+        // EXPANDED MAP: Add 30 more hexes as requested (+ baseline buffer)
+        const totalBufferHexes = Math.max(30, totalClans * 10) + 30; 
         const targetHexCount = totalBaseHexes + totalBufferHexes;
 
         const territories = [];
@@ -202,7 +204,7 @@ class Store {
 
             territories.push({
                 id: i,
-                owner: 'neutral', // HexGrid will forcefully seize the 5 closest to banners later
+                owner: 'neutral',
                 type: type,
                 biome: biome,
                 difficulty: Math.floor(Math.random() * 3) + 1,
@@ -446,6 +448,7 @@ class Store {
             if (result.success) {
                 // Refresh local profile
                 await this.syncUserProfile();
+                this.notify(); // Force UI update
                 return true;
             }
         } catch (e) {

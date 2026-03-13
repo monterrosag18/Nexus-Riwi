@@ -1,47 +1,47 @@
-import { supabase } from '../../../lib/supabase';
+import { supabaseAdmin } from '../../../lib/supabase';
 
 export default async function handler(req, res) {
   try {
+    // 1. GET: Fetch all questions (Admin View)
     if (req.method === 'GET') {
-      const { data: questions, error } = await supabase
+      const { data, error } = await supabaseAdmin
         .from('questions')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('type', { ascending: true })
+        .order('difficulty', { ascending: true });
       
       if (error) throw error;
-      return res.status(200).json(questions);
+      return res.status(200).json(data);
     }
 
+    // 2. POST: Create or Update Question
     if (req.method === 'POST') {
-      const { id, type, difficulty, q, options, correct } = req.body;
-      if (!q || !options || correct === undefined) {
-        return res.status(400).json({ message: 'Missing fields' });
-      }
-
-      const questionData = { type, difficulty, q, options, correct };
+      const qData = req.body;
+      const { id, ...cleanData } = qData;
 
       if (id) {
         // Update
-        const { error } = await supabase
+        const { error } = await supabaseAdmin
           .from('questions')
-          .update(questionData)
+          .update(cleanData)
           .eq('id', id);
         if (error) throw error;
       } else {
-        // Create
-        const { error } = await supabase
+        // Insert
+        const { error } = await supabaseAdmin
           .from('questions')
-          .insert(questionData);
+          .insert([cleanData]);
         if (error) throw error;
       }
       return res.status(200).json({ success: true });
     }
 
+    // 3. DELETE: Remove Question
     if (req.method === 'DELETE') {
       const { id } = req.query;
-      if (!id) return res.status(400).json({ message: 'Missing id' });
+      if (!id) return res.status(400).json({ message: 'ID required' });
 
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('questions')
         .delete()
         .eq('id', id);

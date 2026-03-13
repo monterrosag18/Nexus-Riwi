@@ -70,13 +70,16 @@ export default function createFactionChat() {
 
         return messages.map(m => {
             const time = new Date(m.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const isMe = m.user === store.getState().currentUser?.name;
+            const chatColor = (isMe && store.getState().currentUser?.active_chat_color) || '';
+            
             return `
-                <div class="chat-message ${m.user === store.getState().currentUser?.name ? 'own' : ''}">
+                <div class="chat-message ${isMe ? 'own' : ''}">
                     <div class="msg-meta">
                         <span class="msg-user">${m.user.toUpperCase()}</span>
                         <span class="msg-time">${time}</span>
                     </div>
-                    <div class="msg-bubble">${m.msg}</div>
+                    <div class="msg-bubble" style="${chatColor ? `border-color: ${chatColor}; box-shadow: 0 0 10px ${chatColor}44; color: ${chatColor};` : ''}">${m.msg}</div>
                 </div>
             `;
         }).join('');
