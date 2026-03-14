@@ -460,18 +460,17 @@ function buildTacticalGrid() {
         const type = dbTerritory ? dbTerritory.type : 'code';
         const difficulty = dbTerritory ? dbTerritory.difficulty : 1;
 
-        // INCREASED VISIBILITY: 
-        // - Neutral/Tinted opacity: 0.25 (up from 0.12)
-        // - Owned opacity: 0.5 (up from 0.3)
-        // - Emissive for Tinted: 0.2
+        // Home Base Highlight: Designated if it's the owner and part of initial tinting range
+        const isHomeBase = isTerritory && isVisuallyTinted;
+
         const visualOpacity = isTerritory ? 0.5 : (isVisuallyTinted ? 0.25 : 0.12);
         const emissiveIntensity = isTerritory ? 0.4 : (isVisuallyTinted ? 0.2 : 0);
 
-        createHexagon(hex.x, hex.z, hexRadius * 0.95, hex.color, isTerritory, currentOwner, i, type, difficulty, visualOpacity, emissiveIntensity);
+        createHexagon(hex.x, hex.z, hexRadius * 0.95, hex.color, isTerritory, currentOwner, i, type, difficulty, visualOpacity, emissiveIntensity, isHomeBase);
     });
 }
 
-function createHexagon(x, z, r, color, isTerritory, ownerId, id, type, difficulty, opacity, eIntensity) {
+function createHexagon(x, z, r, color, isTerritory, ownerId, id, type, difficulty, opacity, eIntensity, isHomeBase = false) {
     const points = [];
     for (let i = 0; i <= 6; i++) {
         const angle = (i * Math.PI) / 3;
@@ -502,6 +501,32 @@ function createHexagon(x, z, r, color, isTerritory, ownerId, id, type, difficult
     interactableHexes.push(fill);
     tacticalGroup.add(hex);
     tacticalGroup.add(fill);
+
+    // HQ Indicator for Home Bases
+    if (isHomeBase) {
+        const hqGeo = new THREE.RingGeometry(r * 0.6, r * 0.8, 6);
+        const hqMat = new THREE.MeshBasicMaterial({ 
+            color: 0xffffff, 
+            transparent: true, 
+            opacity: 0.8, 
+            side: THREE.DoubleSide,
+            blending: THREE.AdditiveBlending 
+        });
+        const hq = new THREE.Mesh(hqGeo, hqMat);
+        hq.rotation.x = -Math.PI / 2;
+        hq.position.set(x, 1, z);
+        
+        // Pulsing scale animation
+        if (window.gsap) {
+            gsap.to(hq.scale, {
+                x: 1.2, y: 1.2, duration: 1.5, repeat: -1, yoyo: true, ease: "sine.inOut"
+            });
+            gsap.to(hq.material, {
+                opacity: 0.3, duration: 1.5, repeat: -1, yoyo: true, ease: "sine.inOut"
+            });
+        }
+        tacticalGroup.add(hq);
+    }
 }
 
 function createClanStandard(name, pos, color, icon) {
