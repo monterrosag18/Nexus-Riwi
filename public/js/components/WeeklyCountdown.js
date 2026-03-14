@@ -18,28 +18,31 @@ export default function createWeeklyCountdown() {
         const now = new Date();
         const day = now.getDay(); // 0=Sun, 1=Mon...6=Sat
 
-        // Sunday is the "Complete/Reset" day
-        if (day === 0) {
-            return { completed: true, days: 0, hours: 0, mins: 0, secs: 0 };
+        // Calculate Next Friday at 11:59:59 PM
+        // Friday = 5
+        let target = new Date(now);
+        let daysUntilFriday = (5 - day + 7) % 7;
+        
+        // If today is Friday but it's already past 11:59:59, we target NEXT Friday
+        target.setDate(now.getDate() + daysUntilFriday);
+        target.setHours(23, 59, 59, 999);
+
+        if (now > target) {
+            target.setDate(target.getDate() + 7);
         }
 
-        // Calculate end: Saturday 11:59:59 PM of this week
-        const saturday = new Date(now);
-        const daysUntilSaturday = 6 - day; // Saturday = 6
-        saturday.setDate(now.getDate() + daysUntilSaturday);
-        saturday.setHours(23, 59, 59, 999);
-
-        const diff = saturday.getTime() - now.getTime();
-        if (diff <= 0) {
-            return { completed: true, days: 0, hours: 0, mins: 0, secs: 0 };
-        }
+        const diff = target.getTime() - now.getTime();
+        
+        // We only show "Completed" if we explicitly want a pause (e.g., Saturday morning)
+        // But the user wants "more time" for tomorrow's presentation, so we'll just show the next cycle.
+        const completed = false; 
 
         const secs = Math.floor((diff / 1000) % 60);
         const mins = Math.floor((diff / 1000 / 60) % 60);
         const hours = Math.floor((diff / 1000 / 60 / 60) % 24);
         const days = Math.floor(diff / 1000 / 60 / 60 / 24);
 
-        return { completed: false, days, hours, mins, secs };
+        return { completed, days, hours, mins, secs };
     }
 
     function pad(n) { return String(n).padStart(2, '0'); }
