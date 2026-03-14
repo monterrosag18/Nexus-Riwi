@@ -87,9 +87,10 @@ class Store {
                 const updatedTerr = payload.new;
                 const index = this.state.territories.findIndex(t => t.id === parseInt(updatedTerr.id));
                 if (index !== -1) {
-                    this.state.territories[index].owner = updatedTerr.owner_id || 'neutral';
+                    const newOwner = (updatedTerr.owner_id || 'neutral').toLowerCase();
+                    this.state.territories[index].owner = newOwner;
                     this.notify();
-                    this.logEvent(`Territory ${updatedTerr.id} captured by ${updatedTerr.owner_id || 'neutral'}`, 'warning');
+                    this.logEvent(`Sector #${updatedTerr.id} captured by ${newOwner.toUpperCase()}`, 'territory');
                 }
             })
             .subscribe();
@@ -380,7 +381,12 @@ class Store {
             .map(t => parseInt(t.id));
 
         const isAdjacent = neighbors.some(nId => ownedIds.includes(nId));
-        console.log(`[Adjacency] ID:${targetId} | Neighbors:`, neighbors, "| Owned:", ownedIds, "| Result:", isAdjacent);
+        
+        // Debug Pulse
+        if (!isAdjacent) {
+            console.log(`[Adjacency] ID:${targetId} | Neighbors:`, neighbors, "| OwnedByClan:", ownedIds);
+        }
+        
         return isAdjacent;
     }
 

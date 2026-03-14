@@ -82,7 +82,7 @@ export default async function handler(req, res) {
         return neighbors;
       };
 
-      const neighbors = getNeighbors(targetId);
+      const neighbors = getNeighbors(id);
       const myIds = myTerrs.map(t => parseInt(t.id));
       const isAdjacent = neighbors.some(nId => myIds.includes(nId));
 
@@ -129,6 +129,17 @@ export default async function handler(req, res) {
           await supabaseAdmin.from('clans').update({ points: Math.max(0, (oldClanData.points || 0) - 50) }).eq('id', prevOwner);
         }
       }
+
+      // D. Broadcast Conquest in Chat
+      const clanNames = {
+        'turing': 'TURING', 'tesla': 'TESLA', 'mccarthy': 'MCCARTHY', 
+        'thompson': 'THOMPSON', 'hamilton': 'HAMILTON'
+      };
+      await supabaseAdmin.from('chat_messages').insert([{
+        clan_id: 'SYSTEM',
+        user_username: 'ADMIN',
+        content: `⚠️ SECTOR #${id} SECURED BY ${clanNames[clanId] || clanId.toUpperCase()}`
+      }]);
 
       return res.status(200).json({ success: true });
     }
