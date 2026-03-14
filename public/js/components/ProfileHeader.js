@@ -93,7 +93,7 @@ function updateContent(container) {
             <div style="flex: 1;">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <span style="color: #fff; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1.1rem; letter-spacing: 1px;">
-                        ${user ? user.name.toUpperCase() : 'GUEST_OPERATOR'}
+                        ${(user && user.name) ? user.name.toUpperCase() : 'NEURAL_GUEST'}
                     </span>
                     ${shieldHTML}
                     <button id="global-edit-name-btn" style="
@@ -103,12 +103,13 @@ function updateContent(container) {
                         cursor: pointer;
                         font-size: 0.8rem;
                         transition: color 0.3s;
+                        display: ${user ? 'block' : 'none'};
                     ">
                         <i class="fa-solid fa-pen-to-square"></i>
                     </button>
                 </div>
                 <div style="color: ${clanColor}bb; font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; letter-spacing: 1.5px; text-transform: uppercase;">
-                    SECTOR: ${user ? user.clan : 'NOT_ASSIGNED'}
+                    SECTOR: ${(user && user.clan) ? user.clan : 'NOT_ASSIGNED'}
                 </div>
             </div>
 

@@ -23,128 +23,146 @@ export function initRouter() {
     window.addEventListener('hashchange', handleRoute);
 }
 
-function handleRoute() {
-    let hash = window.location.hash.slice(1);
+let isInitialLoad = true;
 
-    // Auth Guard
+function handleRoute() {
+    const rawHash = window.location.hash;
+    let hash = rawHash.slice(1);
     const user = store.getState().currentUser;
 
-    // If no user, force login
-    if (!user) {
-        if (hash !== 'login') {
-            window.location.hash = '#login';
-            return; // hashchange will fire again
-        }
-        // If user logged in and tries to go to login, redirect to map
-        if (hash === 'login' || !hash) {
-            window.location.hash = '#map';
-            return;
-        }
+    console.log(`[Router] Navigating to: ${hash || 'root'} | User: ${user ? user.name : 'None'}`);
 
-        // Admin Protection
-        if (hash === 'admin') {
-            const isAdmin = user.name === 'nexusadmin' || sessionStorage.getItem('nexus_admin_token');
-            if (!isAdmin) {
-                console.warn("UNAUTHORIZED ACCESS DETECTED: ACCESS DENIED TO SECTOR ADMIN");
-                window.location.hash = '#map';
-                return;
-            }
-        }
+    // 1. Redirection Logic (Auth Guards)
+    // If NO user and NOT on login page -> Force #login
+    const isValidUser = user && (user.name || user.id);
+
+    if (!isValidUser && hash !== 'login') {
+        console.log("[Router] Unauthenticated access. Redirecting to #login.");
+        window.location.hash = '#login';
+        return; 
     }
 
-    // Default to map if empty hash and logged in
-    if (!hash && user) hash = 'map';
+    // If USER exists and IS on login page or root -> Force #map
+    if (isValidUser && (hash === 'login' || !hash)) {
+        console.log("[Router] Authenticated user on login/root. Redirecting to #map.");
+        window.location.hash = '#map';
+        return;
+    }
 
-    // 1. Activate Blast Doors (GSAP Heavy Physics)
+    // 2. Admin Role Guard
+    if (hash === 'admin' && isValidUser && user.role !== 'SUPER_USER') {
+        console.log("[Router] Insufficient privileges for #admin. Redirecting to #map.");
+        window.location.hash = '#map';
+        return;
+    }
+
+    // Default hash fallback
+    if (!hash) hash = 'login';
+
     const doors = document.getElementById('transition-doors');
 
-    // Only animate if moving between views
-    if (doors) {
-        // GSAP Timeline for cinematic entry
+    // INITIAL LOAD OPTIMIZATION: 
+    // If it's the first time loading and we are at login, we skip the heavy slam animation.
+    if (isInitialLoad && hash === 'login') {
+        console.log("[Router] Initial Load: Login detected. Fast rendering.");
+        isInitialLoad = false;
+        changeViewContent(hash);
+        updateUIState(hash);
+        if (doors) {
+            gsap.set(['.door-left', '.door-right'], { x: (i) => i === 0 ? "-100%" : "100%" });
+            gsap.set(doors, { pointerEvents: "none" });
+        }
+        return;
+    }
+
+    isInitialLoad = false;
+
+    // Transition Logic
+    if (doors && window.gsap) {
+        console.log(`[Router] Transitioning to ${hash} via Blast Doors.`);
+        
         const tl = gsap.timeline({
             onComplete: () => {
-                // Animation sequence complete (Open)
                 gsap.set(doors, { pointerEvents: "none" });
+                console.log(`[Router] Transition to ${hash} complete.`);
             }
         });
 
-        // --- STEP 1: SLAM SHUT (Heavy Impact) ---
+        // Fail-safe: Force doors open after 4s
+        const failSafe = setTimeout(() => {
+            console.warn("[Router] Door transition timed out. Forcing open.");
+            gsap.to(['.door-left', '.door-right'], { x: (i) => i === 0 ? "-100%" : "100%", duration: 0.5 });
+            gsap.set(doors, { pointerEvents: "none" });
+        }, 4000);
+
         gsap.set(doors, { pointerEvents: "all" });
 
         tl.to(['.door-left', '.door-right'], {
             x: 0,
             duration: 0.4,
-            ease: "power4.in", // Accelerate heavily
+            ease: "power4.in", 
         })
+        .add(() => {
+            const flash = document.querySelector('.door-flash');
+            if (flash) gsap.fromTo(flash, { opacity: 1 }, { opacity: 0, duration: 0.2 });
 
-            // --- STEP 2: IMPACT SHOCKWAVE (Camera Shake + Spark) ---
-            .add(() => {
-                // Flash of light at center
-                const flash = document.querySelector('.door-flash');
-                if (flash) {
-                    gsap.fromTo(flash, { opacity: 1 }, { opacity: 0, duration: 0.2 });
-                }
-
-                // Shake the whole body slightly
-                gsap.to('body', {
-                    x: "random(-10, 10)",
-                    y: "random(-10, 10)",
-                    duration: 0.1,
-                    repeat: 3,
-                    yoyo: true,
-                    clearProps: "x,y"
-                });
-
-                // Show Loading HUD
-                gsap.to('.door-emblem', { opacity: 1, duration: 0.2 });
-            })
-
-            // --- STEP 3: CHANGE CONTENT (Hidden) ---
-            .add(() => {
-                changeViewContent(hash);
-                updateUIState(hash);
-            }, "+=0.3") // Wait a bit in dark
-
-            // --- STEP 4: UNLOCK & OPEN (Mechanical Release) ---
-            .to('.lock-mechanism', {
-                scale: 1.2,
-                opacity: 1,
-                duration: 0.4,
-                ease: "back.out(1.7)"
-            }, "+=0.5") // Wait for load
-
-            .to('.door-emblem', {
-                opacity: 0,
-                duration: 0.2
-            })
-
-            .to(['.door-left', '.door-right'], {
-                x: (i) => i === 0 ? "-100%" : "100%",
-                duration: 0.8,
-                ease: "power2.inOut", // Smooth heavy open
-                stagger: 0.1 // One opens slightly before other
+            gsap.to('body', {
+                x: "random(-10, 10)",
+                y: "random(-10, 10)",
+                duration: 0.1,
+                repeat: 3,
+                yoyo: true,
+                clearProps: "x,y"
             });
-
+            gsap.to('.door-emblem', { opacity: 1, duration: 0.2 });
+        })
+        .add(() => {
+            changeViewContent(hash);
+            updateUIState(hash);
+        }, "+=0.3")
+        .to('.lock-mechanism', {
+            scale: 1.2,
+            opacity: 1,
+            duration: 0.4,
+            ease: "back.out(1.7)"
+        }, "+=0.5")
+        .to('.door-emblem', { opacity: 0, duration: 0.2 })
+        .to(['.door-left', '.door-right'], {
+            x: (i) => i === 0 ? "-100%" : "100%",
+            duration: 0.8,
+            ease: "power2.inOut",
+            stagger: 0.1,
+            onComplete: () => clearTimeout(failSafe)
+        });
     } else {
-        // Fallback if no doors found
+        console.log(`[Router] Fast jumping to ${hash} (No Doors/GSAP).`);
         changeViewContent(hash);
         updateUIState(hash);
     }
 }
 
 function changeViewContent(hash) {
-    // Update store state
-    store.setView(hash);
+    try {
+        store.setView(hash);
+        const viewContainer = document.getElementById('view-container');
+        const renderFunction = routes[hash];
 
-    // Render view
-    const viewContainer = document.getElementById('view-container');
-    const renderFunction = routes[hash];
-
-    if (renderFunction) {
-        viewContainer.innerHTML = ''; // Clear current
-        viewContainer.appendChild(renderFunction());
-    } else {
-        viewContainer.innerHTML = '<h2>404 - Sector Not Found</h2>';
+        if (renderFunction) {
+            console.log(`[Router] Rendering component for: ${hash}`);
+            viewContainer.innerHTML = ''; 
+            const content = renderFunction();
+            if (content) {
+                viewContainer.appendChild(content);
+            } else {
+                console.error(`[Router] Render function for ${hash} returned null/undefined.`);
+            }
+        } else {
+            console.error(`[Router] No route found for: ${hash}`);
+            viewContainer.innerHTML = '<h2>404 - Sector Not Found</h2>';
+        }
+    } catch (err) {
+        console.error(`[Router] Critical failure rendering ${hash}:`, err);
+        document.getElementById('view-container').innerHTML = `<div class='error-view'>SYSTEM ERROR: UNABLE TO INITIALIZE SECTOR ${hash.toUpperCase()}</div>`;
     }
 }
 

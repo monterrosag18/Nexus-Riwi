@@ -38,7 +38,7 @@ class Store {
 
         this.state = {
             currentView: savedUser ? 'leaderboard' : 'login',
-            currentUser: savedUser,
+            currentUser: savedUser || null,
             clans: {}, // Loaded via API
             territories: [], // Loaded via API
             cosmetics: [
@@ -149,21 +149,40 @@ class Store {
     }
 
     logout(reason = 'USER_INITIATED') {
+        console.log(`[Store] Neural Purge Initiated. Reason: ${reason}`);
+        
+        // Clear all persistent session data
         localStorage.removeItem('riwi_user');
         localStorage.removeItem('riwi_token');
-        this.state.currentUser = null;
-        this.state.currentView = 'login';
-        this.notify();
+        localStorage.removeItem('riwi_events'); // Optional: Clear events on logout for fresh start
         
+        // Final alerts before reload
         if (reason === 'SESSION_OVERWRITE') {
             alert("⚠ SESSION TERMINATED: You have logged in from another device.");
         } else if (reason === 'SESSION_EXPIRED') {
             alert("🔒 NEURAL LINK TERMINATED: Your session has expired or been revoked. Please re-authenticate.");
         }
 
-        // Force a total reset of the frontend state
-        window.location.hash = '#login';
-        window.location.reload();
+        // ATOMIC RESET: 
+        // 1. Purge in-memory state FIRST to satisfy router guards immediately
+        this.state.currentUser = null;
+        
+        // 2. AGGRESSIVE UI HIDE: Prevent shell layout from lingering on Login screen
+        const hideEls = ['sidebar', 'top-bar', 'chat-widget'];
+        hideEls.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+
+        this.notify();
+
+        // 3. Force LANDING on #login to break any potential loops
+        window.location.replace(window.location.origin + '/#login');
+        
+        // Final force-reload to clear memory
+        setTimeout(() => {
+            window.location.reload();
+        }, 100);
     }
 
     // --- EVENT LOG METHODS ---
