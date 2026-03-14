@@ -23,10 +23,8 @@ export default async function createQuestionModal(hexData, hitMesh) {
         'turing': '#00c3ff',
         'tesla': '#ff0000',
         'mccarthy': '#00ff44',
-        'lovelace': '#aa00ff',
-        'neumann': '#ff6600',
         'thompson': '#9B51E0',
-        'halmiton': '#F2C94C'
+        'hamilton': '#F2C94C'
     };
     const activeColor = clanColors[user.clan.toLowerCase()] || '#00f0ff';
 

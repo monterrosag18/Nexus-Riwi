@@ -104,7 +104,16 @@ class Store {
             })
             .subscribe();
 
-        // 3. Listen for Current User Profile Changes (Atomic Sync & Single Session)
+        // 3. Game Settings (Champion Coronation)
+        client
+            .channel('public:game_settings')
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'game_settings' }, payload => {
+                console.log("[Store] CHAMPION UPDATE RECEIVED:", payload.new);
+                this.updateChampionLive();
+            })
+            .subscribe();
+
+        // 4. Listen for Current User Profile Changes (Atomic Sync & Single Session)
         if (this.state.currentUser) {
             const userId = this.state.currentUser.id || this.state.currentUser.name; // Fallback if id missing
             client
@@ -519,6 +528,20 @@ class Store {
             return { success: false, message: result.message || 'LOGIN FAILED' };
         } catch (error) {
             return { success: false, message: 'NETWORK/SYSTEM ERROR' };
+        }
+    }
+
+    async updateChampionLive() {
+        try {
+            const res = await fetch('/api/tournament/champion');
+            const data = await res.json();
+            if (data.champion) {
+                console.log("[Store] New Champion Synced:", data.champion.name);
+                this.state.weeklyChampion = data.champion;
+                this.notify();
+            }
+        } catch (e) {
+            console.error('[Store] Champion sync failed', e);
         }
     }
 

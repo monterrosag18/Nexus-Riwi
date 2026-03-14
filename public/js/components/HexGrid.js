@@ -583,8 +583,8 @@ export function executeConquest(hexData, hitMesh, winningClan) {
         'turing': 0x00c3ff,
         'tesla': 0xff0000,
         'mccarthy': 0x00ff44,
-        'hamilton': 0xF2C94C,
-        'thompson': 0x9B51E0
+        'thompson': 0x9B51E0,
+        'hamilton': 0xF2C94C
     };
 
     const newColorHex = clanColors[winningClan.toLowerCase()] || 0x00f0ff;

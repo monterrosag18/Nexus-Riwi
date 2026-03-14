@@ -1,4 +1,5 @@
 import { FuturisticTower } from './FuturisticTower.js';
+import { store } from '../store.js';
 const THREE = window.THREE;
 
 export class GalaxyBackground {
@@ -11,6 +12,7 @@ export class GalaxyBackground {
         this.ambientLight = null;
         this.directionalLight = null;
         this.starfield = null;
+        this.unsubscribe = null;
 
         this.init();
     }
@@ -45,6 +47,15 @@ export class GalaxyBackground {
 
         // 4. FETCH WEEKLY CHAMPION
         this.updateChampion();
+
+        // 5. SUBSCRIBE TO CHANGES
+        this.unsubscribe = store.subscribe((state) => {
+            if (state.weeklyChampion) {
+                this.tower.setChampion(state.weeklyChampion);
+                const color = new THREE.Color(state.weeklyChampion.color);
+                this.directionalLight.color.copy(color);
+            }
+        });
     }
 
     async updateChampion() {
