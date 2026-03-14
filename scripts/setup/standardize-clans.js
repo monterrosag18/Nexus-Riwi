@@ -14,9 +14,9 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 const TARGET_CLANS = [
     { id: 'turing', name: 'Turing', color: '#00c3ff', icon: '3d_atom', points: 0 },
     { id: 'tesla', name: 'Tesla', color: '#ff0000', icon: '3d_bolt', points: 0 },
-    { id: 'hamilton', name: 'Hamilton', color: '#F2C94C', icon: '3d_pyramid', points: 0 },
-    { id: 'mccarthy', name: 'McCarthy', color: '#00ff44', icon: '3d_gem', points: 0 },
-    { id: 'thompson', name: 'Thompson', color: '#9B51E0', icon: '3d_shield', points: 0 }
+    { id: 'hamilton', name: 'Hamilton', color: '#F2C94C', icon: '3d_pyramid', points: 0 }, // Yellow
+    { id: 'mccarthy', name: 'McCarthy', color: '#00ff44', icon: '3d_gem', points: 0 },    // Green
+    { id: 'thompson', name: 'Thompson', color: '#9B51E0', icon: '3d_shield', points: 0 }  // Purple
 ];
 
 const REASSIGNMENT_MAP = {

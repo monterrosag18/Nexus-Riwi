@@ -614,10 +614,6 @@ class Store {
         }
     }
 
-    logout() {
-        this.logout('USER_INITIATED');
-    }
-
     setView(viewName) {
         if (this.state.currentView !== viewName) {
             this.state.currentView = viewName;

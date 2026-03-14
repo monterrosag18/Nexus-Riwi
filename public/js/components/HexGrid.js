@@ -366,16 +366,17 @@ function buildTacticalGrid() {
     const hexWidth = Math.sqrt(3) * hexRadius;
     const hexHeight = 2 * hexRadius;
 
-    const clanIds = Object.keys(clans);
-    const totalClans = clanIds.length;
+    // FIXED CLAN ORDER: Ensures banners match starting hexes from reset-map.js
+    const fixedClanOrder = ['turing', 'tesla', 'mccarthy', 'thompson', 'hamilton'];
     
     // INCREASED RADIUS: Move banners further outside the grid
     const mapRadius = 190; 
 
     const bannerDistributions = {};
 
-    clanIds.forEach((id, index) => {
-        const angle = (360 / totalClans) * index;
+    fixedClanOrder.forEach((id, index) => {
+        if (!clans[id]) return;
+        const angle = (360 / fixedClanOrder.length) * index;
         const rad = (angle * Math.PI) / 180;
         const x = Math.cos(rad) * mapRadius;
         const z = Math.sin(rad) * mapRadius;
@@ -385,11 +386,15 @@ function buildTacticalGrid() {
         const icon = clanData.icon || '\uf544';
 
         createClanStandard(clanData.name, pos, clanData.color, icon);
+        
+        // Add a 3D Base Platform for the banner
+        createBannerBase(pos, clanData.color);
+
         bannerDistributions[id] = { vec: pos, color: clanData.color };
 
         const currentUser = state.currentUser;
         if (currentUser && currentUser.clan === id) {
-            const ringGeo = new THREE.RingGeometry(12, 16, 64);
+            const ringGeo = new THREE.RingGeometry(16, 20, 64);
             const ringMat = new THREE.MeshBasicMaterial({
                 color: new THREE.Color(clanData.color),
                 transparent: true,
@@ -432,8 +437,9 @@ function buildTacticalGrid() {
         } else {
             // INITIAL VISUAL TINT LOGIC
             const distances = [];
-            clanIds.forEach(cid => {
+            fixedClanOrder.forEach(cid => {
                 const banner = bannerDistributions[cid];
+                if (!banner) return;
                 const d = Math.sqrt((hex.x - banner.vec.x) ** 2 + (hex.z - banner.vec.z) ** 2);
                 distances.push({ id: cid, d });
             });
@@ -502,6 +508,49 @@ function createClanStandard(name, pos, color, icon) {
     const banner = new HoloBanner(scene, pos, color, name, icon);
     if (banner.mesh) banner.mesh.lookAt(0, 0, 0);
     clanBanners.push(banner);
+}
+
+function createBannerBase(pos, color) {
+    const baseGroup = new THREE.Group();
+    baseGroup.position.copy(pos);
+    
+    // Technological Platform (Hexagonal/Octagonal)
+    const platformGeo = new THREE.CylinderGeometry(10, 12, 2, 8);
+    const platformMat = new THREE.MeshStandardMaterial({ 
+        color: 0x111111, 
+        metalness: 0.9, 
+        roughness: 0.2,
+        emissive: color,
+        emissiveIntensity: 0.05
+    });
+    const platform = new THREE.Mesh(platformGeo, platformMat);
+    platform.position.y = 1;
+    baseGroup.add(platform);
+
+    // Glowing Inner Ring
+    const glowGeo = new THREE.TorusGeometry(8, 0.5, 16, 32);
+    const glowMat = new THREE.MeshBasicMaterial({ 
+        color: color, 
+        transparent: true, 
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending 
+    });
+    const glow = new THREE.Mesh(glowGeo, glowMat);
+    glow.rotation.x = Math.PI / 2;
+    glow.position.y = 2.1;
+    baseGroup.add(glow);
+
+    // Tech "Teeth" / Pillars
+    const toothGeo = new THREE.BoxGeometry(2, 4, 2);
+    for (let i = 0; i < 8; i++) {
+        const t = new THREE.Mesh(toothGeo, platformMat);
+        const angle = (Math.PI * 2 / 8) * i;
+        t.position.set(Math.cos(angle) * 11, 2, Math.sin(angle) * 11);
+        t.lookAt(pos.x, 2, pos.z);
+        baseGroup.add(t);
+    }
+
+    tacticalGroup.add(baseGroup);
 }
 
 export function executeConquest(hexData, hitMesh, winningClan) {

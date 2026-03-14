@@ -13,6 +13,14 @@ export default function createNewsTicker() {
         </div>
     `;
 
+    // Reactive Update
+    const unsubscribe = store.subscribe(() => {
+        updateTicker();
+    });
+
+    // Cleanup on remove
+    bar.addEventListener('remove', () => unsubscribe());
+
     // Seed initial events ONLY if log is completely empty AND store is ready
     const log = store.getEventLog();
     if (log.length === 0) {
@@ -93,11 +101,11 @@ export default function createNewsTicker() {
     }
 
     updateTicker();
-    // Refresh every 5 seconds
+    // Refresh admin news every 10 seconds (background sync)
     const interval = setInterval(() => {
         if (!bar.isConnected) { clearInterval(interval); return; }
         updateTicker();
-    }, 5000);
+    }, 10000);
 
     return bar;
 }
