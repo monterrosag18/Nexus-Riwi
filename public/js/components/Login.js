@@ -59,7 +59,7 @@ export default function renderLogin() {
                         <option value="tesla">TESLA</option>
                         <option value="mccarthy">McCARTHY</option>
                         <option value="thompson">THOMPSON</option>
-                        <option value="halmiton">HAMILTON</option>
+                        <option value="hamilton">HAMILTON</option>
                    </select>
                 </div>
               </div>

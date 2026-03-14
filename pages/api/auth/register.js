@@ -44,6 +44,8 @@ export default async function handler(req, res) {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
+    const targetClan = clan.toLowerCase();
+
     // Insert user
     const { error: insertError } = await supabase
       .from('users')
@@ -51,13 +53,19 @@ export default async function handler(req, res) {
         id: crypto.randomUUID(),
         username,
         password_hash: hashedPassword,
-        clan_id: clan.toLowerCase(),
+        clan_id: targetClan,
         credits: 2000,
         total_spins: 0,
         points: 0
       });
 
-    if (insertError) throw insertError;
+    if (insertError) {
+      console.error('[Registration] Database Error:', insertError);
+      if (insertError.code === '23503') {
+        return res.status(400).json({ message: 'FACTION REJECTED: INVALID CLAN ID' });
+      }
+      throw insertError;
+    }
 
     return res.status(200).json({ success: true });
   } catch (error) {
