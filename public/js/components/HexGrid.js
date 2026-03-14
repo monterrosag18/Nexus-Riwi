@@ -49,9 +49,9 @@ export default function renderMap() {
         <div id="map-ui" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50;">
             
             <!-- CENTERED HEADER -->
-            <div class="map-header-centered" style="position: absolute; top: 40px; left: 50%; transform: translateX(-50%); text-align: center; pointer-events: auto;">
-                <div class="nexus-title-glitch" data-text="<NEXUS> </Riwi>" style="text-transform: none;"><NEXUS> <span style="color: #666;">/</span> <span style="text-transform: none;">Riwi</span></div>
-                <div class="nexus-subtitle">SYSTEM: <span class="status-ok">ONLINE</span></div>
+            <div class="nexus-header" style="position: absolute; top: 32px; right: 32px; z-index: 100; text-align: right; pointer-events: none; filter: drop-shadow(0 0 10px rgba(0,245,255,0.3));">
+                <div class="nexus-title-glitch" data-text="NEXUS" style="text-transform: none;">NEXUS</div>
+                <div style="font-family: 'Outfit', sans-serif; font-size: 10px; color: #00f5ff; letter-spacing: 0.3em; opacity: 0.7; margin-top: -4px;">MAIN MAINIFRAME</div>
             </div>
 
             <!-- TACTICAL HUD (Always Visible) -->

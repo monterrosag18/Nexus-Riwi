@@ -19,8 +19,8 @@ export default function renderMiniLeaderboard() {
 
         container.innerHTML = `
             <div class="mini-ld-header">
-                <div class="mini-ld-title">
-                    <i class="fa-solid fa-ranking-star"></i> <NEXUS> / Riwi RANKING
+                <div class="flex items-center gap-1.5 text-primary text-[10px] font-bold tracking-widest uppercase mb-1.5 opacity-80">
+                    <i class="fa-solid fa-ranking-star"></i> NEXUS RANKING
                 </div>
                 <div class="mini-ld-live">LIVE</div>
             </div>

@@ -47,5 +47,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2. Initialize Router (which renders the initial view)
     initRouter();
 
-    console.log('Nexus Riwi System Online. Warning: Unauthorized access to clan data prohibited.');
+    console.log('NEXUS System Online. Warning: Unauthorized access to clan data prohibited.');
 });
