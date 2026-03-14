@@ -35,11 +35,20 @@ function handleRoute() {
             window.location.hash = '#login';
             return; // hashchange will fire again
         }
-    } else {
         // If user logged in and tries to go to login, redirect to map
         if (hash === 'login' || !hash) {
             window.location.hash = '#map';
             return;
+        }
+
+        // Admin Protection
+        if (hash === 'admin') {
+            const isAdmin = user.name === 'nexusadmin' || sessionStorage.getItem('nexus_admin_token');
+            if (!isAdmin) {
+                console.warn("UNAUTHORIZED ACCESS DETECTED: ACCESS DENIED TO SECTOR ADMIN");
+                window.location.hash = '#map';
+                return;
+            }
         }
     }
 

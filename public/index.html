@@ -109,6 +109,40 @@
     <link rel="stylesheet" href="css/leaderboard.css">
     <link rel="stylesheet" href="css/shop.css">
     <link rel="stylesheet" href="css/modals.css">
+
+    <!-- Anti-Cheat & Console Lockdown (Soft Protection) -->
+    <script>
+        (function() {
+            const warningMessage = `
+            %c⚠️ ACCESS DENIED!
+            %cAttempting to access Nexus Core systems via this console is a violation of Riwi Protocol.
+            All actions are logged and associated with your Neural Link.
+            
+            UNAUTHORIZED UPLINKS WILL BE TERMINATED.
+            `;
+            console.log(warningMessage, "color: #ff0000; font-size: 30px; font-weight: bold; text-shadow: 0 0 10px #ff0000;", "color: #00f0ff; font-size: 14px;");
+
+            // Block common DevTools shortcuts (Soft)
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) e.preventDefault();
+                if (e.key === 'F12') e.preventDefault();
+                if (e.ctrlKey && e.key === 'u') e.preventDefault(); // Block View Source
+            });
+
+            // Block Right-Click
+            document.addEventListener('contextmenu', (e) => e.preventDefault());
+            
+            // Periodically clear console console.clear() might be too aggressive, 
+            // but we can shadow the 'supabase' global if someone tries to use it.
+            window.Object.defineProperty(window, 'supabase', {
+                get: function() { 
+                    console.error("NEURAL LINK ERROR: Direct Supabase Access Blocked.");
+                    return undefined; 
+                },
+                set: function() { console.error("NEURAL LINK ERROR: System override blocked."); }
+            });
+        })();
+    </script>
 </head>
 
 <body>

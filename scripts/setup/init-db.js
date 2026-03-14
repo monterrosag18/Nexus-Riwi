@@ -13,7 +13,7 @@ async function seedClans() {
       { id: 'tesla', name: 'Tesla', color: '#EB5757', points: 1932, members_count: 28, icon: 'f0e7' },
       { id: 'mccarthy', name: 'McCarthy', color: '#27AE60', points: 1373, members_count: 22, icon: 'f544' },
       { id: 'thompson', name: 'Thompson', color: '#9B51E0', points: 1105, members_count: 18, icon: 'f085' },
-      { id: 'halmiton', name: 'Hamilton', color: '#F2C94C', points: 940, members_count: 15, icon: 'f06d' }
+      { id: 'hamilton', name: 'Hamilton', color: '#F2C94C', points: 940, members_count: 15, icon: 'f06d' }
     ];
 
     const { error } = await supabase.from('clans').upsert(clans);
