@@ -370,7 +370,7 @@ function buildTacticalGrid() {
     const totalClans = clanIds.length;
     
     // INCREASED RADIUS: Move banners further outside the grid
-    const mapRadius = 110; 
+    const mapRadius = 190; 
 
     const bannerDistributions = {};
 

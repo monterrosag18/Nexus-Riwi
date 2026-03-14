@@ -46,7 +46,7 @@ export default async function handler(req, res) {
         }
 
         // Identify starting points
-        const bannerRadius = 110; 
+        const bannerRadius = 170; 
         const startingIndices = clans.map((clanId, index) => {
             const angle = (360 / clans.length) * index;
             const rad = (angle * Math.PI) / 180;
