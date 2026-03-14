@@ -97,11 +97,20 @@ export default async function handler(req, res) {
 
         if (clanError) throw clanError;
 
-        // 3. Post Announcement to Chat
+        // 3. Reset User Points (Hard Reset for Tournament)
+        console.log('[AdminAPI] Resetting all User points...');
+        const { error: userError } = await supabaseAdmin
+            .from('users')
+            .update({ points: 0 })
+            .neq('points', -1); // Atomic update for all
+
+        if (userError) throw userError;
+
+        // 4. Post Announcement to Chat
         await supabaseAdmin.from('chat_messages').insert([{
             clan_id: 'SYSTEM',
             user_username: 'ADMIN',
-            content: '⚠️ NEXUS NORMALIZED: HOME BASES ESTABLISHED. GRID INTEGRITY 100%.'
+            content: '⚠️ NEXUS NORMALIZED: Season reset complete. All points zeroed.'
         }]);
 
         console.log('[AdminAPI] Global Reset Complete.');

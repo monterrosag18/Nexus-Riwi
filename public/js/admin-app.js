@@ -377,25 +377,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Reset all points
+    // Reset all points (Pointed to atomic API)
     resetBtn.addEventListener('click', async () => {
-        if (confirm('⚠️ RESET ALL FACTION POINTS TO ZERO? This cannot be undone.')) {
-            const clans = await getClans();
-            for (const id of Object.keys(clans)) {
-                await fetch('/api/clans/points', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'x-admin-token': sessionStorage.getItem('nexus_admin_token')
-                    },
-                    body: JSON.stringify({ clanId: id, amount: -clans[id].points })
-                });
+        const confirmed = confirm('⚠️ RESET ALL POINTS & NORMALIZE MATRIX? This will reset all clan points, user points, and territory ownership globally. Proceed?');
+        if (!confirmed) return;
+
+        resetBtn.disabled = true;
+        resetBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> RESETTING...';
+
+        try {
+            const res = await fetch('/api/admin/reset-map', { 
+                method: 'POST',
+                headers: { 'x-admin-token': sessionStorage.getItem('nexus_admin_token') }
+            });
+            const result = await res.json();
+            
+            if (result.success) {
+                alert("✅ SUCCESS: Systems normalized. Scoreboards zeroed.");
+                window.location.reload();
+            } else {
+                alert("❌ ERROR: Reset sequence failed - " + result.error);
             }
-            await renderRoster();
-            resetBtn.innerHTML = '<i class="fa-solid fa-check"></i> POINTS RESET';
-            setTimeout(() => {
-                resetBtn.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i> RESET ALL POINTS';
-            }, 2000);
+        } catch (e) {
+            alert("❌ CRITICAL ERROR: Nexus link broken.");
+        } finally {
+            resetBtn.disabled = false;
+            resetBtn.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i> RESET ALL POINTS';
         }
     });
 
@@ -656,10 +663,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ═══════════════════════════════════════════
-    // 7. INIT
+    // 7. INIT (Consolidated Auth Check)
     // ═══════════════════════════════════════════
-    if (sessionStorage.getItem('nexus_admin_auth') === 'true') {
+    if (sessionStorage.getItem('nexus_admin_token')) {
         renderRoster();
+        renderQuestions();
+        renderNews();
     }
 
     // ═══════════════════════════════════════════

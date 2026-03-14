@@ -78,9 +78,7 @@ export function renderSidebar() {
     `;
     logoutBtn.onclick = (e) => {
         e.preventDefault();
-        if (confirm('TERMINATE UPLINK?')) {
-            store.logout();
-        }
+        store.logout();
     };
     nav.appendChild(logoutBtn);
 

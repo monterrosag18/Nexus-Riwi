@@ -18,18 +18,18 @@ export default function createWeeklyCountdown() {
         const now = new Date();
         const day = now.getDay(); // 0=Sun, 1=Mon...6=Sat
 
-        // Weekend check (Saturday=6 or Sunday=0)
-        if (day === 0 || day === 6) {
+        // Sunday is the "Complete/Reset" day
+        if (day === 0) {
             return { completed: true, days: 0, hours: 0, mins: 0, secs: 0 };
         }
 
-        // Calculate end: Friday 11:59:59 PM of this week
-        const friday = new Date(now);
-        const daysUntilFriday = 5 - day; // Friday = 5
-        friday.setDate(now.getDate() + daysUntilFriday);
-        friday.setHours(23, 59, 59, 999);
+        // Calculate end: Saturday 11:59:59 PM of this week
+        const saturday = new Date(now);
+        const daysUntilSaturday = 6 - day; // Saturday = 6
+        saturday.setDate(now.getDate() + daysUntilSaturday);
+        saturday.setHours(23, 59, 59, 999);
 
-        const diff = friday.getTime() - now.getTime();
+        const diff = saturday.getTime() - now.getTime();
         if (diff <= 0) {
             return { completed: true, days: 0, hours: 0, mins: 0, secs: 0 };
         }
