@@ -323,11 +323,7 @@ async function onMouseClick(event) {
         // ADJACENCY RULE
         const isAdjacent = store.checkAdjacency(hexData.id, clanId);
 
-        // Everyone starts somewhere (Check if has territories)
-        const myTerritories = store.getState().territories.filter(t => (t.owner || '').toLowerCase() === clanId);
-        const canStartAnywhere = myTerritories.length === 0;
-
-        if (!isAdjacent && !canStartAnywhere) {
+        if (!isAdjacent) {
             const feedback = document.createElement('div');
             feedback.style.cssText = `
                 position: fixed; top: 100px; left: 50%; transform: translateX(-50%);
@@ -372,7 +368,9 @@ function buildTacticalGrid() {
 
     const clanIds = Object.keys(clans);
     const totalClans = clanIds.length;
-    const mapRadius = Math.max(90, totalClans * 20);
+    
+    // INCREASED RADIUS: Move banners further outside the grid
+    const mapRadius = 110; 
 
     const bannerDistributions = {};
 

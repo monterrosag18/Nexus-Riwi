@@ -168,6 +168,38 @@ export default function renderAdminDashboard() {
             });
         }
 
+        // Rebuild Map
+        const btnRebuild = container.querySelector('#btn-rebuild-map');
+        if (btnRebuild) {
+            btnRebuild.addEventListener('click', async () => {
+                const confirmed = confirm("⚠️ SYSTEM NORMALIZATION: This will reset all territories to Home Base status and wipe current clan influence. Proceed?");
+                if (!confirmed) return;
+
+                btnRebuild.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> CALIBRATING...';
+                btnRebuild.disabled = true;
+
+                try {
+                    const res = await fetch('/api/admin/reset-map', {
+                        method: 'POST',
+                        headers: { 'x-admin-token': sessionStorage.getItem('nexus_admin_token') }
+                    });
+                    const result = await res.json();
+                    if (result.success) {
+                        alert("✅ SUCCESS: Systems normalized. Grid integrity 100%.");
+                        window.location.reload();
+                    } else {
+                        alert("❌ ERROR: Reset sequence failed - " + result.error);
+                    }
+                } catch (e) {
+                    console.error('Map reset failed', e);
+                    alert("❌ CRITICAL ERROR: Nexus link broken.");
+                } finally {
+                    btnRebuild.innerHTML = '<i class="fa-solid fa-hammer"></i> REGENERATE HEX GRID';
+                    btnRebuild.disabled = false;
+                }
+            });
+        }
+
         // Delete Clan
         const deleteBtns = container.querySelectorAll('.btn-delete-clan');
         deleteBtns.forEach(btn => {

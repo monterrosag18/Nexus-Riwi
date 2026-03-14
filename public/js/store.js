@@ -380,26 +380,30 @@ class Store {
             .map(t => parseInt(t.id));
 
         const isAdjacent = neighbors.some(nId => ownedIds.includes(nId));
-        console.log(`[Adjacency] Target ${targetId} neighbors:`, neighbors, "Owned:", ownedIds, "Result:", isAdjacent);
+        console.log(`[Adjacency] ID:${targetId} | Neighbors:`, neighbors, "| Owned:", ownedIds, "| Result:", isAdjacent);
         return isAdjacent;
     }
 
     getNeighbors(id) {
         const ringSize = 12;
-        const allHexes = [];
+        const hexRadius = 8;
+        const hexWidth = Math.sqrt(3) * hexRadius;
+        const hexHeight = 2 * hexRadius;
         
+        const allHexes = [];
         for (let q = -ringSize; q <= ringSize; q++) {
             for (let r = -ringSize; r <= ringSize; r++) {
                 if (Math.abs(q + r) <= ringSize) {
-                    const x = (Math.sqrt(3) * 8) * (q + r / 2);
-                    const z = (2 * 8) * (3 / 4) * r;
+                    const x = hexWidth * (q + r / 2);
+                    const z = hexHeight * (3 / 4) * r;
                     if (Math.sqrt(x * x + z * z) < 25) continue; 
-                    allHexes.push({ id: allHexes.length, q, r });
+                    allHexes.push({ q, r });
                 }
             }
         }
 
-        const target = allHexes.find(h => h.id === id);
+        const targetIdx = parseInt(id);
+        const target = allHexes[targetIdx];
         if (!target) return [];
 
         const directions = [
@@ -409,8 +413,10 @@ class Store {
 
         const neighborIds = [];
         directions.forEach(d => {
-            const neighbor = allHexes.find(h => h.q === target.q + d.q && h.r === target.r + d.r);
-            if (neighbor) neighborIds.push(neighbor.id);
+            const nq = target.q + d.q;
+            const nr = target.r + d.r;
+            const nIndex = allHexes.findIndex(h => h.q === nq && h.r === nr);
+            if (nIndex !== -1) neighborIds.push(nIndex);
         });
 
         return neighborIds;
