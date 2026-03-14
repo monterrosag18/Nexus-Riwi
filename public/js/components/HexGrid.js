@@ -49,9 +49,10 @@ export default function renderMap() {
         <div id="map-ui" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50;">
             
             <!-- CENTERED HEADER -->
-            <div class="nexus-header" style="position: absolute; top: 32px; right: 32px; z-index: 100; text-align: right; pointer-events: none; filter: drop-shadow(0 0 10px rgba(0,245,255,0.3));">
-                <div class="nexus-title-glitch" data-text="<NEXUS>" style="text-transform: none; font-size: 2.5rem; line-height: 1;"><NEXUS></div>
-                <div style="font-family: 'Outfit', sans-serif; font-size: 10px; color: #00f5ff; letter-spacing: 0.2em; opacity: 0.8; margin-top: -2px;">SYSTEM: <span style="color: #00ff88; font-weight: bold; text-shadow: 0 0 8px #00ff8888;">ONLINE</span></div>
+            <!-- CENTERED HEADER -->
+            <div class="map-header-centered" style="position: absolute; top: 40px; left: 50%; transform: translateX(-50%); text-align: center; pointer-events: none; z-index: 100; filter: drop-shadow(0 0 15px rgba(0,245,255,0.2));">
+                <div class="nexus-title-glitch" data-text="<NEXUS>" style="text-transform: none; font-size: 3rem; line-height: 1;"><NEXUS></div>
+                <div style="font-family: 'Outfit', sans-serif; font-size: 11px; color: #00f5ff; letter-spacing: 0.25em; opacity: 0.9; margin-top: 2px;">SYSTEM: <span style="color: #00ff88; font-weight: bold; text-shadow: 0 0 10px #00ff88AA;">ONLINE</span></div>
             </div>
 
             <!-- TACTICAL HUD (Always Visible) -->
