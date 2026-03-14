@@ -50,8 +50,8 @@ export default function renderMap() {
             
             <!-- CENTERED HEADER -->
             <div class="nexus-header" style="position: absolute; top: 32px; right: 32px; z-index: 100; text-align: right; pointer-events: none; filter: drop-shadow(0 0 10px rgba(0,245,255,0.3));">
-                <div class="nexus-title-glitch" data-text="NEXUS" style="text-transform: none;">NEXUS</div>
-                <div style="font-family: 'Outfit', sans-serif; font-size: 10px; color: #00f5ff; letter-spacing: 0.3em; opacity: 0.7; margin-top: -4px;">MAIN MAINIFRAME</div>
+                <div class="nexus-title-glitch" data-text="<NEXUS>" style="text-transform: none; font-size: 2.5rem; line-height: 1;"><NEXUS></div>
+                <div style="font-family: 'Outfit', sans-serif; font-size: 10px; color: #00f5ff; letter-spacing: 0.2em; opacity: 0.8; margin-top: -2px;">SYSTEM: <span style="color: #00ff88; font-weight: bold; text-shadow: 0 0 8px #00ff8888;">ONLINE</span></div>
             </div>
 
             <!-- TACTICAL HUD (Always Visible) -->
