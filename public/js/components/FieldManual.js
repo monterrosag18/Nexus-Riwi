@@ -37,14 +37,14 @@ export default function renderFieldManual() {
                             <div class="w-12 h-12 bg-primary/10 text-primary rounded-lg flex items-center justify-center">
                                 <span class="material-symbols-outlined text-3xl">groups_3</span>
                             </div>
-                            <h3 class="text-xl font-bold uppercase tracking-tight">The Clans</h3>
+                            <h3 class="text-xl font-bold uppercase tracking-tight">The 5 Clans</h3>
                         </div>
                         <div class="w-full h-40 bg-slate-800 rounded-lg mb-4 overflow-hidden relative">
-                            <img src="./assets/img/rules/clanes.jpg" alt="Imagen de los 9 clanes" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform glitch-img" loading="lazy" />
+                            <img src="./assets/img/manual/clans.png" alt="Imagen de los 5 clanes" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform glitch-img" loading="lazy" />
                             <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
                         </div>
                         <p class="text-slate-400 text-sm leading-relaxed">
-                            Global dominance struggle between 9 elite factions. Align with your brothers-in-arms and coordinate strikes to seize the digital landscape.
+                            Battle for glory between the 5 official factions: Turing, Tesla, Hamilton, McCarthy, and Thompson. Coordinate with your brothers to dominate the grid.
                         </p>
                     </div>
 
@@ -57,11 +57,11 @@ export default function renderFieldManual() {
                             <h3 class="text-xl font-bold uppercase tracking-tight">Hex-Territory</h3>
                         </div>
                         <div class="w-full h-40 bg-slate-800 rounded-lg mb-4 overflow-hidden relative">
-                            <img src="./assets/img/rules/mapa_clanes.jpg" alt="Imagen del mapa de los clanes" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform glitch-img" loading="lazy" />
+                            <img src="./assets/img/manual/map.png" alt="Imagen del mapa de los clanes" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform glitch-img" loading="lazy" />
                             <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
                         </div>
                         <p class="text-slate-400 text-sm leading-relaxed">
-                            Win quizzes and tactical games to capture hexagonal sectors. Each hex expands your clan's influence across the global mainframe.
+                            Conquer sectors using axial movement. You can only invade hexes adjacent to your current territory or starting base. Expand your influence!
                         </p>
                         <a class="shop-button" href="#map">ACCESS MAP</a>
                     </div>
@@ -75,11 +75,11 @@ export default function renderFieldManual() {
                             <h3 class="text-xl font-bold uppercase tracking-tight">Passive Yield</h3>
                         </div>
                         <div class="w-full h-40 bg-slate-800 rounded-lg mb-4 overflow-hidden relative">
-                            <img class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform glitch-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbZGdRzKmSPTmzcn_QO3lAe0b4z2NQAYYTWGIHu_icogmjrC9f2HPtcodWTAefs2XG_lhdlwJWJhRICj-TUZDN7EJx-PkF7Lxf4b1c2DJKmCP_KTwMEMtdLRsZ2NsXJIJG1c0RApDNUekqg__zxt8pAujXlASknLqC2VlY6JfeljzyqLIb4xryZFwjQuFmiTc-iedcgZMwFlBwJidhxypVM7t3VJgQApCK9_zk9DuViK2IUUHJBiI9rInuWtuyks-YzA77FWglRps" loading="lazy" />
+                            <img class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform glitch-img" src="./assets/img/manual/yield.png" loading="lazy" />
                             <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
                         </div>
                         <p class="text-slate-400 text-sm leading-relaxed">
-                            More hexagons = higher points-per-hour yield. Maximize your territory to fund your clan's expensive technological upgrades.
+                            Holding territory generates Credits (CR) and Clan Points. The more sectors you control at the end of the hour, the higher your yield for internal upgrades.
                         </p>
                     </div>
 
@@ -89,14 +89,14 @@ export default function renderFieldManual() {
                             <div class="w-12 h-12 bg-purple-500/10 text-purple-500 rounded-lg flex items-center justify-center">
                                 <span class="material-symbols-outlined text-3xl">shopping_cart</span>
                             </div>
-                            <h3 class="text-xl font-bold uppercase tracking-tight">Tech Shop</h3>
+                            <h3 class="text-xl font-bold uppercase tracking-tight">The Boutique</h3>
                         </div>
                         <div class="w-full h-40 bg-slate-800 rounded-lg mb-4 overflow-hidden relative">
-                            <img src="./assets/img/rules/poderes.jpg" alt="Imagen de los poderes" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform glitch-img" loading="lazy" />
+                            <img src="./assets/img/manual/shop.png" alt="Imagen de los poderes" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform glitch-img" loading="lazy" />
                             <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
                         </div>
                         <p class="text-slate-400 text-sm leading-relaxed">
-                            Spend points on <span class="text-primary font-bold">Hacks</span>, <span class="text-cyan-500 font-bold">Shields</span>, and <span class="text-purple-500 font-bold">Overrides</span>. Tactical items can turn the tide of any confrontation.
+                            Unlocks cosmetic enhancements, neural patches, and tactical modules. Use the Roulette to obtain rare cards or purchase items from the premium vault.
                         </p>
                         <a class="shop-button" href="#shop">GO TO SHOP</a>
                     </div>
@@ -111,11 +111,11 @@ export default function renderFieldManual() {
                             <h3 class="text-xl font-bold uppercase tracking-tight">Decay System</h3>
                         </div>
                         <div class="w-full h-40 bg-slate-800 rounded-lg mb-4 overflow-hidden relative">
-                            <img src="./assets/img/rules/ausencia.jpg" alt="Imagen de ausencia" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform glitch-img" loading="lazy" />
+                            <img src="./assets/img/manual/decay.png" alt="Imagen de ausencia" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform glitch-img" loading="lazy" />
                             <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
                         </div>
                         <p class="text-slate-400 text-sm leading-relaxed">
-                            <span class="text-primary font-bold">CRITICAL:</span> Absenteeism leads to sector vulnerability. If a clan goes quiet, their hexagons weaken and become ripe for hostile takeover.
+                            <span class="text-primary font-bold">WARNING:</span> If a sector is left undefended for long periods, its defensive integrity drops, making it open for hostile takeover without shields.
                         </p>
                     </div>
 
@@ -125,14 +125,14 @@ export default function renderFieldManual() {
                             <div class="w-12 h-12 bg-emerald-500/10 text-emerald-500 rounded-lg flex items-center justify-center">
                                 <span class="material-symbols-outlined text-3xl">task_alt</span>
                             </div>
-                            <h3 class="text-xl font-bold uppercase tracking-tight">Missions</h3>
+                            <h3 class="text-xl font-bold uppercase tracking-tight">Neural Quizzes</h3>
                         </div>
                         <div class="w-full h-40 bg-slate-800 rounded-lg mb-4 overflow-hidden relative">
-                            <img src="./assets/img/rules/conquista.jpg" alt="Imagen de conquista" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform glitch-img" loading="lazy" />
+                            <img src="./assets/img/manual/missions.png" alt="Imagen de conquista" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform glitch-img" loading="lazy" />
                             <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
                         </div>
                         <p class="text-slate-400 text-sm leading-relaxed">
-                            <span class="text-emerald-500 font-bold uppercase">Primary Objective: Data Quizzes</span>. The foundational method for resource extraction and territory expansion.
+                            <span class="text-emerald-500 font-bold uppercase">Main Node</span>. Solve algorithmic challenges, English tests, and soft-skill assessments to claim neutral or enemy sectors.
                         </p>
                     </div>
                 </div>

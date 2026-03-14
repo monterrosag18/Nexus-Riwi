@@ -1,4 +1,9 @@
 /* ======================== FIELD MANUAL (GLITCH & COSMIC) ========================================= */
+:root {
+    --theme-glitch-red-rgb: 236 91 19; /* #EC5B13 - Nexus Primary */
+    --theme-glitch-cyan-rgb: 0 243 255; /* #00F3FF */
+}
+
 .manual-view {
     min-height: 100vh;
     background-color: #030305;
