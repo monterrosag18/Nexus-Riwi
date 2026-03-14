@@ -20,7 +20,7 @@ export default function renderMiniLeaderboard() {
         container.innerHTML = `
             <div class="mini-ld-header">
                 <div class="mini-ld-title">
-                    <i class="fa-solid fa-ranking-star"></i> NEXUS RANKING
+                    <i class="fa-solid fa-ranking-star"></i> <NEXUS> / Riwi RANKING
                 </div>
                 <div class="mini-ld-live">LIVE</div>
             </div>

@@ -184,7 +184,7 @@ export default function renderLogin() {
     }
 
     // Typewriter
-    const fullText = "</Riwi> Nexus";
+    const fullText = "<NEXUS> </Riwi>";
     const tag = container.querySelector("#tag");
     const cursor = container.querySelector("#cursor");
     let index = 0;

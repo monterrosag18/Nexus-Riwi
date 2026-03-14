@@ -140,7 +140,7 @@ export class FuturisticTower {
         ctx.shadowColor = '#00ffff';
         ctx.shadowBlur = 20;
         ctx.fillStyle = '#ffffff';
-        ctx.fillText('</riwi> NEXUS', canvas.width / 2, canvas.height / 2);
+        ctx.fillText('<NEXUS> </Riwi>', canvas.width / 2, canvas.height / 2);
 
         const texture = new THREE.CanvasTexture(canvas);
         const signMat = new THREE.MeshBasicMaterial({

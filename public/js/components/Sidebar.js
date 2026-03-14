@@ -13,7 +13,7 @@ export function renderSidebar() {
         { icon: 'fa-trophy', route: 'leaderboard', label: 'Ranking' },
         { icon: 'fa-dungeon', route: 'shop', label: 'Shop' },
         { icon: 'fa-comments', route: 'chat', label: 'Chat' },
-        { icon: 'fa-book-atlas', route: 'rules', label: 'Rules' }
+        { icon: 'fa-book-atlas', route: 'manual', label: 'Manual' }
     ];
 
     menuItems.forEach(item => {
@@ -39,14 +39,7 @@ export function renderSidebar() {
             };
         }
 
-        if (item.route === 'rules') {
-            link.href = '#';
-            link.onclick = (e) => {
-                e.preventDefault();
-                const modal = createRulesModal();
-                document.body.appendChild(modal);
-            };
-        }
+        // Manual action is handled naturally by router/hashchange
 
         nav.appendChild(link);
     });

@@ -1,5 +1,4 @@
-# NEXUS RIWI 
-> **The Definitive Quantum Conquest Ecosystem for the Elite Coders of Riwi.**
+# <NEXUS> </Riwi> 🚀> **The Definitive Quantum Conquest Ecosystem for the Elite Coders of Riwi.**
 > **El Ecosistema Definitivo de Conquista Cuántica para los Coders de Élite de Riwi.**
 
 ---

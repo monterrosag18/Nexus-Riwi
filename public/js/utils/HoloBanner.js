@@ -6,7 +6,7 @@ export class HoloBanner {
         this.scene = scene;
         this.position = position;
         this.color = new THREE.Color(color);
-        this.label = label || "NEXUS";
+        this.label = label || "<NEXUS>";
         this.iconChar = (iconChar || "\uf007").toString().trim(); 
         
         // --- FAIL-SAFE: Official Clans MUST use 3D Icons ---

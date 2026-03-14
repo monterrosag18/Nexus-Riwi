@@ -50,7 +50,7 @@ export default function renderMap() {
             
             <!-- CENTERED HEADER -->
             <div class="map-header-centered" style="position: absolute; top: 40px; left: 50%; transform: translateX(-50%); text-align: center; pointer-events: auto;">
-                <div class="nexus-title-glitch" data-text="</riwi> NEXUS" style="text-transform: lowercase;">&lt;/riwi&gt; <span style="text-transform: uppercase;">NEXUS</span></div>
+                <div class="nexus-title-glitch" data-text="<NEXUS> </Riwi>" style="text-transform: none;"><NEXUS> <span style="color: #666;">/</span> <span style="text-transform: none;">Riwi</span></div>
                 <div class="nexus-subtitle">SYSTEM: <span class="status-ok">ONLINE</span></div>
             </div>
 

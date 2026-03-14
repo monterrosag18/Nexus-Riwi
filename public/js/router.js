@@ -6,13 +6,15 @@ import renderLeaderboard from './components/Leaderboard.js';
 import renderShop from './components/ShopCarousel.js'; // Updated to new 3D Carousel
 import renderLogin from './components/Login.js';
 import renderAdminDashboard from './components/AdminDashboard.js';
+import renderFieldManual from './components/FieldManual.js';
 
 const routes = {
     'login': renderLogin,
     'map': renderMap,
     'leaderboard': renderLeaderboard,
     'shop': renderShop,
-    'admin': renderAdminDashboard
+    'admin': renderAdminDashboard,
+    'manual': renderFieldManual
 };
 
 export function initRouter() {
