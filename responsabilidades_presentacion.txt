@@ -1,28 +1,29 @@
-REPORTE TÉCNICO DE RESPONSABILIDADES: PROYECTO <NEXUS>
+REPORTE TÉCNICO DETALLADO: EQUIPO <NEXUS>
 
 Carlos:
-- Se encargó del Mapa (HexGrid.js), el Sistema de Chat y el Perfil del Operador.
-- Mapa 3D y Conquista: Implementó la grilla en public/js/components/HexGrid.js y la API en pages/api/territories/index.js.
-- Chat Inter-Facciones: Desarrolló public/js/components/Chat.js y la API en pages/api/chat/index.js con filtros de seguridad.
-- Perfil del Operador: Creó public/js/components/ProfilePanel.js e integró estadísticas vitales desde pages/api/user/profile.js.
-- Solucionó fugas de conexión y optimizó la respuesta visual del mapa.
+- Se encargó del Mapa 3D, el Chat y el Perfil.
+- Implementación: Creó el motor 3D de Hexágonos usando Three.js y coordenadas axiales para cálculos de conquista rápidos.
+- Sincronización: Conectó el mapa con Supabase Realtime para que los cambios de color sean instantáneos.
+- Perfil: Desarrolló el panel de estadísticas del operador con actualización dinámica de créditos y equipo cosmético.
 
 Dana:
-- Se encargó de Autenticación, Registro y Seguridad.
-- Registro y Login: Implementó public/js/components/Login.js y las APIs en pages/api/auth/login.js y register.js.
-- Seguridad: Desarrolló los protectores de rutas en public/js/router.js y la gestión segura de sesiones en public/js/store.js.
+- Se encargó de Seguridad, Login y Registro.
+- Infraestructura: Implementó autenticación segura mediante JWT y protección de rutas (Guards).
+- Rutas: Creó el router.js que bloquea el acceso a invitados y gestiona la limpieza de sesión segura en el navegador.
+- Backend: Programó las APIs de login y registro que validan clanes y encriptan datos.
 
 Juan José:
-- Se encargó de Shop y Sistema Gacha (Boutique).
-- Gacha/Ruleta: Desarrolló public/js/components/GachaModal.js.
-- Validación: Implementó la API de compras en pages/api/shop/purchase.js y efectos visuales en pages/api/shop/card-effect.js.
+- Se encargó de la Shop y el sistema de Gacha (Boutique).
+- Lógica: Desarrolló el sorteo aleatorio de cosméticos con validación de saldo en el servidor para evitar trampas.
+- Interfaz: Creó la animación de ruleta y las tarjetas de recompensa con efectos de cristal y luces neón.
+- Persistencia: Aseguró que cada premio obtenido se guarde permanentemente en la base de datos del usuario.
 
 Camilo:
-- Se encargó del Manual de Campo (Guía).
-- Componente: Desarrolló public/js/components/FieldManual.js.
-- Diseño: Implementó efectos glitch en public/css/manual.css y gestionó las ilustraciones en public/assets/img/manual/.
+- Se encargó de la Guía de Campo (Manual).
+- Estética: Implementó el diseño "Cyberpunk" con efectos de distorsión (glitch) y un fondo espacial en movimiento usando partículas 3D.
+- Contenido: Estructuró toda la información del juego en secciones interactivas para que los nuevos jugadores entiendan los 5 clanes y las reglas.
 
 Julián:
-- Se encargó de Rankings y Ciclo de Torneo.
-- Rankings: Desarrolló public/js/components/Leaderboard.js y MiniLeaderboard.js con APIs en pages/api/clans/index.js.
-- Reloj: Programó el WeeklyCountdown.js para finalizar ciclos los viernes 11:59 PM.
+- Se encargó de Rankings y el Tiempo del Torneo.
+- Análisis: Creó los algoritmos que suman puntos de clanes en tiempo real consultando la base de datos Supabase.
+- Cronómetro: Programó el reloj táctico que dicta el fin del torneo los viernes a medianoche, gestionando los cambios de estado del sistema automáticamente.
