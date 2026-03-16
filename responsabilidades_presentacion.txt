@@ -1,0 +1,28 @@
+REPORTE TÉCNICO DE RESPONSABILIDADES: PROYECTO <NEXUS>
+
+Carlos:
+- Se encargó del Mapa (HexGrid.js), el Sistema de Chat y el Perfil del Operador.
+- Mapa 3D y Conquista: Implementó la grilla en public/js/components/HexGrid.js y la API en pages/api/territories/index.js.
+- Chat Inter-Facciones: Desarrolló public/js/components/Chat.js y la API en pages/api/chat/index.js con filtros de seguridad.
+- Perfil del Operador: Creó public/js/components/ProfilePanel.js e integró estadísticas vitales desde pages/api/user/profile.js.
+- Solucionó fugas de conexión y optimizó la respuesta visual del mapa.
+
+Dana:
+- Se encargó de Autenticación, Registro y Seguridad.
+- Registro y Login: Implementó public/js/components/Login.js y las APIs en pages/api/auth/login.js y register.js.
+- Seguridad: Desarrolló los protectores de rutas en public/js/router.js y la gestión segura de sesiones en public/js/store.js.
+
+Juan José:
+- Se encargó de Shop y Sistema Gacha (Boutique).
+- Gacha/Ruleta: Desarrolló public/js/components/GachaModal.js.
+- Validación: Implementó la API de compras en pages/api/shop/purchase.js y efectos visuales en pages/api/shop/card-effect.js.
+
+Camilo:
+- Se encargó del Manual de Campo (Guía).
+- Componente: Desarrolló public/js/components/FieldManual.js.
+- Diseño: Implementó efectos glitch en public/css/manual.css y gestionó las ilustraciones en public/assets/img/manual/.
+
+Julián:
+- Se encargó de Rankings y Ciclo de Torneo.
+- Rankings: Desarrolló public/js/components/Leaderboard.js y MiniLeaderboard.js con APIs en pages/api/clans/index.js.
+- Reloj: Programó el WeeklyCountdown.js para finalizar ciclos los viernes 11:59 PM.
