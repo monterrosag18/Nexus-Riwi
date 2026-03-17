@@ -14,9 +14,26 @@ export default async function handler(req, res) {
   }
 
     try {
-        console.log('[AdminAPI] Starting Global Map Reset...');
+        console.log('[AdminAPI] Starting Global Map Reset (Fixed Sequence)...');
 
-        // 1. Clear Territories
+        const clans = [
+            { id: 'turing', name: 'Turing', color: '#2D9CDB', points: 50, icon: '3d_atom' },
+            { id: 'tesla', name: 'Tesla', color: '#EB5757', points: 50, icon: '3d_bolt' },
+            { id: 'mccarthy', name: 'McCarthy', color: '#27AE60', points: 50, icon: '3d_gem' },
+            { id: 'thompson', name: 'Thompson', color: '#9B51E0', points: 50, icon: '3d_shield' },
+            { id: 'hamilton', name: 'Hamilton', color: '#F2C94C', points: 50, icon: '3d_pyramid' }
+        ];
+
+        // 1. ENSURE CLANS EXIST (Seed/Upsert) - Crucial to avoid FK violations
+        console.log('[AdminAPI] Seeding official clans...');
+        const { error: seedClanError } = await supabaseAdmin
+            .from('clans')
+            .upsert(clans);
+        
+        if (seedClanError) throw seedClanError;
+
+        // 2. Clear Territories
+        console.log('[AdminAPI] Clearing old territories...');
         const { error: terrError } = await supabaseAdmin
             .from('territories')
             .delete()
@@ -24,10 +41,10 @@ export default async function handler(req, res) {
 
         if (terrError) throw terrError;
 
-        // 1.5 Repopulate with 130 Sectors + Home Bases
+        // 3. Repopulate with 130 Sectors + Home Bases
         console.log('[AdminAPI] Generating map grid with Home Bases...');
         
-        const clans = ['turing', 'tesla', 'mccarthy', 'thompson', 'hamilton'];
+        const clanIds = clans.map(c => c.id);
         const ringSize = 12;
         const hexRadius = 8;
         const hexWidth = Math.sqrt(3) * hexRadius;
@@ -39,22 +56,19 @@ export default async function handler(req, res) {
                 if (Math.abs(q + r) <= ringSize) {
                     const x = hexWidth * (q + r / 2);
                     const z = hexHeight * (3 / 4) * r;
-                    // Leave a void for the tower
                     if (Math.sqrt(x * x + z * z) < 25) continue;
                     allHexes.push({ x, z, q, r });
                 }
             }
         }
 
-        // Identify starting points
         const bannerRadius = 170; 
-        const startingIndices = clans.map((clanId, index) => {
-            const angle = (360 / clans.length) * index;
+        const startingIndices = clanIds.map((clanId, index) => {
+            const angle = (360 / clanIds.length) * index;
             const rad = (angle * Math.PI) / 180;
             const targetX = Math.cos(rad) * bannerRadius;
             const targetZ = Math.sin(rad) * bannerRadius;
 
-            // Find closest hex to this banner position
             let closestIdx = -1;
             let minDist = Infinity;
             allHexes.forEach((hex, i) => {
@@ -70,9 +84,9 @@ export default async function handler(req, res) {
         const newTerritories = allHexes.map((hex, i) => {
             const homeBase = startingIndices.find(sb => sb.hexIdx === i);
             let type = 'code';
-            const r = Math.random();
-            if (r > 0.6) type = 'code';
-            else if (r > 0.3) type = 'english';
+            const rnd = Math.random();
+            if (rnd > 0.6) type = 'code';
+            else if (rnd > 0.3) type = 'english';
             else type = 'soft-skills';
 
             return {
@@ -90,28 +104,20 @@ export default async function handler(req, res) {
 
         if (insertError) throw insertError;
 
-        // 2. Reset Clan Points (Give 50 for the Home Base)
-        const { error: clanError } = await supabaseAdmin
-            .from('clans')
-            .update({ points: 50 })
-            .neq('id', 'null'); 
-
-        if (clanError) throw clanError;
-
-        // 3. Reset User Points (Hard Reset for Tournament)
-        console.log('[AdminAPI] Resetting all User points...');
+        // 4. Reset User Points
+        console.log('[AdminAPI] Resetting User points...');
         const { error: userError } = await supabaseAdmin
             .from('users')
             .update({ points: 0 })
-            .neq('points', -1); // Atomic update for all
+            .neq('points', -1); 
 
         if (userError) throw userError;
 
-        // 4. Post Announcement to Chat
+        // 5. Post Announcement
         await supabaseAdmin.from('chat_messages').insert([{
             clan_id: 'SYSTEM',
             user_username: 'ADMIN',
-            content: '⚠️ NEXUS NORMALIZED: Season reset complete. All points zeroed.'
+            content: '⚠️ NEXUS NORMALIZED: Season reset complete. Security protocol active.'
         }]);
 
         console.log('[AdminAPI] Global Reset Complete.');
