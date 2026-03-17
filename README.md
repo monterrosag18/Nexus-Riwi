@@ -10,7 +10,7 @@
 *   **Camilo Florez** — 
 *   **Julian Aponte** — 
 *   **Juan Jose** — 
-*   **Dhana** — 
+*   **Danna Oyola** — 
 
 ---
 
