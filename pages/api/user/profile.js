@@ -1,9 +1,20 @@
 import { supabase } from '../../../lib/supabase';
+import { verifyToken } from '../../../lib/auth';
 
 export default async function handler(req, res) {
   try {
     if (req.method !== 'GET') {
       return res.status(405).json({ message: 'Method not allowed' });
+    }
+
+    // SECURITY: Verify the requester is a logged-in user
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'AUTHENTICATION_REQUIRED' });
+    }
+    const token = authHeader.split(' ')[1];
+    if (!verifyToken(token)) {
+      return res.status(403).json({ message: 'INVALID_SESSION' });
     }
 
     const { username } = req.query;

@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '../../../lib/supabase';
+import { verifyToken } from '../../../lib/auth';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -7,12 +8,13 @@ export default async function handler(req, res) {
     // Set headers to prevent any caching
     res.setHeader('Cache-Control', 'no-store, max-age=0');
     
-    // Simple Security Shield: Protect mutations
+    // SECURITY: Use real x-admin-token with JWT verification
     if (req.method === 'POST') {
         const adminToken = req.headers['x-admin-token'];
-        if (!adminToken || adminToken.length < 20) {
+        const decoded = verifyToken(adminToken);
+        if (!decoded || decoded.role !== 'SUPER_USER') {
             console.warn('[Security] Unauthorized coronation blocked.');
-            return res.status(403).json({ message: 'AUTH_REQUIRED' });
+            return res.status(403).json({ message: 'ADMIN_AUTH_REQUIRED' });
         }
     }
 

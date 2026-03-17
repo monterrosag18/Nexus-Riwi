@@ -1,16 +1,17 @@
-
 import { supabaseAdmin } from '../../../lib/supabase';
+import { verifyToken } from '../../../lib/auth';
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).json({ message: 'Method not allowed' });
     }
 
-    const adminToken = req.headers['x-admin-token'];
-    if (!adminToken || adminToken.length < 20) {
-      console.warn('[Security] Unauthorized Reset-Map blocked.');
-      return res.status(403).json({ message: 'AUTH_REQUIRED' });
-    }
+  const adminToken = req.headers['x-admin-token'];
+  const decoded = verifyToken(adminToken);
+  if (!decoded || decoded.role !== 'SUPER_USER') {
+    console.warn('[Security] Unauthorized Reset-Map blocked.');
+    return res.status(403).json({ message: 'ADMIN_AUTH_REQUIRED' });
+  }
 
     try {
         console.log('[AdminAPI] Starting Global Map Reset...');

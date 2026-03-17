@@ -1,12 +1,13 @@
 import { supabaseAdmin } from '../../../lib/supabase';
+import { verifyToken } from '../../../lib/auth';
 
 export default async function handler(req, res) {
-  // Simple Security Shield: Protect mutations
   if (req.method !== 'GET') {
     const adminToken = req.headers['x-admin-token'];
-    if (!adminToken || adminToken.length < 20) {
-      console.warn('[Security] Unauthorized news broadcast blocked.');
-      return res.status(403).json({ message: 'AUTH_REQUIRED' });
+    const decoded = verifyToken(adminToken);
+    if (!decoded || decoded.role !== 'SUPER_USER') {
+      console.warn('[Security] Unauthorized news mutation blocked.');
+      return res.status(403).json({ message: 'ADMIN_AUTH_REQUIRED' });
     }
   }
 
