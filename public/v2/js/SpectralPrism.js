@@ -20,6 +20,7 @@ export class SpectralPrism {
             depthWrite: true
         });
 
+        mat.uniforms.uColor.value = new THREE.Color(0x00f3ff);
         this.mesh = new THREE.Mesh(geo, mat);
         this.mesh.position.y = 90;
         this.group.add(this.mesh);

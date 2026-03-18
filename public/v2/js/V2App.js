@@ -141,7 +141,7 @@ export class V2App {
     render() {
         // SELECTIVE BLOOM LOGIC
         this.scene.traverse(obj => {
-            if (obj.isMesh && !obj.layers.isEnabled(this.BLOOM_LAYER)) {
+            if (obj.isMesh && obj.layers && typeof obj.layers.isEnabled === 'function' && !obj.layers.isEnabled(this.BLOOM_LAYER)) {
                 this.materials[obj.uuid] = obj.material;
                 obj.material = this.darkMaterial;
             }

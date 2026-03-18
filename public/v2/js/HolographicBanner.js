@@ -33,7 +33,7 @@ export class HolographicBanner {
             depthWrite: false
         });
 
-        mat.uniforms.uColor.value = this.color;
+        mat.uniforms.uColor.value = new THREE.Color(this.color);
 
         this.mesh = new THREE.Mesh(geometry, mat);
         this.mesh.position.set(pos.x, pos.y + 70, pos.z);

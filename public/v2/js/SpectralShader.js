@@ -2,7 +2,7 @@ export const SpectralShader = {
     uniforms: {
         "tDiffuse": { value: null },
         "time": { value: 0.0 },
-        "uColor": { value: new THREE.Color(0x00f3ff) },
+        "uColor": { value: null }, 
         "uDispersion": { value: 0.5 }
     },
     vertexShader: `

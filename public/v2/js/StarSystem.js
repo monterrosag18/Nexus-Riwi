@@ -12,7 +12,7 @@ export class StarSystem {
         const loader = new THREE.TextureLoader();
         const starsGeo = new THREE.SphereGeometry(6000, 32, 32);
         const starsMat = new THREE.MeshBasicMaterial({
-            map: loader.load('./assets/8k_stars.jpg'), 
+            map: loader.load('../assets/8k_stars.jpg'), 
             color: 0x222222, // Dimmed down for contrast
             side: THREE.BackSide,
             transparent: true,
