@@ -8,8 +8,8 @@ export default async function handler(req, res) {
 
     const { user, pass } = req.body;
 
-    const ADMIN_USER = process.env.ADMIN_USERNAME || 'nexusadmin';
-    const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'nexusriwi2026';
+    const ADMIN_USER = process.env.ADMIN_USERNAME || 'admin';
+    const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'nexusadminpassword2026';
 
     if (user === ADMIN_USER && pass === ADMIN_PASS) {
         // Generate a secure JWT for the admin session
