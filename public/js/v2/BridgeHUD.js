@@ -24,12 +24,12 @@ export class BridgeHUD {
         // 2. GLASS EFFECT (Refraction)
         const glassGeo = new THREE.PlaneGeometry(1000, 1000);
         const glassMat = new THREE.MeshPhysicalMaterial({
-            transmission: 0.1,
-            thickness: 5,
+            metalness: 0,
             roughness: 0,
             transparent: true,
             opacity: 0.1,
-            color: 0x00f3ff
+            color: 0x00f3ff,
+            side: THREE.DoubleSide
         });
         const glass = new THREE.Mesh(glassGeo, glassMat);
         glass.position.z = -490;
