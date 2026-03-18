@@ -203,7 +203,10 @@ export default function renderLeaderboard() {
         clanPanel.style.display = 'none';
         codersPanel.style.display = 'flex';
         try {
-            const res = await fetch(`/api/clans/members?clanId=${clanId}`);
+            const token = localStorage.getItem('riwi_token');
+            const res = await fetch(`/api/clans/members?clanId=${clanId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             const members = res.ok ? await res.json() : [];
             codersTbody.innerHTML = members.length > 0 ? members.map((m, i) => renderUserRow(m, i)).join('') : `<tr><td colspan="4" class="py-16 text-center text-gray-500 font-mono italic uppercase tracking-widest text-xs">No active operatives found in this sector</td></tr>`;
         } catch (e) {

@@ -267,7 +267,7 @@ class Store {
     async syncUserProfile() {
         if (!this.state.currentUser) return;
         try {
-            const res = await fetch(`/api/user/profile?username=${this.state.currentUser.name}`);
+            const res = await this.authenticatedFetch(`/api/user/profile?username=${this.state.currentUser.name}`);
             const profile = await res.json();
             if (profile.name) {
                 this.setUser(profile);

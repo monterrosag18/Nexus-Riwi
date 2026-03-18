@@ -1,8 +1,19 @@
 import { supabaseAdmin } from '../../../lib/supabase';
+import { verifyToken } from '../../../lib/auth';
 
 export default async function handler(req, res) {
   const { clanId } = req.query;
   if (!clanId) return res.status(400).json({ message: 'Missing clanId' });
+
+  // SECURITY: Prevent anonymous crawling of clan rosters
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ message: 'AUTH_REQUIRED' });
+  }
+  const token = authHeader.split(' ')[1];
+  if (!verifyToken(token)) {
+    return res.status(403).json({ message: 'INVALID_SESSION' });
+  }
 
   try {
     // Fetch users for the given clan
@@ -14,7 +25,7 @@ export default async function handler(req, res) {
 
     if (error) throw error;
     
-    // Map to expected format if needed
+    // Map to expected format
     const members = users.map(u => ({
       name: u.username,
       clan: u.clan_id,
