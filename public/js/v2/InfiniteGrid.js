@@ -3,54 +3,74 @@ const THREE = window.THREE;
 export class InfiniteGrid {
     constructor(scene) {
         this.scene = scene;
-        this.count = 500; // Large number of hexes for the "Infinity" look
+        this.count = 800; 
         this.mesh = null;
+        this.territories = [
+            { id: 1, color: new THREE.Color(0x00f3ff), center: new THREE.Vector3(-150, 0, 0) },   // Turing
+            { id: 2, color: new THREE.Color(0xff0000), center: new THREE.Vector3(150, 0, -100) }, // Tesla
+            { id: 3, color: new THREE.Color(0x00ff00), center: new THREE.Vector3(50, 0, 150) },  // McCarthy
+            { id: 4, color: new THREE.Color(0xffff00), center: new THREE.Vector3(-100, 0, -150) },// Hamilton
+            { id: 5, color: new THREE.Color(0xff00ff), center: new THREE.Vector3(200, 0, 100) }   // Lovelace
+        ];
         
         this.init();
     }
 
     init() {
-        // 1. HEXAGON GEOMETRY (Optimized 4-triangle version)
         const shape = new THREE.Shape();
         for (let i = 0; i < 6; i++) {
             const angle = (i / 6) * Math.PI * 2;
-            const x = Math.cos(angle) * 10;
-            const y = Math.sin(angle) * 10;
+            const x = Math.cos(angle) * 8.5; // Slightly smaller hexes
+            const y = Math.sin(angle) * 8.5;
             if (i === 0) shape.moveTo(x, y);
             else shape.lineTo(x, y);
         }
         const geometry = new THREE.ShapeGeometry(shape);
-        geometry.rotateX(-Math.PI / 2); // Lay flat
+        geometry.rotateX(-Math.PI / 2);
 
-        // 2. CUSTOM SHADER MATERIAL (The Glow)
         const material = new THREE.ShaderMaterial({
             uniforms: {
                 time: { value: 0 },
-                uColor: { value: new THREE.Color(0x00f3ff) }
+                uTerritories: { value: this.territories.map(t => t.center) },
+                uColors: { value: this.territories.map(t => t.color) }
             },
             vertexShader: `
                 varying vec2 vUv;
+                varying vec3 vWorldPos;
                 void main() {
                     vUv = uv;
+                    vWorldPos = (instanceMatrix * vec4(position, 1.0)).xyz;
                     gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(position, 1.0);
                 }
             `,
             fragmentShader: `
                 varying vec2 vUv;
+                varying vec3 vWorldPos;
                 uniform float time;
-                uniform vec3 uColor;
+                uniform vec3 uTerritories[5];
+                uniform vec3 uColors[5];
+
                 void main() {
-                    // Calculate distance from center [0.5, 0.5]
-                    float d = length(vUv - 0.5) * 2.0;
-                    
-                    // EDGE GLOW
+                    float d = length(vUv - 0.5) * 2.1;
                     float edge = smoothstep(0.85, 1.0, d);
                     
-                    // PULSE
-                    float pulse = sin(time * 2.0) * 0.1 + 0.9;
+                    // Determine territory color based on proximity
+                    vec3 finalColor = vec3(0.05, 0.05, 0.1); // Default dark
+                    float minDist = 9999.0;
                     
-                    vec3 color = uColor * edge * pulse;
-                    gl_FragColor = vec4(color, edge > 0.1 ? 0.6 : 0.1);
+                    for(int i = 0; i < 5; i++) {
+                        float dist = distance(vWorldPos.xz, uTerritories[i].xz);
+                        if(dist < 120.0) { // Territory radius
+                            float influence = 1.0 - (dist / 120.0);
+                            finalColor = mix(finalColor, uColors[i], influence * 0.4);
+                        }
+                    }
+
+                    // Glow effect
+                    float pulse = sin(time * 1.5) * 0.1 + 0.9;
+                    vec3 glow = finalColor * (1.0 + edge * 2.0) * pulse;
+                    
+                    gl_FragColor = vec4(glow, edge > 0.1 ? 0.7 : 0.2);
                 }
             `,
             transparent: true,
@@ -58,25 +78,24 @@ export class InfiniteGrid {
             depthWrite: false
         });
 
-        // 3. INSTANCED MESH
         this.mesh = new THREE.InstancedMesh(geometry, material, this.count);
-        
         const matrix = new THREE.Matrix4();
-        const hexSpacing = 18;
+        const hexSpacing = 16;
         let idx = 0;
         
-        // Arrange in a large hex grid pattern
-        const size = Math.floor(Math.sqrt(this.count));
-        for (let q = -size; q <= size; q++) {
-            for (let r = -size; r <= size; r++) {
-                if (idx >= this.count) break;
-                
+        // Arrange in a large circular pattern
+        const radius = 250;
+        for (let q = -20; q <= 20; q++) {
+            for (let r = -20; r <= 20; r++) {
                 const x = hexSpacing * (q + r/2);
                 const z = hexSpacing * (Math.sqrt(3)/2) * r;
                 
-                matrix.setPosition(x, 0, z);
-                this.mesh.setMatrixAt(idx, matrix);
-                idx++;
+                if (Math.sqrt(x*x + z*z) < radius) {
+                    if (idx >= this.count) break;
+                    matrix.setPosition(x, 0, z);
+                    this.mesh.setMatrixAt(idx, matrix);
+                    idx++;
+                }
             }
         }
 
