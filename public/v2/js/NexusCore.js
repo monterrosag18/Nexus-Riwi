@@ -64,9 +64,8 @@ export class NexusCore {
 
     update(time) {
         if (this.model) {
-            // Very slow idle rotation
             this.model.rotation.y += 0.002;
-            this.model.position.y = -5 + Math.sin(time * 0.3) * 2; // Subtle hover exactly on the grid
+            this.model.position.y = 50 + Math.sin(time * 0.3) * 5; // Hover above the hex grid
         }
         if (this.mixer) {
             this.mixer.update(0.016); 
