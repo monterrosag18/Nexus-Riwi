@@ -12,7 +12,7 @@ export class StarSystem {
         // 1. GALAXY BACKGROUND SPHERE
         const loader = new THREE.TextureLoader();
         // Use the newly generated premium galaxy texture
-        const textureBg = loader.load('../assets/galaxy.png'); 
+        const textureBg = loader.load('assets/galaxy.png'); 
         const geometryBg = new THREE.SphereGeometry(4000, 64, 64);
         const materialBg = new THREE.MeshBasicMaterial({
             side: THREE.BackSide,

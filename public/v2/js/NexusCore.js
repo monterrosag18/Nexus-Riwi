@@ -12,7 +12,8 @@ export class NexusCore {
             const loader = new THREE.GLTFLoader();
             const loadingText = document.querySelector('#loading-screen p');
             
-            loader.load('../assets/nexus_model.glb', 
+            // Use the moved model from assets
+            loader.load('assets/nexus_model.glb', 
                 (gltf) => {
                     this.model = gltf.scene;
                     
