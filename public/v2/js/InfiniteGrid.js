@@ -33,9 +33,9 @@ export class InfiniteGrid {
 
         // 2. METALLIC MATERIAL (PBR)
         const material = new THREE.MeshStandardMaterial({
-            color: 0x222222, // Lighter for visibility
-            metalness: 0.7,
-            roughness: 0.4
+            color: 0x2a2a2a,
+            metalness: 0.2, // Reduced to prevent specular flashing
+            roughness: 0.8
         });
 
         this.mesh = new THREE.InstancedMesh(geometry, material, this.count);

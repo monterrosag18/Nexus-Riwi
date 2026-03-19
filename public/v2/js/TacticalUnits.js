@@ -48,11 +48,7 @@ export class TacticalUnits {
         barrel.position.z = 8;
         group.add(barrel);
 
-        // Core light
-        const light = new THREE.PointLight(color, 1, 20);
-        light.position.y = 5;
-        group.add(light);
-
+        // Core light removed — was causing colored halo effect
         this.scene.add(group);
     }
 
