@@ -48,8 +48,8 @@ export class V2App {
         // 1. RENDERER SETUP (Filmic Tone Mapping)
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        this.renderer.toneMappingExposure = 1.0;
+        this.renderer.toneMapping = THREE.LinearToneMapping; // More natural lighting for this scene
+        this.renderer.toneMappingExposure = 1.2;
         this.renderer.outputEncoding = THREE.sRGBEncoding;
         this.container.appendChild(this.renderer.domElement);
 
@@ -108,12 +108,16 @@ export class V2App {
         this.finalComposer.addPass(finalPass);
 
         // 3. LIGHTING (Cinematic setup)
-        this.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-        this.scene.add(new THREE.HemisphereLight(0x4433aa, 0x111122, 0.8));
+        this.scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+        this.scene.add(new THREE.HemisphereLight(0xffffff, 0x000000, 0.6));
         
-        const directional = new THREE.DirectionalLight(0xffffff, 1.2);
-        directional.position.set(100, 200, 300);
+        const directional = new THREE.DirectionalLight(0xffffff, 1.5);
+        directional.position.set(100, 400, 200);
         this.scene.add(directional);
+
+        const pointLight = new THREE.PointLight(0x00f3ff, 2.0, 1000);
+        pointLight.position.set(0, 150, 0); // Above the Nexus
+        this.scene.add(pointLight);
 
         // 4. COMPONENTS
         this.components.stars = new StarSystem(this.scene);

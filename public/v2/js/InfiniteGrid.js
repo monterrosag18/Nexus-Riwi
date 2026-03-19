@@ -33,10 +33,10 @@ export class InfiniteGrid {
 
         // 2. METALLIC MATERIAL (PBR)
         const material = new THREE.MeshStandardMaterial({
-            color: 0x050505,
-            metalness: 1.0,
-            roughness: 0.2,
-            emissive: 0x000000 // Subtle highlight
+            color: 0x1a1a1a, // Lighter base for visibility
+            metalness: 0.8,
+            roughness: 0.3,
+            emissive: 0x000000 
         });
 
         this.mesh = new THREE.InstancedMesh(geometry, material, this.count);
@@ -58,11 +58,11 @@ export class InfiniteGrid {
                     this.mesh.setMatrixAt(idx, matrix);
 
                     // Color based on territory
-                    let color = new THREE.Color(0x050505);
+                    let color = new THREE.Color(0x1a1a1a);
                     this.territories.forEach(t => {
                         const dist = Math.sqrt(Math.pow(x - t.center.x, 2) + Math.pow(z - t.center.z, 2));
-                        if (dist < 100) {
-                            color.lerp(new THREE.Color(t.color), 0.15); // Fade in territory color
+                        if (dist < 120) {
+                            color.lerp(new THREE.Color(t.color), 0.5); // More vibrant territory color
                         }
                     });
                     this.mesh.setColorAt(idx, color);
