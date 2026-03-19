@@ -1,6 +1,6 @@
 const THREE = window.THREE;
 import { InfiniteGrid } from './InfiniteGrid.js';
-import { SpectralPrism } from './SpectralPrism.js';
+import { NexusCore } from './NexusCore.js';
 import { HolographicBanner } from './HolographicBanner.js';
 import { StarSystem } from './StarSystem.js';
 import { BridgeHUD } from './BridgeHUD.js';
@@ -26,7 +26,7 @@ export class V2App {
 
         this.components = {
             grid: null,
-            tower: null,
+            nexus: null,
             banners: [],
             stars: null,
             hud: null
@@ -116,7 +116,8 @@ export class V2App {
         // 4. COMPONENTS
         this.components.stars = new StarSystem(this.scene);
         this.components.grid = new InfiniteGrid(this.scene);
-        this.components.tower = new SpectralPrism(this.scene);
+        this.components.nexus = new NexusCore(this.scene);
+        await this.components.nexus.init();
         this.components.hud = new BridgeHUD(this.scene, this.camera);
         this.components.units = new TacticalUnits(this.scene, this.clans.map(c => c.pos));
 
@@ -166,7 +167,7 @@ export class V2App {
         if (this.controls) this.controls.update();
 
         this.components.grid.update(time);
-        this.components.tower.update(time);
+        if (this.components.nexus) this.components.nexus.update(time);
         this.components.banners.forEach(b => b.update(time));
         this.components.stars.update(this.camera);
 

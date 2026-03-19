@@ -3,107 +3,84 @@ const THREE = window.THREE;
 export class StarSystem {
     constructor(scene) {
         this.scene = scene;
-        this.planets = [];
+        this.stars = null;
+        this.sphereBg = null;
         this.init();
     }
 
     init() {
-        // 1. HIGH-RES STARFIELD (Not too neon)
+        // 1. GALAXY BACKGROUND SPHERE
         const loader = new THREE.TextureLoader();
-        const starsGeo = new THREE.SphereGeometry(6000, 32, 32);
-        const starsMat = new THREE.MeshBasicMaterial({
-            map: loader.load('../assets/8k_stars.jpg'), 
-            color: 0x222222, // Dimmed down for contrast
+        // Use the newly generated premium galaxy texture
+        const textureBg = loader.load('../assets/galaxy.png'); 
+        const geometryBg = new THREE.SphereGeometry(4000, 64, 64);
+        const materialBg = new THREE.MeshBasicMaterial({
             side: THREE.BackSide,
+            map: textureBg,
             transparent: true,
-            opacity: 0.8
+            opacity: 0.9
         });
-        const stars = new THREE.Mesh(starsGeo, starsMat);
-        this.scene.add(stars);
+        this.sphereBg = new THREE.Mesh(geometryBg, materialBg);
+        this.scene.add(this.sphereBg);
 
-        // 2. DISTANT NEBULA (Subtle)
-        const nebulaGeo = new THREE.SphereGeometry(5900, 64, 64);
-        const nebulaMat = new THREE.MeshBasicMaterial({
-            color: 0x110022,
+        // 2. STARDUST / BACKGROUND STARS
+        const starPoints = [];
+        for (let i = 0; i < 8000; i++) {
+            const star = new THREE.Vector3(
+                Math.random() * 4000 - 2000,
+                Math.random() * 4000 - 2000,
+                Math.random() * 4000 - 2000
+            );
+            // Don't place stars too close to the center (hex grid)
+            if (star.length() > 500) {
+                starPoints.push(star);
+            }
+        }
+        const starGeo = new THREE.BufferGeometry().setFromPoints(starPoints);
+        const starMat = new THREE.PointsMaterial({ 
+            color: 0xffffff, 
+            size: 1.5, 
             transparent: true,
-            opacity: 0.2,
-            side: THREE.BackSide
+            opacity: 0.8,
+            sizeAttenuation: true 
         });
-        this.scene.add(new THREE.Mesh(nebulaGeo, nebulaMat));
+        this.stars = new THREE.Points(starGeo, starMat);
+        this.scene.add(this.stars);
 
-        // 3. FEATURE PLANET (Gas Giant style)
-        this.createPlanet(
-            {x: -1200, y: 400, z: -800}, 
-            300, 
-            0x442255, 
-            0.8 // Atmosphere intensity
-        );
-
-        // 4. MOON
-        this.createPlanet(
-            {x: 800, y: -200, z: -1500}, 
-            150, 
-            0x444444, 
-            0.3
-        );
-    }
-
-    createPlanet(pos, size, color, atm) {
-        const group = new THREE.Group();
-        group.position.set(pos.x, pos.y, pos.z);
-
-        // Surface
-        const geo = new THREE.SphereGeometry(size, 64, 64);
-        const mat = new THREE.MeshStandardMaterial({ 
-            color: color,
-            roughness: 0.8,
-            metalness: 0.2
+        // 3. MOVING "TWINKLE" STARS (Optional / Added for depth)
+        const twinklePoints = [];
+        for (let i = 0; i < 2000; i++) {
+            twinklePoints.push(new THREE.Vector3(
+                Math.random() * 6000 - 3000,
+                Math.random() * 6000 - 3000,
+                Math.random() * 6000 - 3000
+            ));
+        }
+        const twinkleGeo = new THREE.BufferGeometry().setFromPoints(twinklePoints);
+        const twinkleMat = new THREE.PointsMaterial({ 
+            color: 0x88ccff, 
+            size: 2.2, 
+            transparent: true,
+            opacity: 0.6
         });
-        const surface = new THREE.Mesh(geo, mat);
-        group.add(surface);
-
-        // Atmosphere Glow (Layer 1 - Bloom enabled)
-        const atmGeo = new THREE.SphereGeometry(size * 1.05, 64, 64);
-        const atmMat = new THREE.ShaderMaterial({
-            uniforms: {
-                c: { value: 0.1 },
-                p: { value: 4.5 },
-                glowColor: { value: new THREE.Color(color) },
-                viewVector: { value: new THREE.Vector3() }
-            },
-            vertexShader: `
-                uniform vec3 viewVector;
-                varying float intensity;
-                void main() {
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-                    vec3 vNormal = normalize( normalMatrix * normal );
-                    vec3 vNormel = normalize( viewVector );
-                    intensity = pow( 0.6 - dot(vNormal, vNormel), 4.0 );
-                }
-            `,
-            fragmentShader: `
-                uniform vec3 glowColor;
-                varying float intensity;
-                void main() {
-                    gl_FragColor = vec4( glowColor, intensity );
-                }
-            `,
-            side: THREE.BackSide,
-            blending: THREE.AdditiveBlending,
-            transparent: true
-        });
-        const atmosphere = new THREE.Mesh(atmGeo, atmMat);
-        atmosphere.layers.set(1); // BLOOM LAYER
-        group.add(atmosphere);
-
-        this.scene.add(group);
-        this.planets.push({group, atmosphere});
+        this.twinkleStars = new THREE.Points(twinkleGeo, twinkleMat);
+        this.scene.add(this.twinkleStars);
     }
 
     update(camera) {
-        this.planets.forEach(p => {
-            p.atmosphere.material.uniforms.viewVector.value = 
-                new THREE.Vector3().subVectors(camera.position, p.group.position);
-        });
+        // Gentle rotation for cinematic background feel
+        if (this.sphereBg) {
+            this.sphereBg.rotation.y += 0.0003;
+            this.sphereBg.rotation.z += 0.0001;
+        }
+
+        if (this.stars) {
+            this.stars.rotation.y -= 0.0001;
+        }
+
+        if (this.twinkleStars) {
+            this.twinkleStars.rotation.x += 0.0002;
+            this.twinkleStars.rotation.y += 0.0001;
+        }
     }
 }
