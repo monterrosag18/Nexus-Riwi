@@ -22,8 +22,7 @@ export class StarSystem {
         const materialBg = new THREE.MeshBasicMaterial({
             side: THREE.BackSide,
             map: textureBg,
-            transparent: true,
-            opacity: 0.6
+            side: THREE.BackSide
         });
         this.sphereBg = new THREE.Mesh(geometryBg, materialBg);
         this.group.add(this.sphereBg);

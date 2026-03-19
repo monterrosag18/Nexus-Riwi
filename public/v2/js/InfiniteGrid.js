@@ -53,6 +53,9 @@ export class InfiniteGrid {
                 if (Math.sqrt(x*x + z*z) < radius) {
                     if (idx >= this.count) break;
                     
+                    // Skip center zone to leave room for the Nexus model
+                    if (Math.sqrt(x*x + z*z) < 120) continue;
+                    
                     matrix.setPosition(x, -5, z); // Sits slightly lower
                     this.mesh.setMatrixAt(idx, matrix);
 

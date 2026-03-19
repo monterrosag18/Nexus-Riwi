@@ -12,28 +12,25 @@ export class NexusCore {
             const loader = new THREE.GLTFLoader();
             const loadingText = document.querySelector('#loading-screen p');
             
-            // Use the moved model from assets
             loader.load('assets/nexus_model.glb', 
                 (gltf) => {
                     this.model = gltf.scene;
                     
-                    // Center and Scale adjustment
-                    this.model.position.set(0, 0, 0);
-                    
+                    // 1. Auto-center the model around its own bounding box center
                     const box = new THREE.Box3().setFromObject(this.model);
+                    const center = box.getCenter(new THREE.Vector3());
+                    this.model.position.sub(center); // Moves model so its center = origin
+
+                    // 2. Scale to ~120 units — visible but not overwhelming
                     const size = box.getSize(new THREE.Vector3()).length();
-                    const scalar = 450 / size; 
+                    const scalar = 120 / size;
                     this.model.scale.set(scalar, scalar, scalar);
 
-                    // Restore original materials but enable bloom layer for emissive parts
+                    // 3. Keep original materials (they look great already)
                     this.model.traverse((child) => {
-                        if (child.isMesh) {
-                            child.layers.enable(1); // Enable bloom for all for now, or just specific if we knew names
-                            if (child.material) {
-                                child.material.transparent = true;
-                                child.material.opacity = 1.0;
-                                child.material.side = THREE.DoubleSide;
-                            }
+                        if (child.isMesh && child.material) {
+                            child.material.side = THREE.DoubleSide;
+                            child.material.depthWrite = true;
                         }
                     });
 
@@ -65,7 +62,8 @@ export class NexusCore {
     update(time) {
         if (this.model) {
             this.model.rotation.y += 0.002;
-            this.model.position.y = 50 + Math.sin(time * 0.3) * 5; // Hover above the hex grid
+            // Float gently above the hex grid center (hexes are at y=-5)
+            this.model.position.y = 80 + Math.sin(time * 0.4) * 4;
         }
         if (this.mixer) {
             this.mixer.update(0.016); 
