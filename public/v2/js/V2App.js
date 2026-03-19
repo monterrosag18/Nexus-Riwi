@@ -32,11 +32,11 @@ export class V2App {
         };
         
         this.clans = [
-            { id: 1, name: "Turing", color: 0x00f3ff, pos: {x: -150, z: 0} },
-            { id: 2, name: "Tesla", color: 0xff3344, pos: {x: 180, z: -150} },
-            { id: 3, name: "McCarthy", color: 0x33ff66, pos: {x: 50, z: 200} },
-            { id: 4, name: "Hamilton", color: 0xffcc33, pos: {x: -120, z: -180} },
-            { id: 5, name: "Lovelace", color: 0xff33ff, pos: {x: 250, z: 100} }
+            { id: 1, name: "Turing",   color: 0x00c3ff, pos: {x: -550, z: -550} },
+            { id: 2, name: "Tesla",    color: 0xff3344, pos: {x:  550, z: -550} },
+            { id: 3, name: "McCarthy", color: 0x00ff44, pos: {x:  550, z:  550} },
+            { id: 4, name: "Hamilton", color: 0xF2C94C, pos: {x: -550, z:  550} },
+            { id: 5, name: "Thompson", color: 0x9B51E0, pos: {x:    0, z: -700} },
         ];
 
         this.materials = {}; // Cache for selective bloom
