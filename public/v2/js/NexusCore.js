@@ -22,21 +22,18 @@ export class NexusCore {
                     
                     const box = new THREE.Box3().setFromObject(this.model);
                     const size = box.getSize(new THREE.Vector3()).length();
-                    const scalar = 450 / size; // Slightly larger for emphasis
+                    const scalar = 450 / size; 
                     this.model.scale.set(scalar, scalar, scalar);
 
+                    // Restore original materials but enable bloom layer for emissive parts
                     this.model.traverse((child) => {
                         if (child.isMesh) {
-                            child.layers.enable(1); // BLOOM
-                            child.material = new THREE.MeshStandardMaterial({
-                                color: 0x00f3ff,
-                                emissive: 0x00f3ff,
-                                emissiveIntensity: 0.8,
-                                metalness: 0.9,
-                                roughness: 0.1,
-                                transparent: true,
-                                opacity: 1.0
-                            });
+                            child.layers.enable(1); // Enable bloom for all for now, or just specific if we knew names
+                            if (child.material) {
+                                child.material.transparent = true;
+                                child.material.opacity = 1.0;
+                                child.material.side = THREE.DoubleSide;
+                            }
                         }
                     });
 
@@ -53,7 +50,7 @@ export class NexusCore {
                 },
                 (xhr) => {
                     if (loadingText) {
-                        const percent = (xhr.loaded / xhr.total * 100).toFixed(0);
+                        const percent = (xhr.total > 0) ? (xhr.loaded / xhr.total * 100).toFixed(0) : 0;
                         loadingText.innerText = `SYNCHRONIZING NEXUS CORE: ${percent}%`;
                     }
                 },

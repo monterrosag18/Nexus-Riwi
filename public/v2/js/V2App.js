@@ -65,10 +65,10 @@ export class V2App {
         // 2. SELECTIVE BLOOM SETUP
         const renderScene = new THREE.RenderPass(this.scene, this.camera);
         
-        // Bloom pass (Intensity 1.5, Radius 0.4)
+        // Bloom pass (Intensity 1.0, Radius 0.3)
         const bloomPass = new THREE.UnrealBloomPass(
             new THREE.Vector2(window.innerWidth, window.innerHeight),
-            1.5, 0.4, 0.85
+            1.0, 0.3, 0.9
         );
 
         this.bloomComposer = new THREE.EffectComposer(this.renderer);
@@ -107,10 +107,12 @@ export class V2App {
         this.finalComposer.addPass(renderScene);
         this.finalComposer.addPass(finalPass);
 
-        // 3. LIGHTING (Mood lighting)
-        this.scene.add(new THREE.AmbientLight(0x050510, 0.5));
-        const directional = new THREE.DirectionalLight(0xffffff, 0.8);
-        directional.position.set(200, 500, 200);
+        // 3. LIGHTING (Cinematic setup)
+        this.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+        this.scene.add(new THREE.HemisphereLight(0x4433aa, 0x111122, 0.8));
+        
+        const directional = new THREE.DirectionalLight(0xffffff, 1.2);
+        directional.position.set(100, 200, 300);
         this.scene.add(directional);
 
         // 4. COMPONENTS
