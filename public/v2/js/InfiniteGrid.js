@@ -3,15 +3,15 @@ const THREE = window.THREE;
 export class InfiniteGrid {
     constructor(scene) {
         this.scene = scene;
-        this.count = 600; 
+        this.count = 5000; 
         this.mesh = null;
         
         this.territories = [
-            { center: new THREE.Vector3(-150, 0, 0), color: 0x00f3ff },
-            { center: new THREE.Vector3(180, 0, -150), color: 0xff3344 },
-            { center: new THREE.Vector3(50, 0, 200), color: 0x33ff66 },
-            { center: new THREE.Vector3(-120, 0, -180), color: 0xffcc33 },
-            { center: new THREE.Vector3(250, 0, 100), color: 0xff33ff }
+            { center: new THREE.Vector3(-350, 0, 0), color: 0x00f3ff },
+            { center: new THREE.Vector3(380, 0, -350), color: 0xff3344 },
+            { center: new THREE.Vector3(150, 0, 400), color: 0x33ff66 },
+            { center: new THREE.Vector3(-220, 0, -380), color: 0xffcc33 },
+            { center: new THREE.Vector3(450, 0, 200), color: 0xff33ff }
         ];
 
         this.init();
@@ -33,10 +33,9 @@ export class InfiniteGrid {
 
         // 2. METALLIC MATERIAL (PBR)
         const material = new THREE.MeshStandardMaterial({
-            color: 0x1a1a1a, // Lighter base for visibility
-            metalness: 0.8,
-            roughness: 0.3,
-            emissive: 0x000000 
+            color: 0x222222, // Lighter for visibility
+            metalness: 0.7,
+            roughness: 0.4
         });
 
         this.mesh = new THREE.InstancedMesh(geometry, material, this.count);
@@ -45,24 +44,24 @@ export class InfiniteGrid {
         const hexSpacing = 19;
         let idx = 0;
 
-        const radius = 350;
-        for (let q = -20; q <= 20; q++) {
-            for (let r = -20; r <= 20; r++) {
+        const radius = 1000; 
+        for (let q = -40; q <= 40; q++) {
+            for (let r = -40; r <= 40; r++) {
                 const x = hexSpacing * (q + r/2);
                 const z = hexSpacing * (Math.sqrt(3)/2) * r;
                 
                 if (Math.sqrt(x*x + z*z) < radius) {
                     if (idx >= this.count) break;
                     
-                    matrix.setPosition(x, 0, z);
+                    matrix.setPosition(x, -5, z); // Sits slightly lower
                     this.mesh.setMatrixAt(idx, matrix);
 
                     // Color based on territory
-                    let color = new THREE.Color(0x1a1a1a);
+                    let color = new THREE.Color(0x222222);
                     this.territories.forEach(t => {
                         const dist = Math.sqrt(Math.pow(x - t.center.x, 2) + Math.pow(z - t.center.z, 2));
-                        if (dist < 120) {
-                            color.lerp(new THREE.Color(t.color), 0.5); // More vibrant territory color
+                        if (dist < 200) {
+                            color.lerp(new THREE.Color(t.color), 0.6); 
                         }
                     });
                     this.mesh.setColorAt(idx, color);

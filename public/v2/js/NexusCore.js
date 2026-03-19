@@ -64,12 +64,12 @@ export class NexusCore {
 
     update(time) {
         if (this.model) {
-            // Gentle idle rotation
-            this.model.rotation.y += 0.005;
-            this.model.position.y = Math.sin(time * 0.5) * 10 + 50; // Gentle floating
+            // Very slow idle rotation
+            this.model.rotation.y += 0.002;
+            this.model.position.y = -5 + Math.sin(time * 0.3) * 2; // Subtle hover exactly on the grid
         }
         if (this.mixer) {
-            this.mixer.update(0.016); // Approx 60fps
+            this.mixer.update(0.016); 
         }
     }
 }
