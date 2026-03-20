@@ -21,9 +21,9 @@ export class NexusCore {
                     const center = box.getCenter(new THREE.Vector3());
                     this.model.position.sub(center); // Moves model so its center = origin
 
-                    // 2. Scale to ~220 units — prominent center piece
+                    // Scale to ~320 units — dominant center piece
                     const size = box.getSize(new THREE.Vector3()).length();
-                    const scalar = 220 / size;
+                    const scalar = 320 / size;
                     this.model.scale.set(scalar, scalar, scalar);
 
                     // 3. Keep original materials (they look great already)

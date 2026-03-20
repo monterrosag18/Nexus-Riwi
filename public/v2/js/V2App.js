@@ -5,6 +5,7 @@ import { HolographicBanner } from './HolographicBanner.js';
 import { StarSystem } from './StarSystem.js';
 import { BridgeHUD } from './BridgeHUD.js';
 import { TacticalUnits } from './TacticalUnits.js';
+import { EnergyArcs } from './EnergyArcs.js';
 
 export class V2App {
     constructor() {
@@ -26,6 +27,7 @@ export class V2App {
         this.components = {
             grid: null,
             nexus: null,
+            arcs: null,
             banners: [],
             stars: null,
             hud: null
@@ -111,12 +113,13 @@ export class V2App {
         this.scene.add(cyanLight);
 
         // 4. COMPONENTS
-        this.components.stars = new StarSystem(this.scene);
-        this.components.grid = new InfiniteGrid(this.scene);
-        this.components.nexus = new NexusCore(this.scene);
+        this.components.stars  = new StarSystem(this.scene);
+        this.components.grid   = new InfiniteGrid(this.scene);
+        this.components.nexus  = new NexusCore(this.scene);
         await this.components.nexus.init();
-        this.components.hud = new BridgeHUD(this.scene, this.camera);
-        this.components.units = new TacticalUnits(this.scene, this.clans.map(c => c.pos));
+        this.components.arcs   = new EnergyArcs(this.scene);  // ⚡ lightning
+        this.components.hud    = new BridgeHUD(this.scene, this.camera);
+        this.components.units  = new TacticalUnits(this.scene, this.clans.map(c => c.pos));
 
         this.clans.forEach(c => {
             const banner = new HolographicBanner(this.scene, c.color, c.pos, c.name);
@@ -142,11 +145,13 @@ export class V2App {
     animate() {
         requestAnimationFrame(() => this.animate());
         const time = this.clock.getElapsedTime();
+        const dt   = this.clock.getDelta ? 0.016 : 0.016; // ~60fps delta
 
         if (this.controls) this.controls.update();
 
         this.components.grid.update(time);
-        if (this.components.nexus) this.components.nexus.update(time);
+        if (this.components.nexus)  this.components.nexus.update(time);
+        if (this.components.arcs)   this.components.arcs.update(0.016);
         this.components.banners.forEach(b => b.update(time));
         this.components.stars.update(this.camera);
 
