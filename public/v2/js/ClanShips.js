@@ -1,18 +1,3 @@
-const THREE = window.THREE;
-
-/**
- * ClanShips — Cinematic 3D ships patrolling the Nexus.
- * [UPGRADED] - 5x Scale, Procedural Greeble Details, Plasma Trails.
- */
-
-const SHIP_TYPES = {
-    turing:   'interceptor',
-    tesla:    'needle',
-    mccarthy: 'scout',
-    hamilton: 'commando',
-    thompson: 'shield',
-};
-
 export class ClanShips {
     constructor(scene, camera, clans) {
         this.scene = scene;
@@ -22,155 +7,69 @@ export class ClanShips {
         this.scene.add(this.group);
 
         this.ships = [];
+        // Use global THREE.GLTFLoader from script tag
+        this.loader = new THREE.GLTFLoader();
+        this.isReady = false;
+
         this._init();
     }
 
-    _init() {
-        this.clans.forEach((clan) => {
-            const shipData = this._createShip(clan);
-            this.ships.push(shipData);
-            this.group.add(shipData.mesh);
+    async _init() {
+        // Load all 5 ships in parallel
+        const loadPromises = this.clans.map((clan, index) => {
+            const shipIndex = (index % 5) + 1;
+            const modelUrl = `assets/models/ship_${shipIndex}.glb`;
+            
+            return new Promise((resolve) => {
+                this.loader.load(modelUrl, (gltf) => {
+                    const shipData = this._setupShip(gltf.scene, clan);
+                    this.ships.push(shipData);
+                    this.group.add(shipData.mesh);
+                    resolve();
+                }, undefined, (error) => {
+                    console.error(`Error loading ship ${shipIndex}:`, error);
+                    resolve(); // Continue even if one fails
+                });
+            });
         });
+
+        await Promise.all(loadPromises);
+        this.isReady = true;
     }
 
-    _createShip(clan) {
-        const type = SHIP_TYPES[clan.name.toLowerCase()] || 'interceptor';
+    _setupShip(model, clan) {
         const color = new THREE.Color(clan.color);
         const shipGroup = new THREE.Group();
 
-        // ── 1. MATERIALS ──────────────────────────────────────────────────
-        // Metallic hull
-        const hullMat = new THREE.MeshStandardMaterial({
-            color: 0x2a2a35,
-            metalness: 0.9,
-            roughness: 0.2,
-            emissive: 0x000000
-        });
-
-        // Painted accents (clan color)
-        const paintMat = new THREE.MeshStandardMaterial({
-            color: clan.color,
-            metalness: 0.5,
-            roughness: 0.3,
-            emissive: clan.color,
-            emissiveIntensity: 0.2
-        });
-
-        // Glowing windows/panels
-        const windowMat = new THREE.MeshBasicMaterial({
-            color: 0xffffff,
-            emissive: 0xffffff
-        });
-
-        // ── 2. DETAILED PROCEDURAL MODELS ─────────────────────────────────
-        const createGreeble = (parent, count, sizeRange) => {
-            for (let i = 0; i < count; i++) {
-                const s = Math.random() * (sizeRange[1] - sizeRange[0]) + sizeRange[0];
-                const greeble = new THREE.Mesh(new THREE.BoxGeometry(s, s, s), hullMat);
-                greeble.position.set(
-                    (Math.random() - 0.5) * 4,
-                    (Math.random() - 0.5) * 2,
-                    (Math.random() - 0.5) * 8
-                );
-                parent.add(greeble);
-            }
-        };
-
-        const addWindowLights = (parent, count, area) => {
-            for (let i = 0; i < count; i++) {
-                const dot = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.2), windowMat);
-                dot.position.set(
-                    (Math.random() - 0.5) * area.x,
-                    (Math.random() - 0.5) * area.y,
-                    (Math.random() - 0.5) * area.z
-                );
-                parent.add(dot);
-            }
-        };
-
-        const SCALE = 6.0; // 6x from original
-
-        switch (type) {
-            case 'interceptor': { // Turing
-                const body = new THREE.Mesh(new THREE.ConeGeometry(2, 10, 4), hullMat);
-                body.rotation.x = Math.PI / 2;
-                shipGroup.add(body);
-                // Wings
-                const wingShape = new THREE.Shape();
-                wingShape.moveTo(0,0); wingShape.lineTo(8, -4); wingShape.lineTo(2, -10); wingShape.closePath();
-                const wingGeo = new THREE.ExtrudeGeometry(wingShape, { depth: 0.8, bevelEnabled: true, bevelSize: 0.2 });
-                const w1 = new THREE.Mesh(wingGeo, paintMat);
-                w1.position.set(1.5, 0, 2);
-                const w2 = w1.clone(); w2.scale.x = -1; w2.position.x = -1.5;
-                shipGroup.add(w1, w2);
-                createGreeble(shipGroup, 10, [0.5, 1.5]);
-                break;
-            }
-            case 'needle': { // Tesla
-                const body = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 1.5, 18, 6), hullMat);
-                body.rotation.x = Math.PI / 2;
-                shipGroup.add(body);
-                // Stabilizers
-                for (let i = 0; i < 3; i++) {
-                    const r = (i / 3) * Math.PI * 2;
-                    const fin = new THREE.Mesh(new THREE.BoxGeometry(0.2, 4, 3), paintMat);
-                    fin.position.set(Math.cos(r) * 2, Math.sin(r) * 2, -4);
-                    fin.rotation.z = r;
-                    shipGroup.add(fin);
+        // ── 1. MATERIAL PROCESSING ─────────────────────────────────────────
+        // We traverse the model and inject clan colors into emissive channels
+        model.traverse((child) => {
+            if (child.isMesh) {
+                // Ensure metallic look
+                child.material.metalness = 0.9;
+                child.material.roughness = 0.2;
+                
+                // If it looks like a painted part or window, add emissive glow
+                if (child.name.toLowerCase().includes('glass') || child.name.toLowerCase().includes('light')) {
+                    child.material.emissive = color;
+                    child.material.emissiveIntensity = 2.0;
+                } else if (Math.random() > 0.7) {
+                    // Add subtle clan color accents to a few parts
+                    child.material.emissive = color;
+                    child.material.emissiveIntensity = 0.2;
                 }
-                const emitter = new THREE.Mesh(new THREE.SphereGeometry(1, 8, 8), paintMat);
-                emitter.position.z = 9;
-                shipGroup.add(emitter);
-                break;
             }
-            case 'scout': { // McCarthy
-                const h1 = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 12), hullMat);
-                h1.position.x = 4;
-                const h2 = h1.clone(); h2.position.x = -4;
-                const bridge = new THREE.Mesh(new THREE.BoxGeometry(8, 0.8, 4), paintMat);
-                bridge.position.z = -2;
-                shipGroup.add(h1, h2, bridge);
-                createGreeble(h1, 5, [0.4, 1.0]);
-                createGreeble(h2, 5, [0.4, 1.0]);
-                break;
-            }
-            case 'commando': { // Hamilton
-                const core = new THREE.Mesh(new THREE.BoxGeometry(5, 4, 14), hullMat);
-                shipGroup.add(core);
-                const bridge = new THREE.Mesh(new THREE.BoxGeometry(3, 2, 4), paintMat);
-                bridge.position.y = 2.5;
-                bridge.position.z = 1;
-                shipGroup.add(bridge);
-                const gun1 = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.8, 6), hullMat);
-                gun1.rotation.x = Math.PI / 2;
-                gun1.position.set(3, -1.5, 5);
-                const gun2 = gun1.clone(); gun2.position.x = -3;
-                shipGroup.add(gun1, gun2);
-                createGreeble(core, 15, [0.6, 2.0]);
-                addWindowLights(core, 12, new THREE.Vector3(4, 3, 10));
-                break;
-            }
-            case 'shield': { // Thompson
-                const saucer = new THREE.Mesh(new THREE.CylinderGeometry(6, 7, 2, 8), hullMat);
-                saucer.rotation.x = Math.PI / 2;
-                shipGroup.add(saucer);
-                const wing1 = new THREE.Mesh(new THREE.BoxGeometry(10, 0.5, 6), paintMat);
-                wing1.position.x = 8;
-                const wing2 = wing1.clone(); wing2.position.x = -8;
-                shipGroup.add(wing1, wing2);
-                const top = new THREE.Mesh(new THREE.SphereGeometry(3, 8, 8), paintMat);
-                top.position.y = 1.5;
-                top.scale.y = 0.5;
-                shipGroup.add(top);
-                break;
-            }
-        }
+        });
 
-        shipGroup.scale.setScalar(SCALE);
+        const SCALE = 12.0; // Significant scale for "Brutal" presence
+        model.scale.setScalar(SCALE);
+        model.rotation.y = Math.PI; // Orient forward
+        shipGroup.add(model);
 
-        // ── 3. PLASMA ENGINE TRAIL (Improved GLSL) ────────────────────────
-        const trailGeo = new THREE.CylinderGeometry(0.1, 4.5, 40, 16, 1, true);
-        const trailMat = new THREE.ShaderMaterial({
+        // ── 2. ENGINE GLOW (Plasma Shader) ──────────────────────────────────
+        // We add two glow cylinders at the back for engines
+        const engineGeo = new THREE.CylinderGeometry(0.1, 4.0, 35, 16, 1, true);
+        const engineMat = new THREE.ShaderMaterial({
             uniforms: {
                 uColor: { value: color },
                 uTime:  { value: 0 }
@@ -179,56 +78,52 @@ export class ClanShips {
                 varying vec2 vUv;
                 void main() {
                     vUv = uv;
-                    // Taper end of trail
-                    vec3 pos = position;
-                    float taper = 1.0 - uv.y; 
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
                 }
             `,
             fragmentShader: `
                 uniform vec3 uColor;
                 uniform float uTime;
                 varying vec2 vUv;
-
                 void main() {
-                    // Moving noise texture
-                    float noise = sin(vUv.x * 20.0 + uTime * 15.0) * cos(vUv.y * 10.0 - uTime * 10.0) * 0.5 + 0.5;
-                    float alpha = (1.0 - vUv.y) * 0.45; // Fade over length
-                    alpha *= (0.7 + 0.3 * noise); // Flicker
-                    
-                    // Central bright core
-                    float core = smoothstep(0.4, 0.5, 1.0 - abs(vUv.x - 0.5) * 2.0);
-                    vec3 finalColor = mix(uColor, vec3(1.0), core * 0.4);
-
+                    float noise = sin(vUv.x * 30.0 + uTime * 20.0) * 0.5 + 0.5;
+                    float alpha = pow(1.0 - vUv.y, 2.0) * 0.6;
+                    alpha *= (0.7 + 0.3 * noise);
+                    vec3 finalColor = mix(uColor, vec3(1.0), (1.0 - vUv.y) * 0.4);
                     gl_FragColor = vec4(finalColor, alpha);
                 }
             `,
             transparent: true,
-            side: THREE.BackSide,
+            side: THREE.DoubleSide,
             blending: THREE.AdditiveBlending,
             depthWrite: false
         });
 
-        const trail = new THREE.Mesh(trailGeo, trailMat);
-        trail.rotation.x = -Math.PI / 2;
-        trail.position.z = -25; // Adjusted for new scale
-        shipGroup.add(trail);
+        // Add two engine trails
+        const trail1 = new THREE.Mesh(engineGeo, engineMat);
+        trail1.rotation.x = -Math.PI / 2;
+        trail1.position.set(-2, 0, -10);
+        shipGroup.add(trail1);
 
-        // ── 4. FLIGHT PATH ──────────────────────────────────────────────
+        const trail2 = trail1.clone();
+        trail2.position.x = 2;
+        shipGroup.add(trail2);
+
+        // ── 3. FLIGHT PATH ──────────────────────────────────────────────────
         const points = [];
-        const orbitRadius = 800 + Math.random() * 400;
-        const orbitHeight = 150 + Math.random() * 200;
+        const orbitRadius = 1000 + Math.random() * 500;
+        const orbitHeight = 200 + Math.random() * 300;
         for (let i = 0; i < 12; i++) {
             const angle = (i / 12) * Math.PI * 2;
             points.push(new THREE.Vector3(
-                Math.cos(angle) * (orbitRadius + (Math.random()-0.5)*250),
-                orbitHeight + (Math.random()-0.5)*150,
-                Math.sin(angle) * (orbitRadius + (Math.random()-0.5)*250)
+                Math.cos(angle) * (orbitRadius + (Math.random()-0.5)*400),
+                orbitHeight + (Math.random()-0.5)*200,
+                Math.sin(angle) * (orbitRadius + (Math.random()-0.5)*400)
             ));
         }
         const path = new THREE.CatmullRomCurve3(points, true);
 
-        // ── 5. HOLOGRAPHIC LABEL (Larger) ────────────────────────────────
+        // ── 4. LABEL ────────────────────────────────────────────────────────
         const labelCanvas = document.createElement('canvas');
         labelCanvas.width = 512; labelCanvas.height = 128;
         const ctx = labelCanvas.getContext('2d');
@@ -241,25 +136,27 @@ export class ClanShips {
         
         const labelTex = new THREE.CanvasTexture(labelCanvas);
         const label = new THREE.Mesh(
-            new THREE.PlaneGeometry(60, 15),
+            new THREE.PlaneGeometry(80, 20),
             new THREE.MeshBasicMaterial({ map: labelTex, transparent: true, side: THREE.DoubleSide, depthWrite: false })
         );
-        label.position.y = 20;
+        label.position.y = 35;
         shipGroup.add(label);
 
         return {
             mesh: shipGroup,
             path: path,
             t: Math.random(),
-            speed: 0.008 + Math.random() * 0.012, // Slower for "massive" feel
+            speed: 0.005 + Math.random() * 0.008,
             label: label,
-            trail: trail,
+            engineMat: engineMat,
             bobOffset: Math.random() * 1000
         };
     }
 
     update(time) {
-        const delta = 0.016; 
+        if (!this.isReady) return;
+
+        const delta = 0.016;
         const up = new THREE.Vector3(0, 1, 0);
 
         this.ships.forEach(s => {
@@ -271,27 +168,22 @@ export class ClanShips {
             const moveDir = new THREE.Vector3().subVectors(nextPos, pos).normalize();
             
             // Subtle Bobbing
-            const bob = Math.sin(time * 0.5 + s.bobOffset) * 5;
+            const bob = Math.sin(time * 0.4 + s.bobOffset) * 10;
             s.mesh.position.set(pos.x, pos.y + bob, pos.z);
             
             s.mesh.lookAt(nextPos);
 
-            // Improved Banking
-            // Normal of the path compared to global Up
-            const right = new THREE.Vector3().crossVectors(moveDir, up).normalize();
-            const curUp = new THREE.Vector3().crossVectors(right, moveDir).normalize();
-            
-            // Lookahead banking: calculate turn intensity
+            // Advanced Banking Physics
             const futureT = (s.t + 0.04) % 1.0;
             const futurePos = s.path.getPoint(futureT);
             const futureDir = new THREE.Vector3().subVectors(futurePos, nextPos).normalize();
             const turnIntensity = moveDir.cross(futureDir).y;
             
-            const bankAngle = turnIntensity * 45; // Max 45 degrees
+            const bankAngle = turnIntensity * 70; // Even more dynamic banking for larger ships
             s.mesh.rotateZ(bankAngle);
 
             // Update Shader
-            s.trail.material.uniforms.uTime.value = time;
+            s.engineMat.uniforms.uTime.value = time;
 
             // Billboard label
             if (this.camera) {
