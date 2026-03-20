@@ -1,11 +1,11 @@
 const THREE = window.THREE;
 import { InfiniteGrid } from './InfiniteGrid.js';
 import { NexusCore } from './NexusCore.js';
-import { ClanStandard } from './ClanStandard.js';
+import { CrystalMonument } from './CrystalMonument.js';
 import { SpaceBackground } from './SpaceBackground.js';
 import { BridgeHUD } from './BridgeHUD.js';
 import { TacticalUnits } from './TacticalUnits.js';
-import { EnergyArcs } from './EnergyArcs.js';
+import { ParticleStreams } from './ParticleStreams.js';
 
 export class V2App {
     constructor() {
@@ -27,7 +27,7 @@ export class V2App {
         this.components = {
             grid: null,
             nexus: null,
-            arcs: null,
+            streams: null,
             banners: [],
             space: null,
             hud: null
@@ -118,13 +118,13 @@ export class V2App {
         this.components.grid   = new InfiniteGrid(this.scene);
         this.components.nexus  = new NexusCore(this.scene);
         await this.components.nexus.init();
-        this.components.arcs   = new EnergyArcs(this.scene);  // ⚡ lightning
-        this.components.hud    = new BridgeHUD(this.scene, this.camera);
-        this.components.units  = new TacticalUnits(this.scene, this.clans.map(c => c.pos));
+        this.components.streams = new ParticleStreams(this.scene);  // ⚡ particles
+        this.components.hud     = new BridgeHUD(this.scene, this.camera);
+        this.components.units   = new TacticalUnits(this.scene, this.clans.map(c => c.pos));
 
         this.clans.forEach(c => {
-            const standard = new ClanStandard(this.scene, c.name, c.color, c.pos);
-            this.components.banners.push(standard);
+            const monument = new CrystalMonument(this.scene, this.camera, c.name, c.color, c.pos);
+            this.components.banners.push(monument);
         });
 
         this.animate();
@@ -151,8 +151,8 @@ export class V2App {
         if (this.controls) this.controls.update();
 
         this.components.grid.update(time);
-        if (this.components.nexus)  this.components.nexus.update(time);
-        if (this.components.arcs)   this.components.arcs.update(0.016);
+        if (this.components.nexus)    this.components.nexus.update(time);
+        if (this.components.streams)  this.components.streams.update(0.016);
         this.components.banners.forEach(b => b.update(time));
         this.components.space.update(this.camera);
 
