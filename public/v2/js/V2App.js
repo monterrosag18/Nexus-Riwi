@@ -2,7 +2,7 @@ const THREE = window.THREE;
 import { InfiniteGrid } from './InfiniteGrid.js';
 import { NexusCore } from './NexusCore.js';
 import { ClanStandard } from './ClanStandard.js';
-import { StarSystem } from './StarSystem.js';
+import { SpaceBackground } from './SpaceBackground.js';
 import { BridgeHUD } from './BridgeHUD.js';
 import { TacticalUnits } from './TacticalUnits.js';
 import { EnergyArcs } from './EnergyArcs.js';
@@ -29,7 +29,7 @@ export class V2App {
             nexus: null,
             arcs: null,
             banners: [],
-            stars: null,
+            space: null,
             hud: null
         };
         
@@ -67,7 +67,8 @@ export class V2App {
         this.renderer.outputEncoding = THREE.sRGBEncoding;
         this.container.appendChild(this.renderer.domElement);
 
-        this.scene.background = new THREE.Color(0x020205);
+        // Background handled by SpaceBackground — pure black fallback
+        this.scene.background = new THREE.Color(0x000005);
         this.camera.position.set(0, 500, 700);
         this.camera.lookAt(0, 0, 0);
         this.scene.add(this.camera);
@@ -113,7 +114,7 @@ export class V2App {
         this.scene.add(cyanLight);
 
         // 4. COMPONENTS
-        this.components.stars  = new StarSystem(this.scene);
+        this.components.space  = new SpaceBackground(this.scene);
         this.components.grid   = new InfiniteGrid(this.scene);
         this.components.nexus  = new NexusCore(this.scene);
         await this.components.nexus.init();
@@ -153,7 +154,7 @@ export class V2App {
         if (this.components.nexus)  this.components.nexus.update(time);
         if (this.components.arcs)   this.components.arcs.update(0.016);
         this.components.banners.forEach(b => b.update(time));
-        this.components.stars.update(this.camera);
+        this.components.space.update(this.camera);
 
         this.render();
     }
