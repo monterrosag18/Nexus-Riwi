@@ -6,6 +6,7 @@ import { SpaceBackground } from './SpaceBackground.js';
 import { BridgeHUD } from './BridgeHUD.js';
 import { TacticalUnits } from './TacticalUnits.js';
 import { ParticleStreams } from './ParticleStreams.js';
+import { AsteroidField } from './AsteroidField.js';
 
 export class V2App {
     constructor() {
@@ -25,12 +26,13 @@ export class V2App {
         this.composer = null; // Simple composer
 
         this.components = {
-            grid: null,
-            nexus: null,
-            streams: null,
-            banners: [],
-            space: null,
-            hud: null
+            grid:     null,
+            nexus:    null,
+            streams:  null,
+            asteroids: null,
+            banners:  [],
+            space:    null,
+            hud:      null
         };
         
         // Clans evenly spaced in a ring at radius 600
@@ -118,7 +120,8 @@ export class V2App {
         this.components.grid   = new InfiniteGrid(this.scene);
         this.components.nexus  = new NexusCore(this.scene);
         await this.components.nexus.init();
-        this.components.streams = new ParticleStreams(this.scene);  // ⚡ particles
+        this.components.streams   = new ParticleStreams(this.scene);
+        this.components.asteroids  = new AsteroidField(this.scene);   // 🪨 asteroids
         this.components.hud     = new BridgeHUD(this.scene, this.camera);
         this.components.units   = new TacticalUnits(this.scene, this.clans.map(c => c.pos));
 
@@ -152,7 +155,8 @@ export class V2App {
 
         this.components.grid.update(time);
         if (this.components.nexus)    this.components.nexus.update(time);
-        if (this.components.streams)  this.components.streams.update(0.016);
+        if (this.components.streams)   this.components.streams.update(0.016);
+        if (this.components.asteroids)  this.components.asteroids.update(0.016);
         this.components.banners.forEach(b => b.update(time));
         this.components.space.update(this.camera);
 
