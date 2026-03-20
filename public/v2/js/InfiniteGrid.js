@@ -13,15 +13,15 @@ export class InfiniteGrid {
     }
 
     init() {
-        const hexR       = 10;
-        const hexSpacing = 21;
+        const hexR       = 20;
+        const hexSpacing = 42;
         const gridRadius = 600;
-        const centerClear = 140;
+        const centerClear = 160;
 
         // Pre-build coordinates
         const positions = [];
-        for (let q = -30; q <= 30; q++) {
-            for (let r = -30; r <= 30; r++) {
+        for (let q = -15; q <= 15; q++) {
+            for (let r = -15; r <= 15; r++) {
                 const x = hexSpacing * (q + r / 2);
                 const z = hexSpacing * (Math.sqrt(3) / 2) * r;
                 const dist = Math.sqrt(x * x + z * z);
