@@ -31,13 +31,26 @@ export class V2App {
             hud: null
         };
         
-        this.clans = [
-            { id: 1, name: "Turing",   color: 0x00c3ff, pos: {x: -550, z: -550} },
-            { id: 2, name: "Tesla",    color: 0xff3344, pos: {x:  550, z: -550} },
-            { id: 3, name: "McCarthy", color: 0x00ff44, pos: {x:  550, z:  550} },
-            { id: 4, name: "Hamilton", color: 0xF2C94C, pos: {x: -550, z:  550} },
-            { id: 5, name: "Thompson", color: 0x9B51E0, pos: {x:    0, z: -700} },
+        // Clans evenly spaced in a ring at radius 600
+        const clanDefs = [
+            { name: "Turing",   color: 0x00c3ff },
+            { name: "Tesla",    color: 0xff3344 },
+            { name: "McCarthy", color: 0x00ff44 },
+            { name: "Hamilton", color: 0xF2C94C },
+            { name: "Thompson", color: 0x9B51E0 },
         ];
+        const clanRingRadius = 620;
+        this.clans = clanDefs.map((c, i) => {
+            const angle = (i / clanDefs.length) * Math.PI * 2 - Math.PI / 2;
+            return {
+                id: i + 1,
+                ...c,
+                pos: {
+                    x: Math.cos(angle) * clanRingRadius,
+                    z: Math.sin(angle) * clanRingRadius
+                }
+            };
+        });
 
         this.materials = {}; // Cache for selective bloom
         this.darkMaterial = new THREE.MeshBasicMaterial({ color: 'black' });
@@ -53,7 +66,8 @@ export class V2App {
         this.container.appendChild(this.renderer.domElement);
 
         this.scene.background = new THREE.Color(0x020205);
-        this.camera.position.set(200, 300, 600);
+        this.camera.position.set(0, 500, 700);
+        this.camera.lookAt(0, 0, 0);
         this.scene.add(this.camera);
 
         this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
@@ -61,25 +75,40 @@ export class V2App {
         this.controls.dampingFactor = 0.05;
         this.controls.maxPolarAngle = Math.PI / 2.1; // Stay above ground
 
-        // 2. SIMPLE BLOOM SETUP (no selective bloom - it was darkening the Nexus model)
+        // 2. BLOOM — High intensity for neon glow effect
         const renderScene = new THREE.RenderPass(this.scene, this.camera);
         const bloomPass = new THREE.UnrealBloomPass(
             new THREE.Vector2(window.innerWidth, window.innerHeight),
-            0.5, 0.3, 0.85
+            1.8,  // strength
+            0.5,  // radius
+            0.75  // threshold — only very bright things glow
         );
 
         this.composer = new THREE.EffectComposer(this.renderer);
         this.composer.addPass(renderScene);
         this.composer.addPass(bloomPass);
 
-        // 3. LIGHTING (Clean neutral setup)
-        this.scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-        const directional = new THREE.DirectionalLight(0xffffff, 1.5);
-        directional.position.set(200, 600, 200);
-        this.scene.add(directional);
-        const backLight = new THREE.DirectionalLight(0xffffff, 0.4);
-        backLight.position.set(-200, 200, -200);
-        this.scene.add(backLight);
+        // 3. LIGHTING — Matching nebula palette (purple left, orange right, cyan top)
+        this.scene.add(new THREE.AmbientLight(0x111122, 1.0));
+
+        const keyLight = new THREE.DirectionalLight(0xffffff, 1.5);
+        keyLight.position.set(300, 800, 400);
+        this.scene.add(keyLight);
+
+        // Purple fill — left side
+        const purpleLight = new THREE.DirectionalLight(0x6633cc, 0.8);
+        purpleLight.position.set(-600, 200, 0);
+        this.scene.add(purpleLight);
+
+        // Warm orange fill — right side
+        const orangeLight = new THREE.DirectionalLight(0xff8833, 0.6);
+        orangeLight.position.set(600, 200, 0);
+        this.scene.add(orangeLight);
+
+        // Cyan top glow — above the nexus
+        const cyanLight = new THREE.PointLight(0x00eeff, 1.2, 1500);
+        cyanLight.position.set(0, 500, 0);
+        this.scene.add(cyanLight);
 
         // 4. COMPONENTS
         this.components.stars = new StarSystem(this.scene);
