@@ -7,6 +7,7 @@ import { BridgeHUD } from './BridgeHUD.js';
 import { TacticalUnits } from './TacticalUnits.js';
 import { ParticleStreams } from './ParticleStreams.js';
 import { AsteroidField } from './AsteroidField.js';
+import { AudioManager } from './AudioManager.js';
 
 export class V2App {
     constructor() {
@@ -26,13 +27,14 @@ export class V2App {
         this.composer = null; // Simple composer
 
         this.components = {
-            grid:     null,
-            nexus:    null,
-            streams:  null,
+            grid:      null,
+            nexus:     null,
+            streams:   null,
             asteroids: null,
-            banners:  [],
-            space:    null,
-            hud:      null
+            banners:   [],
+            space:     null,
+            hud:       null,
+            audio:     null
         };
         
         // Clans evenly spaced in a ring at radius 600
@@ -130,6 +132,9 @@ export class V2App {
             this.components.banners.push(monument);
         });
 
+        this.components.audio = new AudioManager(this.camera);
+        this._initUI();
+
         this.animate();
         window.addEventListener('resize', () => this.onWindowResize());
         return Promise.resolve();
@@ -142,8 +147,49 @@ export class V2App {
         this.composer.setSize(window.innerWidth, window.innerHeight);
     }
 
+    _initUI() {
+        const startOverlay = document.getElementById('start-overlay');
+        const settingsTrigger = document.getElementById('settings-trigger');
+        const settingsPanel = document.getElementById('settings-panel');
+        const closeSettings = document.getElementById('close-settings');
+        const audioToggle = document.getElementById('audio-toggle');
+        const bloomToggle = document.getElementById('bloom-toggle');
+
+        // Start Overlay (Audio context requires user interaction)
+        startOverlay.addEventListener('click', () => {
+            if (this.components.audio) this.components.audio.start();
+            gsap.to(startOverlay, { opacity: 0, duration: 1, onComplete: () => startOverlay.remove() });
+        });
+
+        // Settings Toggle
+        settingsTrigger.addEventListener('click', () => {
+            settingsPanel.classList.toggle('open');
+        });
+
+        closeSettings.addEventListener('click', () => {
+            settingsPanel.classList.remove('open');
+        });
+
+        // Audio Mute Toggle
+        audioToggle.addEventListener('change', (e) => {
+            if (this.components.audio) this.components.audio.toggleMute();
+        });
+
+        // Bloom Toggle
+        bloomToggle.addEventListener('change', (e) => {
+            const bloomPass = this.composer.passes.find(p => p.strength !== undefined);
+            if (bloomPass) {
+                bloomPass.enabled = e.target.checked;
+            }
+        });
+    }
+
     render() {
-        this.composer.render();
+        if (this.composer) {
+            this.composer.render();
+        } else {
+            this.renderer.render(this.scene, this.camera);
+        }
     }
 
     animate() {
