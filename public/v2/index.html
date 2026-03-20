@@ -67,6 +67,113 @@
 
         .loader { width: 40px; height: 40px; border: 2px solid #00f3ff; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
+        /* ── RANKING PANEL ───────────────────────────────────────── */
+        #ranking-panel {
+            position: absolute;
+            top: 50%;
+            right: 24px;
+            transform: translateY(-50%);
+            width: 240px;
+            background: rgba(0, 2, 16, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 243, 255, 0.25);
+            border-radius: 12px;
+            padding: 18px 16px 14px;
+            pointer-events: none;
+            z-index: 20;
+            box-shadow: 0 0 40px rgba(0,243,255,0.08), inset 0 0 40px rgba(0,0,0,0.5);
+        }
+
+        #ranking-panel .rp-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: rgba(0,243,255,0.55);
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(0,243,255,0.18);
+            padding-bottom: 8px;
+            margin-bottom: 14px;
+            text-align: center;
+        }
+
+        #ranking-panel .rp-title span {
+            display: block;
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 4px;
+            margin-bottom: 2px;
+        }
+
+        .rp-clan {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 7px 6px;
+            border-radius: 7px;
+            margin-bottom: 4px;
+            transition: background .3s;
+        }
+        .rp-clan:last-child { margin-bottom: 0; }
+
+        .rp-rank {
+            font-size: 18px;
+            font-weight: 900;
+            width: 22px;
+            text-align: center;
+            flex-shrink: 0;
+            color: rgba(255,255,255,0.35);
+        }
+        .rp-rank.gold   { color: #F2C94C; text-shadow: 0 0 8px #F2C94C88; }
+        .rp-rank.silver { color: #a0b0c0; text-shadow: 0 0 6px #a0b0c088; }
+        .rp-rank.bronze { color: #cd7f32; text-shadow: 0 0 6px #cd7f3288; }
+
+        .rp-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            box-shadow: 0 0 8px currentColor;
+        }
+
+        .rp-info { flex: 1; min-width: 0; }
+        .rp-name {
+            font-size: 13px; font-weight: 700;
+            letter-spacing: 1.5px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            text-transform: uppercase;
+        }
+        .rp-score {
+            font-size: 10px; letter-spacing: 1px;
+            opacity: 0.55; margin-top: 1px;
+        }
+
+        .rp-bar-wrap {
+            width: 100%; height: 3px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 2px;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+        .rp-bar {
+            height: 100%; width: 0%;
+            border-radius: 2px;
+            transition: width 1s ease;
+        }
+
+        .rp-divider {
+            border: none;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            margin: 10px 0;
+        }
+
+        .rp-footer {
+            font-size: 9px; letter-spacing: 2px;
+            color: rgba(0,243,255,0.3);
+            text-align: center;
+            text-transform: uppercase;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -87,6 +194,68 @@
     </div>
 
     <div id="nexus-logo">NEXUS <span style="font-weight: 300; opacity: 0.5;">RIWI</span></div>
+
+    <!-- CLAN RANKING PANEL -->
+    <div id="ranking-panel">
+        <div class="rp-title">
+            <span>⬡ NEXUS</span>
+            CLAN RANKINGS
+        </div>
+
+        <!-- Rank 1 -->
+        <div class="rp-clan">
+            <div class="rp-rank gold">1</div>
+            <div class="rp-dot" style="color:#00c3ff;background:#00c3ff"></div>
+            <div class="rp-info">
+                <div class="rp-name" style="color:#00c3ff">Turing</div>
+                <div class="rp-score">0 pts</div>
+                <div class="rp-bar-wrap"><div class="rp-bar" style="background:#00c3ff;width:0%"></div></div>
+            </div>
+        </div>
+        <!-- Rank 2 -->
+        <div class="rp-clan">
+            <div class="rp-rank silver">2</div>
+            <div class="rp-dot" style="color:#ff3344;background:#ff3344"></div>
+            <div class="rp-info">
+                <div class="rp-name" style="color:#ff3344">Tesla</div>
+                <div class="rp-score">0 pts</div>
+                <div class="rp-bar-wrap"><div class="rp-bar" style="background:#ff3344;width:0%"></div></div>
+            </div>
+        </div>
+        <!-- Rank 3 -->
+        <div class="rp-clan">
+            <div class="rp-rank bronze">3</div>
+            <div class="rp-dot" style="color:#00ff44;background:#00ff44"></div>
+            <div class="rp-info">
+                <div class="rp-name" style="color:#00ff44">McCarthy</div>
+                <div class="rp-score">0 pts</div>
+                <div class="rp-bar-wrap"><div class="rp-bar" style="background:#00ff44;width:0%"></div></div>
+            </div>
+        </div>
+        <!-- Rank 4 -->
+        <div class="rp-clan">
+            <div class="rp-rank">4</div>
+            <div class="rp-dot" style="color:#F2C94C;background:#F2C94C"></div>
+            <div class="rp-info">
+                <div class="rp-name" style="color:#F2C94C">Hamilton</div>
+                <div class="rp-score">0 pts</div>
+                <div class="rp-bar-wrap"><div class="rp-bar" style="background:#F2C94C;width:0%"></div></div>
+            </div>
+        </div>
+        <!-- Rank 5 -->
+        <div class="rp-clan">
+            <div class="rp-rank">5</div>
+            <div class="rp-dot" style="color:#9B51E0;background:#9B51E0"></div>
+            <div class="rp-info">
+                <div class="rp-name" style="color:#9B51E0">Thompson</div>
+                <div class="rp-score">0 pts</div>
+                <div class="rp-bar-wrap"><div class="rp-bar" style="background:#9B51E0;width:0%"></div></div>
+            </div>
+        </div>
+
+        <hr class="rp-divider">
+        <div class="rp-footer">Season · Week 1</div>
+    </div>
 
     <div id="canvas-container"></div>
 
