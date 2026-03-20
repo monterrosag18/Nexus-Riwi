@@ -1,7 +1,7 @@
 const THREE = window.THREE;
 import { InfiniteGrid } from './InfiniteGrid.js';
 import { NexusCore } from './NexusCore.js';
-import { HolographicBanner } from './HolographicBanner.js';
+import { ClanStandard } from './ClanStandard.js';
 import { StarSystem } from './StarSystem.js';
 import { BridgeHUD } from './BridgeHUD.js';
 import { TacticalUnits } from './TacticalUnits.js';
@@ -122,8 +122,8 @@ export class V2App {
         this.components.units  = new TacticalUnits(this.scene, this.clans.map(c => c.pos));
 
         this.clans.forEach(c => {
-            const banner = new HolographicBanner(this.scene, c.color, c.pos, c.name);
-            this.components.banners.push(banner);
+            const standard = new ClanStandard(this.scene, c.name, c.color, c.pos);
+            this.components.banners.push(standard);
         });
 
         this.animate();
