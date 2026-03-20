@@ -25,16 +25,10 @@ export class NexusSign {
         // ── 1. NEXUS (TOP) ────────────────────────────────────────────────
         const nexusTex = this._createTextTexture('NEXUS', 512, 128, 90, '#00f3ff', true);
         this.nexusSign = this._createHologramPlane(nexusTex, 400, 100);
-        this.nexusSign.position.y = 480; // Above Nexus Core (scaled 320)
+        this.nexusSign.position.y = 480; // Above Nexus Core
         this.group.add(this.nexusSign);
 
-        // ── 2. CAMPEÓN (BOTTOM) ───────────────────────────────────────────
-        const championTex = this._createTextTexture('CAMPEÓN', 512, 128, 60, '#ff00ff', false);
-        this.championSign = this._createHologramPlane(championTex, 300, 75);
-        this.championSign.position.y = -400; // Below Nexus Core
-        this.group.add(this.championSign);
-
-        // ── 3. DECORATIVE ENERGY BEAMS ────────────────────────────────────
+        // ── 2. DECORATIVE ENERGY BEAMS ────────────────────────────────────
         this._addSupportBeams();
     }
 
@@ -152,7 +146,6 @@ export class NexusSign {
         // Billboarding
         if (this.camera) {
             this.nexusSign.lookAt(this.camera.position);
-            this.championSign.lookAt(this.camera.position);
         }
     }
 }
