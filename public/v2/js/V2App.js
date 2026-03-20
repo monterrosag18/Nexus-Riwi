@@ -10,6 +10,8 @@ import { AsteroidField } from './AsteroidField.js';
 import { AudioManager } from './AudioManager.js';
 import { ClanShips } from './ClanShips.js';
 import { NexusSign } from './NexusSign.js';
+import { ShootingStars } from './ShootingStars.js';
+
 
 
 export class V2App {
@@ -39,8 +41,10 @@ export class V2App {
             hud:       null,
             audio:     null,
             ships:     null,
-            sign:      null
+            sign:      null,
+            stars:     null
         };
+
 
         
         // Clans evenly spaced in a ring at radius 600
@@ -141,7 +145,9 @@ export class V2App {
         this.components.audio = new AudioManager(this.camera);
         this.components.ships = new ClanShips(this.scene, this.camera, this.clans);
         this.components.sign = new NexusSign(this.scene, this.camera);
+        this.components.stars = new ShootingStars(this.scene);
         this._initUI();
+
 
 
         this.animate();
@@ -214,7 +220,9 @@ export class V2App {
         if (this.components.asteroids)  this.components.asteroids.update(0.016);
         if (this.components.ships)      this.components.ships.update(time);
         if (this.components.sign)       this.components.sign.update(time);
+        if (this.components.stars)      this.components.stars.update(time);
         this.components.banners.forEach(b => b.update(time));
+
 
         this.components.space.update(this.camera);
 

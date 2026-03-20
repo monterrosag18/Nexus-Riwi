@@ -301,7 +301,7 @@ export class CrystalMonument {
         ctx.shadowBlur = 0;
 
         const tex = new THREE.CanvasTexture(canvas);
-        const geo = new THREE.PlaneGeometry(40, 10);
+        const geo = new THREE.PlaneGeometry(80, 20);
         const mat = new THREE.MeshBasicMaterial({
             map: tex, transparent: true, depthWrite: false
         });

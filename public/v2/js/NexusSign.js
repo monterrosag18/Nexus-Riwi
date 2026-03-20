@@ -28,9 +28,9 @@ export class NexusSign {
         this.nexusSign.position.y = 480; // Above Nexus Core
         this.group.add(this.nexusSign);
 
-        // ── 2. DECORATIVE ENERGY BEAMS ────────────────────────────────────
-        this._addSupportBeams();
+        // ── 2. (REMOVED) DECORATIVE ENERGY BEAMS ──────────────────────────
     }
+
 
     _createTextTexture(text, width, height, fontSize, color, glow) {
         const canvas = document.createElement('canvas');
@@ -121,17 +121,9 @@ export class NexusSign {
     }
 
     _addSupportBeams() {
-        const geo = new THREE.CylinderGeometry(1, 1, 1000, 8);
-        const mat = new THREE.MeshBasicMaterial({ color: '#00f3ff', transparent: true, opacity: 0.15 });
-        
-        const beamL = new THREE.Mesh(geo, mat);
-        beamL.position.set(-200, 0, -20);
-        this.group.add(beamL);
-
-        const beamR = beamL.clone();
-        beamR.position.x = 200;
-        this.group.add(beamR);
+        // Method kept for structure but optics removed
     }
+
 
     update(time) {
         this.uniforms.uTime.value = time;

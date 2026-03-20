@@ -23,7 +23,7 @@ export class NexusCore {
 
                     // Scale to ~320 units — dominant center piece
                     const size = box.getSize(new THREE.Vector3()).length();
-                    const scalar = 320 / size;
+                    const scalar = 500 / size;
                     this.model.scale.set(scalar, scalar, scalar);
 
                     // 3. Keep original materials (they look great already)

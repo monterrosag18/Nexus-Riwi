@@ -158,7 +158,7 @@ export class ClanShips {
         ctx.textAlign = 'center';
         ctx.fillText(text.toUpperCase(), 256, 80);
         const tex = new THREE.CanvasTexture(canvas);
-        const mesh = new THREE.Mesh(new THREE.PlaneGeometry(80, 20), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false }));
+        const mesh = new THREE.Mesh(new THREE.PlaneGeometry(160, 40), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false }));
         return mesh;
     }
 
