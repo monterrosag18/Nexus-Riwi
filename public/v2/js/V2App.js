@@ -295,53 +295,70 @@ export class V2App {
         const title = document.getElementById('game-title');
         const content = document.getElementById('game-content');
         this.gameType = type;
+        this.typeLog(`INITIALIZING_${type.toUpperCase()}_PROTOCOL...`);
 
         if (type === 'code') {
-            title.innerText = 'REACTOR MASTERY: LOOP SYNCHRONIZATION';
+            title.innerText = '[REACTOR_CORE_SYNC]';
             content.innerHTML = `
                 <div class="reactor-mastery" id="reactor-bars">
                     ${[0,1,2,3,4].map(i => `<div class="reactor-bar" id="bar-${i}"></div>`).join('')}
                 </div>
-                <p>Estabiliza las 5 barras usando un <span class="highlight">for loop</span>. Usa <span class="accent">bars[i].sync();</span></p>
-                <textarea id="code-input" class="code-area">for(let i=0; i<5; i++) {\n  // Escribe: bars[i].sync();\n}</textarea>
-                <button class="btn-action" onclick="window.v2app.checkAnswer('code')">EJECUTAR BUCLE</button>
+                <div class="console-container">
+                    <div class="console-decoration">NEXUS_OS_v.04</div>
+                    <textarea id="code-input" class="console-ui" spellcheck="false" 
+                        oninput="window.v2app.typeLog('Sincronizando núcleo...')">for(let i=0; i<5; i++) {\n  bars[i].sync();\n}</textarea>
+                </div>
+                <button class="btn-action" onclick="window.v2app.checkAnswer('code')">EXECUTE_LOOP</button>
             `;
         } else if (type === 'english') {
-            title.innerText = 'SIGNAL REASSEMBLY: TECHNICAL ENGLISH';
+            title.innerText = '[SIGNAL_DECRYPT]';
             this.reassemblyWords = [];
             const fragments = ["INITIATE", "SECTOR", "PERSISTENCE", "SEQUENCE", "NOW"];
             content.innerHTML = `
-                <div class="reassembly-slot" id="reassembly-display">... CONSTRUYENDO COMANDO ...</div>
-                <p>Rearma la instrucción de defensa de la Flota:</p>
+                <div class="reassembly-slot" id="reassembly-display">>>> WAITING_INPUT <<<</div>
                 <div class="fragment-container">
                     ${fragments.sort(() => Math.random() - 0.5).map(f => `
                         <div class="fragment" onclick="window.v2app.addFragment('${f}')">${f}</div>
                     `).join('')}
                 </div>
-                <button class="btn-action" style="background:#444;" onclick="window.v2app.clearFragments()">REINICIAR</button>
             `;
         } else {
-            title.innerText = 'NEURAL-SYNC: DATA TIMING';
+            title.innerText = '[DATA_WAVE_LOCK]';
             content.innerHTML = `
                 <div class="sync-container">
                     <div id="data-packet" class="data-packet"></div>
-                    <div id="sync-gate" class="sync-gate" onclick="window.v2app.checkSync()">GATE</div>
+                    <div id="sync-gate" class="sync-gate" onclick="window.v2app.checkSync()">LOCK</div>
                 </div>
-                <p>Cliquea el <span class="highlight">GATE</span> justo cuando el paquete de datos pase por el centro.</p>
             `;
             this.startPacketAnimation();
         }
     }
 
+    typeLog(msg) {
+        const term = document.getElementById('system-terminal');
+        const line = document.createElement('div');
+        line.innerHTML = `[${new Date().toLocaleTimeString()}]: ${msg}`;
+        term.appendChild(line);
+        term.scrollTop = term.scrollHeight;
+    }
+
+    triggerGlitch() {
+        const overlay = document.getElementById('challenge-overlay');
+        overlay.style.animation = 'glitch 0.2s 3';
+        setTimeout(() => overlay.style.animation = '', 600);
+    }
+
     // --- REASSEMBLY LOGIC ---
     addFragment(word) {
         this.reassemblyWords.push(word);
+        this.typeLog(`FRAGMENT_ADDED: ${word}`);
         document.getElementById('reassembly-display').innerText = this.reassemblyWords.join(" ");
         if (this.reassemblyWords.length === 5) {
             if (this.reassemblyWords.join(" ") === "INITIATE SECTOR PERSISTENCE SEQUENCE NOW") {
                 this.winChallenge();
             } else {
-                alert("COMANDO INVÁLIDO: REINICIANDO");
+                this.typeLog("CRITICAL_ERROR: INVALID_SEQUENCE");
+                this.triggerGlitch();
                 this.clearFragments();
             }
         }
@@ -362,41 +379,48 @@ export class V2App {
         const packet = document.getElementById('data-packet');
         const pos = parseFloat(packet.style.left);
         if (pos > 65 && pos < 75) {
+            this.typeLog("WAVE_LOCK_SUCCESSFUL");
             this.winChallenge();
         } else {
-            alert("FUERA DE SINCRONÍA: EL PAQUETE SE PERDIÓ");
+            this.typeLog("WAVE_LOCK_FAILED: OUT_OF_SYNC");
+            this.triggerGlitch();
         }
     }
 
     checkAnswer(type) {
         if (type === 'code') {
             const code = document.getElementById('code-input').value;
-            // Enhanced loop simulator
             if (code.includes('for') && code.includes('bars[i].sync()')) {
+                this.typeLog("EXECUTING_ENGINE_LOOP...");
                 let i = 0;
                 const interval = setInterval(() => {
+                    this.typeLog(`SYNCING_CORE_BAR_0${i+1}...`);
                     document.getElementById(`bar-${i}`).classList.add('active');
                     i++;
                     if (i === 5) {
                         clearInterval(interval);
-                        setTimeout(() => this.winChallenge(), 1000);
+                        setTimeout(() => this.winChallenge(), 800);
                     }
                 }, 400);
             } else {
-                alert("ERROR DE SINTAXIS: BUCLE NO DETECTADO");
+                this.typeLog("SYNTAX_ERROR: ILLEGAL_CORE_ACCESS");
+                this.triggerGlitch();
             }
         }
     }
 
     winChallenge() {
         clearInterval(this.gameTimer);
+        this.typeLog("CONQUEST_CONFIRMED: INITIATING_ORBITAL_STRIKE");
         this.createOrbitalStrike();
-        alert('¡MAESTRÍA DEMOSTRADA! SECTOR ASEGURADO.');
         
         if (this.selectedHexIndex !== null) {
             this.components.grid.setTerritoryColor([this.selectedHexIndex], 0x00f3ff);
         }
-        this.closeChallenge();
+        setTimeout(() => {
+            alert('¡MAESTRÍA DEMOSTRADA! SECTOR ASEGURADO.');
+            this.closeChallenge();
+        }, 1500);
     }
 
     createOrbitalStrike() {

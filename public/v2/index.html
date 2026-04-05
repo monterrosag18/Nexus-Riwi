@@ -420,6 +420,43 @@
             display: flex; align-items: center; justify-content: center;
             font-family: 'Rajdhani', sans-serif; letter-spacing: 2px;
         }
+
+        /* ── HIGH FIDELITY TACTICAL UI (HF) ──────────────────── */
+        .scanline {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, transparent 0%, rgba(0, 243, 255, 0.1) 50%, transparent 100%);
+            background-size: 100% 20px; animation: scan 4s linear infinite;
+            pointer-events: none; z-index: 2; opacity: 0.3;
+        }
+        @keyframes scan { from { transform: translateY(-100%); } to { transform: translateY(100%); } }
+
+        .hologram-flicker { animation: flicker 3s linear infinite; }
+        @keyframes flicker { 
+            0%, 100% { opacity: 1; } 
+            92% { opacity: 1; } 93% { opacity: 0.8; } 94% { opacity: 1; }
+            95% { opacity: 0.9; } 96% { opacity: 1; }
+        }
+
+        .svg-icon { width: 40px; height: 40px; fill: none; stroke: #00f3ff; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; margin-bottom: 15px; }
+
+        .system-terminal {
+            width: 100%; height: 80px; background: rgba(0,0,0,0.8);
+            border: 1px solid #111; margin-top: 15px; padding: 10px;
+            font-family: 'Courier New', Courier, monospace; font-size: 10px;
+            color: #00f3ff; overflow-y: hidden; line-height: 1.4;
+        }
+
+        .console-container { position: relative; width: 100%; margin: 15px 0; }
+        .console-ui {
+            width: 100%; height: 120px; background: #000; color: #00f3ff;
+            border: 1px solid #333; padding: 15px; font-family: monospace;
+            font-size: 14px; position: relative; z-index: 1; outline: none;
+            caret-color: #00f3ff;
+        }
+        .console-decoration {
+            position: absolute; top: 5px; right: 10px; font-size: 8px;
+            color: rgba(0, 243, 255, 0.3); letter-spacing: 1px;
+        }
     </style>
 </head>
 <body>
@@ -549,33 +586,42 @@
     <!-- CHALLENGE SYSTEM OVERLAY -->
     <div id="challenge-overlay">
         <!-- 1. SELECTOR MENU -->
-        <div id="game-selector" class="challenge-card" style="display: block;">
-            <h3 style="text-align: center; letter-spacing: 5px; margin-bottom: 30px;">SELECCIONAR PROTOCOLO</h3>
+        <div id="game-selector" class="challenge-card hologram-flicker" style="display: block;">
+            <div class="scanline"></div>
+            <h3 style="text-align: center; letter-spacing: 5px; margin-bottom: 30px; font-size: 14px; opacity: 0.8;">[CHOOSE_PROTOCOL_V.04]</h3>
             <div class="selector-menu">
                 <div class="select-btn" onclick="window.v2app.startChallenge('code')">
-                    <div style="font-size: 24px; margin-bottom: 10px;">💻</div>
-                    <div style="font-size: 12px; letter-spacing: 2px;">DESARROLLO</div>
+                    <svg class="svg-icon" viewBox="0 0 24 24"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/><path d="M12 4.5l-4 15"/></svg>
+                    <div style="font-size: 10px; letter-spacing: 3px; font-weight: 700;">INJEKTOR</div>
+                    <div style="font-size: 8px; opacity: 0.4; margin-top: 5px;">ENGINE_SYNC</div>
                 </div>
                 <div class="select-btn" onclick="window.v2app.startChallenge('english')">
-                    <div style="font-size: 24px; margin-bottom: 10px;">📡</div>
-                    <div style="font-size: 12px; letter-spacing: 2px;">INGLÉS</div>
+                    <svg class="svg-icon" viewBox="0 0 24 24"><path d="M4 11V4h7M4 4l7 7m6-7v7h-7m7-7l-7 7m-4 8v7h7m-7-7l7 7m6-7v7h-7m7-7l-7 7"/></svg>
+                    <div style="font-size: 10px; letter-spacing: 3px; font-weight: 700;">LINGUA</div>
+                    <div style="font-size: 8px; opacity: 0.4; margin-top: 5px;">TAC_SIGNAL</div>
                 </div>
                 <div class="select-btn" onclick="window.v2app.startChallenge('soft')">
-                    <div style="font-size: 24px; margin-bottom: 10px;">🤝</div>
-                    <div style="font-size: 12px; letter-spacing: 2px;">SOFT SKILLS</div>
+                    <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                    <div style="font-size: 10px; letter-spacing: 3px; font-weight: 700;">NEURAL</div>
+                    <div style="font-size: 8px; opacity: 0.4; margin-top: 5px;">DATA_FLOW</div>
                 </div>
             </div>
-            <p style="text-align: center; margin-top: 30px; opacity: 0.4; font-size: 10px;" onclick="window.v2app.closeChallenge()">CANCELAR CONQUISTA [X]</p>
+            <p style="text-align: center; margin-top: 30px; opacity: 0.4; font-size: 10px; cursor: pointer;" onclick="window.v2app.closeChallenge()">ABORT_COMMAND_X</p>
         </div>
 
         <!-- 2. GAME PANELS -->
-        <div id="game-panel" class="challenge-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; padding-bottom: 15px; margin-bottom: 20px;">
-                <h3 id="game-title">RETO EN CURSO</h3>
+        <div id="game-panel" class="challenge-card hologram-flicker">
+            <div class="scanline"></div>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid rgba(0, 243, 255, 0.1); padding-bottom: 15px; margin-bottom: 20px;">
+                <h3 id="game-title" style="font-size: 12px; letter-spacing: 4px; color: #00f3ff;">[SYSTEM_ACTIVE]</h3>
                 <div id="challenge-timer">00:60</div>
             </div>
             <div id="game-content">
-                <!-- Specialized game logic will be injected here -->
+                <!-- Specialized game logic -->
+            </div>
+            <div class="system-terminal" id="system-terminal">
+                [SYSTEM]: AUTHENTICATING USER...<br>
+                [SYSTEM]: LOADING_PROTOCOL_STABLE...
             </div>
         </div>
     </div>
