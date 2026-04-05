@@ -284,46 +284,80 @@ export class V2App {
     renderChallenge(type) {
         const title = document.getElementById('game-title');
         const content = document.getElementById('game-content');
-        
+        this.nodesState = [90, 180, 0, 270, 90, 0, 180, 270, 90]; // Initial rotations
+
         if (type === 'code') {
-            title.innerText = 'PROTOTIPO: INYECCIÓN DE CÓDIGO';
+            title.innerText = 'REACTOR INJEKTOR: CORE STABILIZATION';
             content.innerHTML = `
-                <p>Repara el sub-sistema sumando <span class="highlight">A + B</span>. Define <span class="accent">result</span>.</p>
-                <textarea id="code-input" class="code-area">const a = 12;\nconst b = 28;\nlet result = 0;\n\n// ESCRIBE AQUÍ: result = a + b;\n</textarea>
-                <button class="btn-action" onclick="window.v2app.checkAnswer('code')">EJECUTAR BREACH</button>
+                <div class="reactor-hud">
+                    <div id="reactor-core" class="reactor-core"></div>
+                </div>
+                <p>Define <span class="highlight">status = "online"</span> para sincronizar los núcleos gravitacionales.</p>
+                <textarea id="code-input" class="code-area" oninput="window.v2app.updateReactor()">let status = "offline";\n\n// ESCRIBE AQUÍ: status = "online";\n</textarea>
+                <button class="btn-action" onclick="window.v2app.checkAnswer('code')">ESTABILIZAR NÚCLEO</button>
             `;
         } else if (type === 'english') {
-            title.innerText = 'PROTOTIPO: RADIO-HOLOGRAMA';
+            title.innerText = 'TACTICAL RADIO: LIAISON PROTOCOL';
             content.innerHTML = `
-                <p>Traduce la orden del Capitán: <span class="highlight">"Deploy the orbital shield immediately"</span>.</p>
-                <div class="option-item" onclick="window.v2app.checkAnswer('english', 1)">A) Destruye el escudo orbital ahora</div>
-                <div class="option-item" onclick="window.v2app.checkAnswer('english', 2)">B) Despliega el escudo orbital inmediatamente</div>
-                <div class="option-item" onclick="window.v2app.checkAnswer('english', 3)">C) Repara el escudo de la base</div>
-                <button class="btn-action" style="background:#444;" onclick="window.v2app.closeChallenge()">ABORTAR</button>
+                <div class="radio-screen">
+                    <div id="radio-text" class="glitch-text">Esperando señal de Barranquilla...</div>
+                </div>
+                <p style="margin-top:15px;">Barranquilla dice: <span class="highlight">"We need to bypass the firewall manually."</span> ¿Cómo respondes?</p>
+                <div class="option-item" onclick="window.v2app.checkAnswer('english', 1)">A) "Copy that, attacking the wall now."</div>
+                <div class="option-item" onclick="window.v2app.checkAnswer('english', 2)">B) "Understood, initiating manual bypass sequence."</div>
+                <div class="option-item" onclick="window.v2app.checkAnswer('english', 3)">C) "Roger, closing the firewall immediately."</div>
             `;
+            setTimeout(() => { document.getElementById('radio-text').innerText = "CONEXIÓN ESTABLE: RECIBIENDO ÓRDENES..."; }, 1000);
         } else {
-            title.innerText = 'PROTOTIPO: SOFT SKILLS';
+            title.innerText = 'NEURAL-FLOW: LOGIC ROUTING';
             content.innerHTML = `
-                <p>SITUACIÓN: El servidor de Barranquilla está fallando y tu equipo está bajo presión. ¿Cómo actúas?</p>
-                <div class="option-item" onclick="window.v2app.checkAnswer('soft', 1)">A) Culpo al equipo de infraestructura</div>
-                <div class="option-item" onclick="window.v2app.checkAnswer('soft', 2)">B) Mantengo la calma y coordino una mesa técnica de emergencia</div>
-                <div class="option-item" onclick="window.v2app.checkAnswer('soft', 3)">C) Me desconecto para evitar el estrés</div>
-                <button class="btn-action" style="background:#444;" onclick="window.v2app.closeChallenge()">ABORTAR</button>
+                <p>Rota los nodos para conectar el flujo de datos de <span class="highlight">ENTRADA</span> a <span class="accent">SALIDA</span>.</p>
+                <div class="logic-grid" id="logic-grid">
+                    ${this.nodesState.map((rot, i) => `
+                        <div class="node" id="node-${i}" style="transform: rotate(${rot}deg)" onclick="window.v2app.rotateNode(${i})">
+                            ${i === 4 ? '⬢' : (i % 2 === 0 ? '┗' : '┃')}
+                        </div>
+                    `).join('')}
+                </div>
+                <button class="btn-action" onclick="window.v2app.checkAnswer('soft')">VALIDAR RUTA</button>
             `;
         }
+    }
+
+    updateReactor() {
+        const val = document.getElementById('code-input').value;
+        const core = document.getElementById('reactor-core');
+        if (val.includes('status = "online"')) {
+            core.classList.add('stable');
+        } else {
+            core.classList.remove('stable');
+        }
+    }
+
+    rotateNode(index) {
+        this.nodesState[index] = (this.nodesState[index] + 90) % 360;
+        const node = document.getElementById(`node-${index}`);
+        node.style.transform = `rotate(${this.nodesState[index]}deg)`;
+        node.classList.add('active');
+        setTimeout(() => node.classList.remove('active'), 200);
     }
 
     checkAnswer(type, selection) {
         let win = false;
         if (type === 'code') {
             const val = document.getElementById('code-input').value;
-            if (val.includes('result = a + b')) win = true;
-        } else if (selection === 2) {
-            win = true;
+            if (val.includes('status = "online"')) win = true;
+        } else if (type === 'english') {
+            if (selection === 2) win = true;
+        } else {
+            // Neural-Flow win condition: Simple check for 0-degree rotation on critical path
+            win = this.nodesState.every(rot => rot === 0); 
+            // For the demo, let's make it easier: if all nodes are at 0 deg
+            if (!win) alert('FLUJO INTERRUMPIDO: ALINEA LOS NODOS (TODOS A 0°)');
         }
 
         if (win) this.winChallenge();
-        else alert('ERROR EN EL PROTOCOLO: REINTENTA');
+        else if (type !== 'soft') alert('PROTOCOLO FALLIDO: REINTENTA');
     }
 
     winChallenge() {
