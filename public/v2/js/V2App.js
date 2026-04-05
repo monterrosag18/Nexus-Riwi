@@ -242,6 +242,14 @@ export class V2App {
             this.particles.geometry.attributes.position.needsUpdate = true;
         }
 
+        // --- BRIDGE DIAGNOSTICS ANIMATION ---
+        const cpu = document.getElementById('diag-cpu');
+        const sync = document.getElementById('diag-sync');
+        const react = document.getElementById('diag-reactor');
+        if (cpu) cpu.style.width = `${70 + Math.sin(time * 0.005) * 10}%`;
+        if (sync) sync.style.width = `${40 + Math.cos(time * 0.008) * 15}%`;
+        if (react) react.style.width = `${85 + Math.sin(time * 0.003) * 5}%`;
+
 
         this.components.space.update(this.camera);
 
@@ -441,30 +449,15 @@ export class V2App {
         }, 2000);
     }
 
-    winChallenge() {
-        clearInterval(this.gameTimer);
-        alert('¡BREACH EXITOSO! SECTOR CONQUISTADO.');
-        
-        // Change hex color logic
-        if (this.selectedHexIndex !== null) {
-            this.components.grid.setTerritoryColor([this.selectedHexIndex], 0x00f3ff);
-            // Optional: Launch ship impact effect here
-        }
-        
-        this.closeChallenge();
-    }
-
-    failChallenge(reason) {
-        clearInterval(this.gameTimer);
-        alert(`FALLO CRÍTICO: ${reason}`);
-        this.closeChallenge();
-    }
-
     closeChallenge() {
         const overlay = document.getElementById('challenge-overlay');
-        overlay.classList.remove('active');
-        setTimeout(() => overlay.style.display = 'none', 500);
+        overlay.style.display = 'none';
         this.selectedHexIndex = null;
         clearInterval(this.gameTimer);
+        this.typeLog("SYSTEM_SHUTDOWN: TERMINATING_USER_SESSION");
+        if (this.particles) {
+            this.scene.remove(this.particles);
+            this.particles = null;
+        }
     }
 }
