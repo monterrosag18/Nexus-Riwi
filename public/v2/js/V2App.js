@@ -30,6 +30,11 @@ export class V2App {
         this.controls = null;
         this.clock = new THREE.Clock();
         this.composer = null; // Simple composer
+        this.raycaster = new THREE.Raycaster();
+        this.pointer = new THREE.Vector2();
+        this.selectedHexIndex = null;
+        this.gameTimer = null;
+        this.gameTimeLeft = 60;
 
         this.components = {
             grid:      null,
@@ -148,6 +153,10 @@ export class V2App {
         this.components.stars = new ShootingStars(this.scene);
         this._initUI();
 
+        // Reveal the app to the window for HTML button access
+        window.v2app = this;
+        this.renderer.domElement.addEventListener('pointerdown', (e) => this._onPointerDown(e));
+
 
 
         this.animate();
@@ -227,5 +236,120 @@ export class V2App {
         this.components.space.update(this.camera);
 
         this.render();
+    }
+
+    // ── GAME LOGIC ────────────────────────────────────────────────────────
+    _onPointerDown(event) {
+        // Only trigger if no challenge is active
+        if (this.selectedHexIndex !== null) return;
+
+        this.pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+        this.pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        this.raycaster.setFromCamera(this.pointer, this.camera);
+        const intersects = this.raycaster.intersectObject(this.components.grid.fills);
+
+        if (intersects.length > 0) {
+            this.selectedHexIndex = intersects[0].instanceId;
+            this.openSelector();
+        }
+    }
+
+    openSelector() {
+        const overlay = document.getElementById('challenge-overlay');
+        overlay.style.display = 'flex';
+        setTimeout(() => overlay.classList.add('active'), 10);
+        document.getElementById('game-selector').style.display = 'block';
+        document.getElementById('game-panel').style.display = 'none';
+    }
+
+    startChallenge(type) {
+        this.gameTimeLeft = 60;
+        document.getElementById('game-selector').style.display = 'none';
+        document.getElementById('game-panel').style.display = 'block';
+        this.renderChallenge(type);
+        this.startTimer();
+    }
+
+    startTimer() {
+        clearInterval(this.gameTimer);
+        this.gameTimer = setInterval(() => {
+            this.gameTimeLeft--;
+            const timerEl = document.getElementById('challenge-timer');
+            if (timerEl) timerEl.innerText = `00:${this.gameTimeLeft.toString().padStart(2, '0')}`;
+            if (this.gameTimeLeft <= 0) this.failChallenge('TIEMPO AGOTADO');
+        }, 1000);
+    }
+
+    renderChallenge(type) {
+        const title = document.getElementById('game-title');
+        const content = document.getElementById('game-content');
+        
+        if (type === 'code') {
+            title.innerText = 'PROTOTIPO: INYECCIÓN DE CÓDIGO';
+            content.innerHTML = `
+                <p>Repara el sub-sistema sumando <span class="highlight">A + B</span>. Define <span class="accent">result</span>.</p>
+                <textarea id="code-input" class="code-area">const a = 12;\nconst b = 28;\nlet result = 0;\n\n// ESCRIBE AQUÍ: result = a + b;\n</textarea>
+                <button class="btn-action" onclick="window.v2app.checkAnswer('code')">EJECUTAR BREACH</button>
+            `;
+        } else if (type === 'english') {
+            title.innerText = 'PROTOTIPO: RADIO-HOLOGRAMA';
+            content.innerHTML = `
+                <p>Traduce la orden del Capitán: <span class="highlight">"Deploy the orbital shield immediately"</span>.</p>
+                <div class="option-item" onclick="window.v2app.checkAnswer('english', 1)">A) Destruye el escudo orbital ahora</div>
+                <div class="option-item" onclick="window.v2app.checkAnswer('english', 2)">B) Despliega el escudo orbital inmediatamente</div>
+                <div class="option-item" onclick="window.v2app.checkAnswer('english', 3)">C) Repara el escudo de la base</div>
+                <button class="btn-action" style="background:#444;" onclick="window.v2app.closeChallenge()">ABORTAR</button>
+            `;
+        } else {
+            title.innerText = 'PROTOTIPO: SOFT SKILLS';
+            content.innerHTML = `
+                <p>SITUACIÓN: El servidor de Barranquilla está fallando y tu equipo está bajo presión. ¿Cómo actúas?</p>
+                <div class="option-item" onclick="window.v2app.checkAnswer('soft', 1)">A) Culpo al equipo de infraestructura</div>
+                <div class="option-item" onclick="window.v2app.checkAnswer('soft', 2)">B) Mantengo la calma y coordino una mesa técnica de emergencia</div>
+                <div class="option-item" onclick="window.v2app.checkAnswer('soft', 3)">C) Me desconecto para evitar el estrés</div>
+                <button class="btn-action" style="background:#444;" onclick="window.v2app.closeChallenge()">ABORTAR</button>
+            `;
+        }
+    }
+
+    checkAnswer(type, selection) {
+        let win = false;
+        if (type === 'code') {
+            const val = document.getElementById('code-input').value;
+            if (val.includes('result = a + b')) win = true;
+        } else if (selection === 2) {
+            win = true;
+        }
+
+        if (win) this.winChallenge();
+        else alert('ERROR EN EL PROTOCOLO: REINTENTA');
+    }
+
+    winChallenge() {
+        clearInterval(this.gameTimer);
+        alert('¡BREACH EXITOSO! SECTOR CONQUISTADO.');
+        
+        // Change hex color logic
+        if (this.selectedHexIndex !== null) {
+            this.components.grid.setTerritoryColor([this.selectedHexIndex], 0x00f3ff);
+            // Optional: Launch ship impact effect here
+        }
+        
+        this.closeChallenge();
+    }
+
+    failChallenge(reason) {
+        clearInterval(this.gameTimer);
+        alert(`FALLO CRÍTICO: ${reason}`);
+        this.closeChallenge();
+    }
+
+    closeChallenge() {
+        const overlay = document.getElementById('challenge-overlay');
+        overlay.classList.remove('active');
+        setTimeout(() => overlay.style.display = 'none', 500);
+        this.selectedHexIndex = null;
+        clearInterval(this.gameTimer);
     }
 }

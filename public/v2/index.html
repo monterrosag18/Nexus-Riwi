@@ -286,6 +286,77 @@
         .start-prompt h2 { font-weight: 300; letter-spacing: 15px; margin-bottom: 10px; }
         .start-prompt p { font-size: 12px; letter-spacing: 4px; opacity: 0.6; }
         @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+
+        /* ── CHALLENGE SIMULATOR (V2 INTEGRATION) ───────────────── */
+        #challenge-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 4, 0.5);
+            backdrop-filter: blur(0px) brightness(1);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            transition: backdrop-filter 0.5s ease, background 0.5s ease;
+        }
+        #challenge-overlay.active {
+            backdrop-filter: blur(12px) brightness(0.2);
+            background: rgba(0, 0, 8, 0.85);
+        }
+
+        .challenge-card {
+            width: 700px;
+            background: rgba(10, 10, 20, 0.9);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            padding: 30px;
+            position: relative;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 1), 0 0 20px rgba(0, 243, 255, 0.1);
+            clip-path: polygon(0 0, 95% 0, 100% 5%, 100% 100%, 5% 100%, 0 95%);
+            display: none;
+        }
+
+        .selector-menu {
+            display: flex;
+            gap: 20px;
+            text-align: center;
+        }
+
+        .select-btn {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            padding: 25px;
+            width: 180px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .select-btn:hover {
+            background: rgba(0, 243, 255, 0.1);
+            border-color: #00f3ff;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 243, 255, 0.2);
+        }
+
+        #challenge-timer { color: #ec5b13; font-weight: 700; font-size: 24px; }
+        
+        .code-area { 
+            background: #000; color: #00f3ff; border: 1px solid #222;
+            padding: 15px; font-family: monospace; width: 100%; height: 120px;
+            margin: 15px 0; outline: none;
+        }
+
+        .option-item {
+            background: rgba(255,255,255,0.05);
+            padding: 12px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer; transition: 0.2s;
+        }
+        .option-item:hover { background: rgba(0, 243, 255, 0.15); border-color: #00f3ff; }
+
+        .btn-action {
+            background: #ec5b13; color: #fff; border: none;
+            padding: 12px 25px; font-weight: 700; cursor: pointer;
+            text-transform: uppercase; letter-spacing: 2px;
+            margin-top: 15px;
+        }
     </style>
 </head>
 <body>
@@ -411,6 +482,38 @@
     </div>
 
     <div id="canvas-container"></div>
+
+    <!-- CHALLENGE SYSTEM OVERLAY -->
+    <div id="challenge-overlay">
+        <!-- 1. SELECTOR MENU -->
+        <div id="game-selector" class="challenge-card" style="display: block;">
+            <h3 style="text-align: center; letter-spacing: 5px; margin-bottom: 30px;">SELECCIONAR PROTOCOLO</h3>
+            <div class="selector-menu">
+                <div class="select-btn" onclick="window.v2app.startChallenge('code')">
+                    <div style="font-size: 24px; margin-bottom: 10px;">💻</div>
+                    <div style="font-size: 12px; letter-spacing: 2px;">DESARROLLO</div>
+                </div>
+                <div class="select-btn" onclick="window.v2app.startChallenge('english')">
+                    <div style="font-size: 24px; margin-bottom: 10px;">📡</div>
+                    <div style="font-size: 12px; letter-spacing: 2px;">INGLÉS</div>
+                </div>
+                <div class="select-btn" onclick="window.v2app.startChallenge('soft')">
+                    <div style="font-size: 24px; margin-bottom: 10px;">🤝</div>
+                    <div style="font-size: 12px; letter-spacing: 2px;">SOFT SKILLS</div>
+                </div>
+            </div>
+            <p style="text-align: center; margin-top: 30px; opacity: 0.4; font-size: 10px;" onclick="window.v2app.closeChallenge()">CANCELAR CONQUISTA [X]</p>
+        </div>
+
+        <!-- 2. GAME PANELS -->
+        <div id="game-panel" class="challenge-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; padding-bottom: 15px; margin-bottom: 20px;">
+                <h3 id="game-title">RETO EN CURSO</h3>
+                <div id="challenge-timer">00:60</div>
+            </div>
+            <div id="game-content"></div>
+        </div>
+    </div>
 
     <script type="module">
         import { V2App } from './js/V2App.js';
