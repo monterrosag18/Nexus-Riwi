@@ -304,12 +304,15 @@ export class V2App {
         const content = document.getElementById('game-content');
         const obj = document.getElementById('bridge-objective');
         const debug = document.getElementById('debug-lines');
-        debug.innerHTML = ''; // Clear logs
+        debug.innerHTML = ''; 
         this.gameType = type;
-        this.addDebugLine(`SYSTEM_CHECK: ${type.toUpperCase()}_LINK_STABLE`);
+
+        // Massive Briefing Log
+        this.addDebugLine(">>> INITIATING_CINEMATIC_MASTERY_PROTOCOL <<<");
+        this.addDebugLine(">>> DEPLOYING_VISUAL_INTERFACE_v4.0 <<<");
 
         if (type === 'code') {
-            obj.innerText = "OBJ: EXECUTE MULTI-ROD SYNC (FOR/WHILE/MAP)";
+            obj.innerText = "[OBJECTIVE]: SYNC ALL CORE RODS USING A LOOP STRUCTURE";
             title.innerText = '[ULTRA_REACTOR_CORE]';
             content.innerHTML = `
                 <div class="reactor-mastery" id="reactor-bars">
@@ -318,45 +321,45 @@ export class V2App {
                 <div class="console-container">
                     <textarea id="code-input" class="console-ui" spellcheck="false">for(let i=0; i<5; i++) {\n  bars[i].sync();\n}</textarea>
                 </div>
-                <button class="btn-action" onclick="window.v2app.checkAnswer('code')">INIT_ORCHESTRATOR</button>
+                <button class="btn-action" onclick="window.v2app.checkAnswer('code')">EXECUTE_SYNC</button>
             `;
         } else if (type === 'english') {
-            obj.innerText = "OBJ: RECONSTRUCT TAC-DECRYPT SIGNAL";
-            title.innerText = '[WAVE_SIGNAL_DECRYPT]';
+            obj.innerText = "[OBJECTIVE]: RECONSTRUCT ENCRYPTED SIGNAL FRAGMENTS";
+            title.innerText = '[SIGNAL_DECRYPT_STATION]';
             this.reassemblyWords = [];
             const fragments = ["INITIATE", "SECTOR", "PERSISTENCE", "SEQUENCE", "NOW"];
             content.innerHTML = `
-                <div class="waveform-container">
-                    ${Array.from({length: 20}).map(() => `<div class="wave-bar"></div>`).join('')}
+                <div class="waveform-container" style="height: 100px;">
+                    ${Array.from({length: 30}).map(() => `<div class="wave-bar" style="width: 5px;"></div>`).join('')}
                 </div>
-                <div class="reassembly-slot" id="reassembly-display">>>> SYNCING_AUDIO <<<</div>
+                <div class="reassembly-slot" id="reassembly-display" style="font-size: 24px; margin: 20px 0;">READY_FOR_INPUT</div>
                 <div class="fragment-container">
                     ${fragments.sort(() => Math.random() - 0.5).map(f => `
-                        <div class="fragment" onclick="window.v2app.addFragment('${f}')">${f}</div>
+                        <div class="fragment" style="font-size: 16px; padding: 15px;" onclick="window.v2app.addFragment('${f}')">${f}</div>
                     `).join('')}
                 </div>
             `;
         } else {
-            obj.innerText = "OBJ: ESTABLISH NEURAL PATHWAY (G1: A&B, G2: G1|C)";
-            title.innerText = '[ULTRA_NEURAL_LINK]';
+            obj.innerText = "[OBJECTIVE]: ALIGN HEX-LOGIC: (A AND B) OR C";
+            title.innerText = '[NEURAL_HEX_ROUTING]';
             this.circuitState = { A: false, B: false, C: false };
             content.innerHTML = `
-                <div class="circuit-container">
+                <div class="circuit-container" style="gap: 60px;">
                     <svg style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;">
-                        <path id="wire-ab" class="wire data-pulse" d="M80,60 L200,60" />
-                        <path id="wire-bc" class="wire data-pulse" d="M80,180 L200,180" />
-                        <path id="wire-out" class="wire data-pulse" d="M260,120 L350,120" />
+                        <path id="wire-ab" class="logic-wire" d="M120,80 L250,80" />
+                        <path id="wire-bc" class="logic-wire" d="M120,240 L250,240" />
+                        <path id="wire-out" class="logic-wire" d="M330,160 L450,160" />
                     </svg>
                     <div class="circuit-column">
-                        <div id="sw-A" class="switch-node" onclick="window.v2app.toggleSwitch('A')">A</div>
-                        <div id="sw-B" class="switch-node" onclick="window.v2app.toggleSwitch('B')">B</div>
-                        <div id="sw-C" class="switch-node" onclick="window.v2app.toggleSwitch('C')">C</div>
+                        <div id="sw-A" class="hex-node inactive" onclick="window.v2app.toggleSwitch('A')">A</div>
+                        <div id="sw-B" class="hex-node inactive" onclick="window.v2app.toggleSwitch('B')">B</div>
+                        <div id="sw-C" class="hex-node inactive" onclick="window.v2app.toggleSwitch('C')">C</div>
                     </div>
                     <div class="circuit-column">
-                        <div class="gate-node">AND_GATE<span>(AB)</span></div>
-                        <div class="gate-node">OR_GATE<span>(OUT)</span></div>
+                        <div class="gate-node" style="width: 80px; height: 80px; font-size: 14px;">AND_GATE</div>
+                        <div class="gate-node" style="width: 80px; height: 80px; font-size: 14px;">OR_GATE</div>
                     </div>
-                    <div id="neural-core" class="processor-core"></div>
+                    <div id="neural-core" class="processor-core" style="width: 140px; height: 140px;"></div>
                 </div>
             `;
         }
@@ -374,7 +377,9 @@ export class V2App {
 
     toggleSwitch(id) {
         this.circuitState[id] = !this.circuitState[id];
-        document.getElementById(`sw-${id}`).classList.toggle('active');
+        const el = document.getElementById(`sw-${id}`);
+        el.classList.toggle('active', this.circuitState[id]);
+        el.classList.toggle('inactive', !this.circuitState[id]);
         this.updateCircuit();
     }
 
@@ -390,7 +395,7 @@ export class V2App {
         const core = document.getElementById('neural-core');
         if (g2) {
             core.classList.add('active');
-            this.addDebugLine("NEURAL_CORE_STABILIZED: DATA_FLOW_LOCKED");
+            this.addDebugLine("NEURAL_HEX_STABILIZED: CONDUIT_OPEN");
             setTimeout(() => this.winChallenge(), 1200);
         } else {
             core.classList.remove('active');
