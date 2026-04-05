@@ -35,6 +35,7 @@ export class V2App {
         this.selectedHexIndex = null;
         this.gameTimer = null;
         this.gameTimeLeft = 60;
+        this.particles = null; // Orbital Strike System
 
         this.components = {
             grid:      null,
@@ -232,6 +233,15 @@ export class V2App {
         if (this.components.stars)      this.components.stars.update(time);
         this.components.banners.forEach(b => b.update(time));
 
+        if (this.particles) {
+            const positions = this.particles.geometry.attributes.position.array;
+            for (let i = 0; i < positions.length; i += 3) {
+                positions[i + 1] -= 2; // fall speed
+                if (positions[i+1] < -10) positions[i+1] = 500; 
+            }
+            this.particles.geometry.attributes.position.needsUpdate = true;
+        }
+
 
         this.components.space.update(this.camera);
 
@@ -284,80 +294,127 @@ export class V2App {
     renderChallenge(type) {
         const title = document.getElementById('game-title');
         const content = document.getElementById('game-content');
-        this.nodesState = [90, 180, 0, 270, 90, 0, 180, 270, 90]; // Initial rotations
+        this.gameType = type;
 
         if (type === 'code') {
-            title.innerText = 'REACTOR INJEKTOR: CORE STABILIZATION';
+            title.innerText = 'REACTOR MASTERY: LOOP SYNCHRONIZATION';
             content.innerHTML = `
-                <div class="reactor-hud">
-                    <div id="reactor-core" class="reactor-core"></div>
+                <div class="reactor-mastery" id="reactor-bars">
+                    ${[0,1,2,3,4].map(i => `<div class="reactor-bar" id="bar-${i}"></div>`).join('')}
                 </div>
-                <p>Define <span class="highlight">status = "online"</span> para sincronizar los núcleos gravitacionales.</p>
-                <textarea id="code-input" class="code-area" oninput="window.v2app.updateReactor()">let status = "offline";\n\n// ESCRIBE AQUÍ: status = "online";\n</textarea>
-                <button class="btn-action" onclick="window.v2app.checkAnswer('code')">ESTABILIZAR NÚCLEO</button>
+                <p>Estabiliza las 5 barras usando un <span class="highlight">for loop</span>. Usa <span class="accent">bars[i].sync();</span></p>
+                <textarea id="code-input" class="code-area">for(let i=0; i<5; i++) {\n  // Escribe: bars[i].sync();\n}</textarea>
+                <button class="btn-action" onclick="window.v2app.checkAnswer('code')">EJECUTAR BUCLE</button>
             `;
         } else if (type === 'english') {
-            title.innerText = 'TACTICAL RADIO: LIAISON PROTOCOL';
+            title.innerText = 'SIGNAL REASSEMBLY: TECHNICAL ENGLISH';
+            this.reassemblyWords = [];
+            const fragments = ["INITIATE", "SECTOR", "PERSISTENCE", "SEQUENCE", "NOW"];
             content.innerHTML = `
-                <div class="radio-screen">
-                    <div id="radio-text" class="glitch-text">Esperando señal de Barranquilla...</div>
-                </div>
-                <p style="margin-top:15px;">Barranquilla dice: <span class="highlight">"We need to bypass the firewall manually."</span> ¿Cómo respondes?</p>
-                <div class="option-item" onclick="window.v2app.checkAnswer('english', 1)">A) "Copy that, attacking the wall now."</div>
-                <div class="option-item" onclick="window.v2app.checkAnswer('english', 2)">B) "Understood, initiating manual bypass sequence."</div>
-                <div class="option-item" onclick="window.v2app.checkAnswer('english', 3)">C) "Roger, closing the firewall immediately."</div>
-            `;
-            setTimeout(() => { document.getElementById('radio-text').innerText = "CONEXIÓN ESTABLE: RECIBIENDO ÓRDENES..."; }, 1000);
-        } else {
-            title.innerText = 'NEURAL-FLOW: LOGIC ROUTING';
-            content.innerHTML = `
-                <p>Rota los nodos para conectar el flujo de datos de <span class="highlight">ENTRADA</span> a <span class="accent">SALIDA</span>.</p>
-                <div class="logic-grid" id="logic-grid">
-                    ${this.nodesState.map((rot, i) => `
-                        <div class="node" id="node-${i}" style="transform: rotate(${rot}deg)" onclick="window.v2app.rotateNode(${i})">
-                            ${i === 4 ? '⬢' : (i % 2 === 0 ? '┗' : '┃')}
-                        </div>
+                <div class="reassembly-slot" id="reassembly-display">... CONSTRUYENDO COMANDO ...</div>
+                <p>Rearma la instrucción de defensa de la Flota:</p>
+                <div class="fragment-container">
+                    ${fragments.sort(() => Math.random() - 0.5).map(f => `
+                        <div class="fragment" onclick="window.v2app.addFragment('${f}')">${f}</div>
                     `).join('')}
                 </div>
-                <button class="btn-action" onclick="window.v2app.checkAnswer('soft')">VALIDAR RUTA</button>
+                <button class="btn-action" style="background:#444;" onclick="window.v2app.clearFragments()">REINICIAR</button>
             `;
-        }
-    }
-
-    updateReactor() {
-        const val = document.getElementById('code-input').value;
-        const core = document.getElementById('reactor-core');
-        if (val.includes('status = "online"')) {
-            core.classList.add('stable');
         } else {
-            core.classList.remove('stable');
+            title.innerText = 'NEURAL-SYNC: DATA TIMING';
+            content.innerHTML = `
+                <div class="sync-container">
+                    <div id="data-packet" class="data-packet"></div>
+                    <div id="sync-gate" class="sync-gate" onclick="window.v2app.checkSync()">GATE</div>
+                </div>
+                <p>Cliquea el <span class="highlight">GATE</span> justo cuando el paquete de datos pase por el centro.</p>
+            `;
+            this.startPacketAnimation();
         }
     }
 
-    rotateNode(index) {
-        this.nodesState[index] = (this.nodesState[index] + 90) % 360;
-        const node = document.getElementById(`node-${index}`);
-        node.style.transform = `rotate(${this.nodesState[index]}deg)`;
-        node.classList.add('active');
-        setTimeout(() => node.classList.remove('active'), 200);
+    // --- REASSEMBLY LOGIC ---
+    addFragment(word) {
+        this.reassemblyWords.push(word);
+        document.getElementById('reassembly-display').innerText = this.reassemblyWords.join(" ");
+        if (this.reassemblyWords.length === 5) {
+            if (this.reassemblyWords.join(" ") === "INITIATE SECTOR PERSISTENCE SEQUENCE NOW") {
+                this.winChallenge();
+            } else {
+                alert("COMANDO INVÁLIDO: REINICIANDO");
+                this.clearFragments();
+            }
+        }
+    }
+    clearFragments() { 
+        this.reassemblyWords = []; 
+        document.getElementById('reassembly-display').innerText = "..."; 
     }
 
-    checkAnswer(type, selection) {
-        let win = false;
+    // --- NEURAL SYNC LOGIC ---
+    startPacketAnimation() {
+        const packet = document.getElementById('data-packet');
+        gsap.to(packet, {
+            left: "100%", duration: 2, repeat: -1, ease: "none"
+        });
+    }
+    checkSync() {
+        const packet = document.getElementById('data-packet');
+        const pos = parseFloat(packet.style.left);
+        if (pos > 65 && pos < 75) {
+            this.winChallenge();
+        } else {
+            alert("FUERA DE SINCRONÍA: EL PAQUETE SE PERDIÓ");
+        }
+    }
+
+    checkAnswer(type) {
         if (type === 'code') {
-            const val = document.getElementById('code-input').value;
-            if (val.includes('status = "online"')) win = true;
-        } else if (type === 'english') {
-            if (selection === 2) win = true;
-        } else {
-            // Neural-Flow win condition: Simple check for 0-degree rotation on critical path
-            win = this.nodesState.every(rot => rot === 0); 
-            // For the demo, let's make it easier: if all nodes are at 0 deg
-            if (!win) alert('FLUJO INTERRUMPIDO: ALINEA LOS NODOS (TODOS A 0°)');
+            const code = document.getElementById('code-input').value;
+            // Enhanced loop simulator
+            if (code.includes('for') && code.includes('bars[i].sync()')) {
+                let i = 0;
+                const interval = setInterval(() => {
+                    document.getElementById(`bar-${i}`).classList.add('active');
+                    i++;
+                    if (i === 5) {
+                        clearInterval(interval);
+                        setTimeout(() => this.winChallenge(), 1000);
+                    }
+                }, 400);
+            } else {
+                alert("ERROR DE SINTAXIS: BUCLE NO DETECTADO");
+            }
         }
+    }
 
-        if (win) this.winChallenge();
-        else if (type !== 'soft') alert('PROTOCOLO FALLIDO: REINTENTA');
+    winChallenge() {
+        clearInterval(this.gameTimer);
+        this.createOrbitalStrike();
+        alert('¡MAESTRÍA DEMOSTRADA! SECTOR ASEGURADO.');
+        
+        if (this.selectedHexIndex !== null) {
+            this.components.grid.setTerritoryColor([this.selectedHexIndex], 0x00f3ff);
+        }
+        this.closeChallenge();
+    }
+
+    createOrbitalStrike() {
+        // Particle beam from sky
+        const geometry = new THREE.BufferGeometry();
+        const pts = [];
+        for(let i=0; i<100; i++) {
+            pts.push((Math.random()-0.5)*20, 500*Math.random(), (Math.random()-0.5)*20);
+        }
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+        const material = new THREE.PointsMaterial({ color: 0x00f3ff, size: 2 });
+        this.particles = new THREE.Points(geometry, material);
+        this.scene.add(this.particles);
+        
+        setTimeout(() => {
+            this.scene.remove(this.particles);
+            this.particles = null;
+        }, 2000);
     }
 
     winChallenge() {
