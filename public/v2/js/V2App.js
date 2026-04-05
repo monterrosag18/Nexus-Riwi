@@ -76,6 +76,11 @@ export class V2App {
 
         this.materials = {}; // Cache for selective bloom
         this.darkMaterial = new THREE.MeshBasicMaterial({ color: 'black' });
+        
+        // --- 3D COMMAND NEXUS ---
+        this.commandGroup = new THREE.Group();
+        this.scene.add(this.commandGroup);
+        this.isCommandMode = false;
     }
 
     async init() {
@@ -258,15 +263,22 @@ export class V2App {
 
     // ── GAME LOGIC ────────────────────────────────────────────────────────
     _onPointerDown(event) {
-        // Only trigger if no challenge is active
-        if (this.selectedHexIndex !== null) return;
-
         this.pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
         this.pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
         this.raycaster.setFromCamera(this.pointer, this.camera);
-        const intersects = this.raycaster.intersectObject(this.components.grid.fills);
 
+        // Interaction during 3D Command Mode
+        if (this.isCommandMode) {
+            const intersects = this.raycaster.intersectObjects(this.commandGroup.children);
+            if (intersects.length > 0) {
+                const obj = intersects[0].object;
+                if (obj.userData.onSelect) obj.userData.onSelect();
+            }
+            return;
+        }
+
+        // Standard Hex Selection
+        const intersects = this.raycaster.intersectObject(this.components.grid.fills);
         if (intersects.length > 0) {
             this.selectedHexIndex = intersects[0].instanceId;
             this.openSelector();
@@ -283,10 +295,34 @@ export class V2App {
 
     startChallenge(type) {
         this.gameTimeLeft = 60;
+        this.isCommandMode = true;
         document.getElementById('game-selector').style.display = 'none';
+        
+        // Hide only the center logic area of the card, keep header/footer
         document.getElementById('game-panel').style.display = 'block';
-        this.renderChallenge(type);
-        this.startTimer();
+        document.getElementById('game-content').style.opacity = '0'; // We use 3D space instead
+
+        // --- CINEMATIC CAMERA ZOOM ---
+        const hexPos = this.components.grid.getHexPos(this.selectedHexIndex);
+        if (hexPos) {
+            this.controls.enabled = false;
+            gsap.to(this.camera.position, {
+                x: hexPos.x, y: 150, z: hexPos.z + 180,
+                duration: 1.5, ease: "power2.inOut"
+            });
+            gsap.to(this.controls.target, {
+                x: hexPos.x, y: 0, z: hexPos.z,
+                duration: 1.5, ease: "power2.inOut",
+                onComplete: () => {
+                    this.renderChallenge(type);
+                    this.startTimer();
+                }
+            });
+
+            // Focus Effect: Darken map background
+            gsap.to(this.components.grid.fills.material, { opacity: 0.1, duration: 1 });
+            gsap.to(this.components.grid.lines.material, { opacity: 0.2, duration: 1 });
+        }
     }
 
     startTimer() {
@@ -314,10 +350,8 @@ export class V2App {
         if (type === 'code') {
             obj.innerText = "[OBJECTIVE]: SYNC ALL CORE RODS USING A LOOP STRUCTURE";
             title.innerText = '[ULTRA_REACTOR_CORE]';
+            this._create3DReactor();
             content.innerHTML = `
-                <div class="reactor-mastery" id="reactor-bars">
-                    ${[0,1,2,3,4].map(i => `<div class="reactor-bar" id="bar-${i}"></div>`).join('')}
-                </div>
                 <div class="console-container">
                     <textarea id="code-input" class="console-ui" spellcheck="false">for(let i=0; i<5; i++) {\n  bars[i].sync();\n}</textarea>
                 </div>
@@ -327,42 +361,73 @@ export class V2App {
             obj.innerText = "[OBJECTIVE]: RECONSTRUCT ENCRYPTED SIGNAL FRAGMENTS";
             title.innerText = '[SIGNAL_DECRYPT_STATION]';
             this.reassemblyWords = [];
-            const fragments = ["INITIATE", "SECTOR", "PERSISTENCE", "SEQUENCE", "NOW"];
+            // For now, simpler 3D representation or keep text fragments floating
+            this._create3DSignalNodes();
             content.innerHTML = `
-                <div class="waveform-container" style="height: 100px;">
-                    ${Array.from({length: 30}).map(() => `<div class="wave-bar" style="width: 5px;"></div>`).join('')}
-                </div>
                 <div class="reassembly-slot" id="reassembly-display" style="font-size: 24px; margin: 20px 0;">READY_FOR_INPUT</div>
-                <div class="fragment-container">
-                    ${fragments.sort(() => Math.random() - 0.5).map(f => `
+                <div class="fragment-container"> 
+                    <!-- Fragments handled via Raycasting later -->
+                    ${["INITIATE", "SECTOR", "PERSISTENCE", "SEQUENCE", "NOW"].map(f => `
                         <div class="fragment" style="font-size: 16px; padding: 15px;" onclick="window.v2app.addFragment('${f}')">${f}</div>
                     `).join('')}
                 </div>
             `;
         } else {
-            obj.innerText = "[OBJECTIVE]: ALIGN HEX-LOGIC: (A AND B) OR C";
-            title.innerText = '[NEURAL_HEX_ROUTING]';
+            obj.innerText = "[OBJECTIVE]: ALIGN HEX-LOGICAL CORES (A&B) OR C";
+            title.innerText = '[NEURAL_3D_ROUTING]';
             this.circuitState = { A: false, B: false, C: false };
-            content.innerHTML = `
-                <div class="circuit-container" style="gap: 60px;">
-                    <svg style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;">
-                        <path id="wire-ab" class="logic-wire" d="M120,80 L250,80" />
-                        <path id="wire-bc" class="logic-wire" d="M120,240 L250,240" />
-                        <path id="wire-out" class="logic-wire" d="M330,160 L450,160" />
-                    </svg>
-                    <div class="circuit-column">
-                        <div id="sw-A" class="hex-node inactive" onclick="window.v2app.toggleSwitch('A')">A</div>
-                        <div id="sw-B" class="hex-node inactive" onclick="window.v2app.toggleSwitch('B')">B</div>
-                        <div id="sw-C" class="hex-node inactive" onclick="window.v2app.toggleSwitch('C')">C</div>
-                    </div>
-                    <div class="circuit-column">
-                        <div class="gate-node" style="width: 80px; height: 80px; font-size: 14px;">AND_GATE</div>
-                        <div class="gate-node" style="width: 80px; height: 80px; font-size: 14px;">OR_GATE</div>
-                    </div>
-                    <div id="neural-core" class="processor-core" style="width: 140px; height: 140px;"></div>
-                </div>
-            `;
+            this._create3DNeuralFlow();
+            content.innerHTML = ''; // Full 3D
         }
+    }
+
+    _create3DNeuralFlow() {
+        this.commandGroup.clear();
+        const hexPos = this.components.grid.getHexPos(this.selectedHexIndex);
+        const startX = hexPos.x - 40;
+        const startZ = hexPos.z;
+
+        const createNode = (id, x, y, z) => {
+            const geo = new THREE.CylinderGeometry(8, 8, 4, 6);
+            const mat = new THREE.MeshStandardMaterial({ 
+                color: 0xff4400, emissive: 0xff4400, emissiveIntensity: 0.5, transparent: true, opacity: 0.8 
+            });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.set(x, y + 20, z);
+            mesh.rotation.x = Math.PI/2;
+            mesh.userData = { id, type: 'switch', onSelect: () => this.toggleSwitch(id) };
+            this.commandGroup.add(mesh);
+            return mesh;
+        };
+
+        this.nodeA = createNode('A', startX, 40, startZ - 30);
+        this.nodeB = createNode('B', startX, 0, startZ - 30);
+        this.nodeC = createNode('C', startX, -40, startZ - 30);
+
+        // Core
+        const coreGeo = new THREE.IcosahedronGeometry(15, 1);
+        const coreMat = new THREE.MeshStandardMaterial({ color: 0x222222, wireframe: true });
+        this.neuralCore = new THREE.Mesh(coreGeo, coreMat);
+        this.neuralCore.position.set(startX + 80, 0, startZ - 30);
+        this.commandGroup.add(this.neuralCore);
+    }
+
+    _create3DReactor() {
+        this.commandGroup.clear();
+        const hexPos = this.components.grid.getHexPos(this.selectedHexIndex);
+        this.reactorBars = [];
+        for(let i=0; i<5; i++) {
+            const geo = new THREE.BoxGeometry(6, 40, 6);
+            const mat = new THREE.MeshStandardMaterial({ color: 0xff0044, emissive: 0xff0044, emissiveIntensity: 0.2 });
+            const bar = new THREE.Mesh(geo, mat);
+            bar.position.set(hexPos.x - 40 + i*20, 20, hexPos.z - 20);
+            this.commandGroup.add(bar);
+            this.reactorBars.push(bar);
+        }
+    }
+
+    _create3DSignalNodes() {
+        this.commandGroup.clear(); // Placeholder for 3D signal visualization
     }
 
     addDebugLine(msg) {
@@ -388,17 +453,22 @@ export class V2App {
         const g1 = A && B;
         const g2 = g1 || C;
 
-        document.getElementById('wire-ab').classList.toggle('active', g1);
-        document.getElementById('wire-bc').classList.toggle('active', C);
-        document.getElementById('wire-out').classList.toggle('active', g2);
+        // Update 3D Nodes
+        const updateNode = (node, active) => {
+            node.material.color.set(active ? 0x00f3ff : 0xff4400);
+            node.material.emissive.set(active ? 0x00f3ff : 0xff4400);
+            node.material.emissiveIntensity = active ? 1.5 : 0.5;
+        };
+
+        if (this.nodeA) updateNode(this.nodeA, A);
+        if (this.nodeB) updateNode(this.nodeB, B);
+        if (this.nodeC) updateNode(this.nodeC, C);
         
-        const core = document.getElementById('neural-core');
-        if (g2) {
-            core.classList.add('active');
+        if (g2 && this.neuralCore) {
+            this.neuralCore.material.color.set(0x00f3ff);
+            this.neuralCore.material.wireframe = false;
             this.addDebugLine("NEURAL_HEX_STABILIZED: CONDUIT_OPEN");
             setTimeout(() => this.winChallenge(), 1200);
-        } else {
-            core.classList.remove('active');
         }
     }
 
@@ -458,13 +528,16 @@ export class V2App {
     checkAnswer(type) {
         if (type === 'code') {
             const code = document.getElementById('code-input').value;
-            // Mastery Ultra: Logic validator
             const isLoop = code.includes('for') || code.includes('while') || code.includes('forEach');
             if (isLoop && code.includes('bars[i].sync()')) {
                 this.addDebugLine("ORCHESTRATING_ULTRA_SYNC...");
                 let i = 0;
                 const interval = setInterval(() => {
-                    document.getElementById(`bar-${i}`).classList.add('active');
+                    if (this.reactorBars[i]) {
+                        this.reactorBars[i].material.color.set(0x00f3ff);
+                        this.reactorBars[i].material.emissiveIntensity = 2;
+                        this.reactorBars[i].scale.y = 1.5;
+                    }
                     this.addDebugLine(`CORE_UNIT_0${i+1}:_STABILIZED_100%`);
                     i++;
                     if (i === 5) {
