@@ -303,30 +303,33 @@ export class V2App {
         const title = document.getElementById('game-title');
         const content = document.getElementById('game-content');
         const obj = document.getElementById('bridge-objective');
+        const debug = document.getElementById('debug-lines');
+        debug.innerHTML = ''; // Clear logs
         this.gameType = type;
-        this.typeLog(`INITIALIZING_${type.toUpperCase()}_PROTOCOL...`);
+        this.addDebugLine(`SYSTEM_CHECK: ${type.toUpperCase()}_LINK_STABLE`);
 
         if (type === 'code') {
-            obj.innerText = "OBJ: SYNCHRONIZE 5 POWER RODS VIA FOR-LOOP";
-            title.innerText = '[REACTOR_CORE_SYNC]';
+            obj.innerText = "OBJ: EXECUTE MULTI-ROD SYNC (FOR/WHILE/MAP)";
+            title.innerText = '[ULTRA_REACTOR_CORE]';
             content.innerHTML = `
                 <div class="reactor-mastery" id="reactor-bars">
                     ${[0,1,2,3,4].map(i => `<div class="reactor-bar" id="bar-${i}"></div>`).join('')}
                 </div>
                 <div class="console-container">
-                    <div class="console-decoration">NEXUS_OS_v.04</div>
-                    <textarea id="code-input" class="console-ui" spellcheck="false" 
-                        oninput="window.v2app.typeLog('Sincronizando núcleo...')">for(let i=0; i<5; i++) {\n  bars[i].sync();\n}</textarea>
+                    <textarea id="code-input" class="console-ui" spellcheck="false">for(let i=0; i<5; i++) {\n  bars[i].sync();\n}</textarea>
                 </div>
-                <button class="btn-action" onclick="window.v2app.checkAnswer('code')">EXECUTE_LOOP</button>
+                <button class="btn-action" onclick="window.v2app.checkAnswer('code')">INIT_ORCHESTRATOR</button>
             `;
         } else if (type === 'english') {
-            obj.innerText = "OBJ: RECONSTRUCT TAC-COMMAND FROM FRAGMENTS";
-            title.innerText = '[SIGNAL_DECRYPT]';
+            obj.innerText = "OBJ: RECONSTRUCT TAC-DECRYPT SIGNAL";
+            title.innerText = '[WAVE_SIGNAL_DECRYPT]';
             this.reassemblyWords = [];
             const fragments = ["INITIATE", "SECTOR", "PERSISTENCE", "SEQUENCE", "NOW"];
             content.innerHTML = `
-                <div class="reassembly-slot" id="reassembly-display">>>> WAITING_INPUT <<<</div>
+                <div class="waveform-container">
+                    ${Array.from({length: 20}).map(() => `<div class="wave-bar"></div>`).join('')}
+                </div>
+                <div class="reassembly-slot" id="reassembly-display">>>> SYNCING_AUDIO <<<</div>
                 <div class="fragment-container">
                     ${fragments.sort(() => Math.random() - 0.5).map(f => `
                         <div class="fragment" onclick="window.v2app.addFragment('${f}')">${f}</div>
@@ -334,15 +337,15 @@ export class V2App {
                 </div>
             `;
         } else {
-            obj.innerText = "OBJ: ACTIVATE NEURAL CORE VIA LOGIC GATE (A & B) OR C";
-            title.innerText = '[NEURAL_FLOW_CIRCUIT]';
+            obj.innerText = "OBJ: ESTABLISH NEURAL PATHWAY (G1: A&B, G2: G1|C)";
+            title.innerText = '[ULTRA_NEURAL_LINK]';
             this.circuitState = { A: false, B: false, C: false };
             content.innerHTML = `
                 <div class="circuit-container">
                     <svg style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;">
-                        <path id="wire-ab" class="wire" d="M80,60 L200,60" />
-                        <path id="wire-bc" class="wire" d="M80,180 L200,180" />
-                        <path id="wire-out" class="wire" d="M260,120 L350,120" />
+                        <path id="wire-ab" class="wire data-pulse" d="M80,60 L200,60" />
+                        <path id="wire-bc" class="wire data-pulse" d="M80,180 L200,180" />
+                        <path id="wire-out" class="wire data-pulse" d="M260,120 L350,120" />
                     </svg>
                     <div class="circuit-column">
                         <div id="sw-A" class="switch-node" onclick="window.v2app.toggleSwitch('A')">A</div>
@@ -350,13 +353,23 @@ export class V2App {
                         <div id="sw-C" class="switch-node" onclick="window.v2app.toggleSwitch('C')">C</div>
                     </div>
                     <div class="circuit-column">
-                        <div class="gate-node">AND<span>(A & B)</span></div>
-                        <div class="gate-node">OR<span>(G1 | C)</span></div>
+                        <div class="gate-node">AND_GATE<span>(AB)</span></div>
+                        <div class="gate-node">OR_GATE<span>(OUT)</span></div>
                     </div>
                     <div id="neural-core" class="processor-core"></div>
                 </div>
             `;
         }
+    }
+
+    addDebugLine(msg) {
+        const d = document.getElementById('debug-lines');
+        const line = document.createElement('div');
+        line.className = 'debug-line active';
+        line.innerText = `>> ${msg}`;
+        d.appendChild(line);
+        setTimeout(() => line.classList.remove('active'), 500);
+        d.scrollTop = d.scrollHeight;
     }
 
     toggleSwitch(id) {
@@ -377,8 +390,8 @@ export class V2App {
         const core = document.getElementById('neural-core');
         if (g2) {
             core.classList.add('active');
-            this.typeLog("NEURAL_CORE_STABILIZED: SIGNAL_LOCKED");
-            setTimeout(() => this.winChallenge(), 1000);
+            this.addDebugLine("NEURAL_CORE_STABILIZED: DATA_FLOW_LOCKED");
+            setTimeout(() => this.winChallenge(), 1200);
         } else {
             core.classList.remove('active');
         }
@@ -401,13 +414,13 @@ export class V2App {
     // --- REASSEMBLY LOGIC ---
     addFragment(word) {
         this.reassemblyWords.push(word);
-        this.typeLog(`FRAGMENT_ADDED: ${word}`);
+        this.addDebugLine(`FRAGMENT_CAPTURED: ${word}`);
         document.getElementById('reassembly-display').innerText = this.reassemblyWords.join(" ");
         if (this.reassemblyWords.length === 5) {
             if (this.reassemblyWords.join(" ") === "INITIATE SECTOR PERSISTENCE SEQUENCE NOW") {
                 this.winChallenge();
             } else {
-                this.typeLog("CRITICAL_ERROR: INVALID_SEQUENCE");
+                this.addDebugLine("ERROR: PARSING_FAILED_REINJECTING...");
                 this.triggerGlitch();
                 this.clearFragments();
             }
@@ -440,20 +453,22 @@ export class V2App {
     checkAnswer(type) {
         if (type === 'code') {
             const code = document.getElementById('code-input').value;
-            if (code.includes('for') && code.includes('bars[i].sync()')) {
-                this.typeLog("EXECUTING_ENGINE_LOOP...");
+            // Mastery Ultra: Logic validator
+            const isLoop = code.includes('for') || code.includes('while') || code.includes('forEach');
+            if (isLoop && code.includes('bars[i].sync()')) {
+                this.addDebugLine("ORCHESTRATING_ULTRA_SYNC...");
                 let i = 0;
                 const interval = setInterval(() => {
-                    this.typeLog(`SYNCING_CORE_BAR_0${i+1}...`);
                     document.getElementById(`bar-${i}`).classList.add('active');
+                    this.addDebugLine(`CORE_UNIT_0${i+1}:_STABILIZED_100%`);
                     i++;
                     if (i === 5) {
                         clearInterval(interval);
-                        setTimeout(() => this.winChallenge(), 800);
+                        setTimeout(() => this.winChallenge(), 600);
                     }
                 }, 400);
             } else {
-                this.typeLog("SYNTAX_ERROR: ILLEGAL_CORE_ACCESS");
+                this.addDebugLine("FATAL_ERROR: CODE_INJECTION_REJECTED");
                 this.triggerGlitch();
             }
         }

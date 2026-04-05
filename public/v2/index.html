@@ -358,56 +358,53 @@
             margin-top: 15px;
         }
 
-        /* ── NEURAL-FLOW v2: LOGIC CIRCUITRY ────────────────── */
-        .circuit-container {
-            display: flex; align-items: center; justify-content: space-around;
-            background: rgba(0,0,0,0.4); padding: 30px; border: 1px solid #111;
-            margin: 20px 0; position: relative; gap: 40px;
-        }
-        .circuit-column { display: flex; flex-direction: column; gap: 30px; }
-        
-        .switch-node {
-            width: 50px; height: 50px; border-radius: 5px;
-            background: #111; border: 2px solid #333;
-            display: flex; justify-content: center; align-items: center;
-            cursor: pointer; font-weight: 700; font-size: 14px;
-            transition: all 0.3s; color: rgba(255,255,255,0.2);
-        }
-        .switch-node.active {
-            border-color: #00f3ff; color: #fff;
-            box-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
-            background: rgba(0, 243, 255, 0.1);
-        }
-
-        .gate-node {
-            width: 60px; height: 60px; border: 1px solid #222;
-            background: #050505; display: flex; justify-content: center;
-            align-items: center; font-size: 10px; flex-direction: column;
-            color: #00f3ff; letter-spacing: 1px; font-weight: 700;
-        }
-
-        .processor-core {
-            width: 100px; height: 100px; background: rgba(0, 243, 255, 0.05);
-            border: 2px solid #222; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            transition: 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        /* ── ULTRA-MASTERY EDITION: PROFESSIONAL HUD ────────── */
+        .challenge-card {
+            width: 900px;
+            background: rgba(4, 4, 12, 0.9);
+            backdrop-filter: blur(25px) saturate(180%);
+            border: 2px solid rgba(0, 243, 255, 0.15);
+            box-shadow: inset 0 0 40px rgba(0, 243, 255, 0.05), 0 0 80px rgba(0,0,0,1);
             position: relative;
+            display: none; flex-direction: column;
+            overflow: visible; border-radius: 4px;
         }
-        .processor-core.active {
-            border-color: #00f3ff; box-shadow: 0 0 40px #00f3ff;
-            background: rgba(0, 243, 255, 0.2);
-        }
-        .processor-core::after {
-            content: "N"; font-size: 40px; font-weight: 700;
-            color: rgba(255,255,255,0.1);
-        }
-        .processor-core.active::after { color: #00f3ff; animation: pulse 1s infinite alternate; }
 
-        .wire {
-            stroke: #1a1a1a; stroke-width: 3; fill: none;
-            transition: stroke 0.4s, filter 0.4s;
+        /* Chromatic Aberration & Scanlines */
+        .bridge-body::before {
+            content: ""; position: absolute; top:0; left:0; width:100%; height:100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%; pointer-events: none; z-index: 5;
         }
-        .wire.active { stroke: #00f3ff; filter: drop-shadow(0 0 5px #00f3ff); }
+
+        /* Pulsing SVG Data Wires */
+        .data-pulse {
+            stroke-dasharray: 10, 10;
+            animation: data-flow 1.5s linear infinite;
+        }
+        @keyframes data-flow { from { stroke-dashoffset: 20; } to { stroke-dashoffset: 0; } }
+
+        /* Waveform Monitor */
+        .waveform-container {
+            width: 100%; height: 60px; display: flex; align-items: flex-end;
+            gap: 2px; justify-content: center; background: rgba(0,255,100,0.05);
+            border: 1px solid rgba(0,255,100,0.1); margin-bottom: 20px;
+        }
+        .wave-bar {
+            width: 3px; height: 10px; background: #00ff66;
+            box-shadow: 0 0 10px #00ff66; animation: wave 1s infinite alternate ease-in-out;
+        }
+        @keyframes wave { from { height: 10px; } to { height: 50px; } }
+
+        /* Tactical Debug Sidebar */
+        .debug-panel {
+            width: 250px; border-left: 1px solid #222;
+            padding: 15px; font-family: monospace; font-size: 9px;
+            color: #888; background: rgba(0,0,0,0.3);
+            display: flex; flex-direction: column; gap: 5px;
+        }
+        .debug-line { border-bottom: 1px solid #111; padding: 2px 0; }
+        .debug-line.active { color: #00f3ff; font-weight: 700; text-shadow: 0 0 5px #00f3ff; }
 
         /* Signal Reassembly (Fragments) */
         .fragment-container {
@@ -651,8 +648,14 @@
                 <div class="bridge-main">
                     <h3 id="game-title" style="font-size: 12px; letter-spacing: 4px; color: #00f3ff; margin-bottom: 20px;">[INITIALIZING_STATION...]</h3>
                     <div id="game-content">
-                        <!-- Specialized game logic -->
+                        <!-- Ultra-Specialized game logic -->
                     </div>
+                </div>
+
+                <!-- NEW: Debug Panel Lateral -->
+                <div class="debug-panel" id="tactical-debug">
+                    <div style="border-bottom: 1px solid #444; margin-bottom: 10px; color: #00f3ff; font-weight: 700;">PROACTIVE_LOGS_v1.0</div>
+                    <div id="debug-lines"></div>
                 </div>
             </div>
 
