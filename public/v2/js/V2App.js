@@ -302,10 +302,12 @@ export class V2App {
     renderChallenge(type) {
         const title = document.getElementById('game-title');
         const content = document.getElementById('game-content');
+        const obj = document.getElementById('bridge-objective');
         this.gameType = type;
         this.typeLog(`INITIALIZING_${type.toUpperCase()}_PROTOCOL...`);
 
         if (type === 'code') {
+            obj.innerText = "OBJ: SYNCHRONIZE 5 POWER RODS VIA FOR-LOOP";
             title.innerText = '[REACTOR_CORE_SYNC]';
             content.innerHTML = `
                 <div class="reactor-mastery" id="reactor-bars">
@@ -319,6 +321,7 @@ export class V2App {
                 <button class="btn-action" onclick="window.v2app.checkAnswer('code')">EXECUTE_LOOP</button>
             `;
         } else if (type === 'english') {
+            obj.innerText = "OBJ: RECONSTRUCT TAC-COMMAND FROM FRAGMENTS";
             title.innerText = '[SIGNAL_DECRYPT]';
             this.reassemblyWords = [];
             const fragments = ["INITIATE", "SECTOR", "PERSISTENCE", "SEQUENCE", "NOW"];
@@ -331,14 +334,53 @@ export class V2App {
                 </div>
             `;
         } else {
-            title.innerText = '[DATA_WAVE_LOCK]';
+            obj.innerText = "OBJ: ACTIVATE NEURAL CORE VIA LOGIC GATE (A & B) OR C";
+            title.innerText = '[NEURAL_FLOW_CIRCUIT]';
+            this.circuitState = { A: false, B: false, C: false };
             content.innerHTML = `
-                <div class="sync-container">
-                    <div id="data-packet" class="data-packet"></div>
-                    <div id="sync-gate" class="sync-gate" onclick="window.v2app.checkSync()">LOCK</div>
+                <div class="circuit-container">
+                    <svg style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;">
+                        <path id="wire-ab" class="wire" d="M80,60 L200,60" />
+                        <path id="wire-bc" class="wire" d="M80,180 L200,180" />
+                        <path id="wire-out" class="wire" d="M260,120 L350,120" />
+                    </svg>
+                    <div class="circuit-column">
+                        <div id="sw-A" class="switch-node" onclick="window.v2app.toggleSwitch('A')">A</div>
+                        <div id="sw-B" class="switch-node" onclick="window.v2app.toggleSwitch('B')">B</div>
+                        <div id="sw-C" class="switch-node" onclick="window.v2app.toggleSwitch('C')">C</div>
+                    </div>
+                    <div class="circuit-column">
+                        <div class="gate-node">AND<span>(A & B)</span></div>
+                        <div class="gate-node">OR<span>(G1 | C)</span></div>
+                    </div>
+                    <div id="neural-core" class="processor-core"></div>
                 </div>
             `;
-            this.startPacketAnimation();
+        }
+    }
+
+    toggleSwitch(id) {
+        this.circuitState[id] = !this.circuitState[id];
+        document.getElementById(`sw-${id}`).classList.toggle('active');
+        this.updateCircuit();
+    }
+
+    updateCircuit() {
+        const { A, B, C } = this.circuitState;
+        const g1 = A && B;
+        const g2 = g1 || C;
+
+        document.getElementById('wire-ab').classList.toggle('active', g1);
+        document.getElementById('wire-bc').classList.toggle('active', C);
+        document.getElementById('wire-out').classList.toggle('active', g2);
+        
+        const core = document.getElementById('neural-core');
+        if (g2) {
+            core.classList.add('active');
+            this.typeLog("NEURAL_CORE_STABILIZED: SIGNAL_LOCKED");
+            setTimeout(() => this.winChallenge(), 1000);
+        } else {
+            core.classList.remove('active');
         }
     }
 

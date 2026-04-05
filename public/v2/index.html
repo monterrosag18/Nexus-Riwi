@@ -358,47 +358,56 @@
             margin-top: 15px;
         }
 
-        /* ── MASTERY EDITION: NEW REAL GAMES STYLES ───────────────── */
-        /* Reactor Mastery (Loops) */
-        .reactor-mastery {
-            display: flex; gap: 10px; justify-content: center;
-            height: 120px; align-items: flex-end; margin-bottom: 20px;
+        /* ── NEURAL-FLOW v2: LOGIC CIRCUITRY ────────────────── */
+        .circuit-container {
+            display: flex; align-items: center; justify-content: space-around;
+            background: rgba(0,0,0,0.4); padding: 30px; border: 1px solid #111;
+            margin: 20px 0; position: relative; gap: 40px;
         }
-        .reactor-bar {
-            width: 30px; height: 10%;
-            background: rgba(255, 51, 68, 0.2);
-            border: 1px solid #ff3344;
-            box-shadow: 0 0 10px rgba(255, 51, 68, 0.3);
-            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        .circuit-column { display: flex; flex-direction: column; gap: 30px; }
+        
+        .switch-node {
+            width: 50px; height: 50px; border-radius: 5px;
+            background: #111; border: 2px solid #333;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; font-weight: 700; font-size: 14px;
+            transition: all 0.3s; color: rgba(255,255,255,0.2);
         }
-        .reactor-bar.active {
-            height: 100%; background: #00f3ff;
-            border-color: #00f3ff; box-shadow: 0 0 20px #00f3ff;
+        .switch-node.active {
+            border-color: #00f3ff; color: #fff;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
+            background: rgba(0, 243, 255, 0.1);
         }
 
-        /* Neural-Sync (Timing) */
-        .sync-container {
-            width: 100%; height: 150px;
-            background: rgba(0,2,16,0.5);
-            border: 1px solid #222; position: relative;
-            overflow: hidden; margin: 15px 0;
+        .gate-node {
+            width: 60px; height: 60px; border: 1px solid #222;
+            background: #050505; display: flex; justify-content: center;
+            align-items: center; font-size: 10px; flex-direction: column;
+            color: #00f3ff; letter-spacing: 1px; font-weight: 700;
         }
-        .data-packet {
-            width: 20px; height: 20px;
-            background: #00f3ff; border-radius: 50%;
-            box-shadow: 0 0 25px #00f3ff;
-            position: absolute; top: calc(50% - 10px); left: 0%;
-            z-index: 5;
-        }
-        .sync-gate {
-            width: 40px; height: 40px;
-            border: 2px dashed rgba(255,255,255,0.2);
-            border-radius: 50%; position: absolute;
-            top: calc(50% - 20px); left: 70%;
+
+        .processor-core {
+            width: 100px; height: 100px; background: rgba(0, 243, 255, 0.05);
+            border: 2px solid #222; border-radius: 50%;
             display: flex; justify-content: center; align-items: center;
-            cursor: pointer; transition: 0.3s;
+            transition: 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
         }
-        .sync-gate.active { border: 2px solid #00f3ff; box-shadow: 0 0 15px #00f3ff; }
+        .processor-core.active {
+            border-color: #00f3ff; box-shadow: 0 0 40px #00f3ff;
+            background: rgba(0, 243, 255, 0.2);
+        }
+        .processor-core::after {
+            content: "N"; font-size: 40px; font-weight: 700;
+            color: rgba(255,255,255,0.1);
+        }
+        .processor-core.active::after { color: #00f3ff; animation: pulse 1s infinite alternate; }
+
+        .wire {
+            stroke: #1a1a1a; stroke-width: 3; fill: none;
+            transition: stroke 0.4s, filter 0.4s;
+        }
+        .wire.active { stroke: #00f3ff; filter: drop-shadow(0 0 5px #00f3ff); }
 
         /* Signal Reassembly (Fragments) */
         .fragment-container {
@@ -617,9 +626,9 @@
             <div class="bridge-header">
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <div style="width: 8px; height: 8px; background: #00f3ff; border-radius: 50%; box-shadow: 0 0 10px #00f3ff;"></div>
-                    <span>[NEXUS_BRIDGE_STATION_ALPHA]</span>
+                    <span>[BRIDGE_STATION_ALPHA]</span>
                 </div>
-                <div id="challenge-timer" style="color: #00f3ff; font-family: monospace;">00:60</div>
+                <div id="bridge-objective" style="font-size: 10px; color: #ff3344; letter-spacing: 2px; text-transform: uppercase;">OBJ: ANALYZING_SYSTEM_NEEDS...</div>
                 <button class="exit-btn" onclick="window.v2app.closeChallenge()">[EXIT_STATION_X]</button>
             </div>
 
