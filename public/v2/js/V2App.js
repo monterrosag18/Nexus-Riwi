@@ -602,6 +602,22 @@ export class V2App {
         }
     }
 
+    winChallenge() {
+        clearInterval(this.gameTimer);
+        this.addDebugLine("CONQUEST_CONFIRMED: INITIATING_ORBITAL_STRIKE");
+        this.typeLog("SECTOR_CAPTURED: SYSTEM_SYNC_COMPLETE");
+        this.createOrbitalStrike();
+        
+        if (this.selectedHexIndex !== null) {
+            this.components.grid.setTerritoryColor([this.selectedHexIndex], 0x00f3ff);
+        }
+        
+        // Auto-close after effect, no blocking alert
+        setTimeout(() => {
+            this.closeChallenge();
+        }, 3000); 
+    }
+
     typeLog(msg) {
         const term = document.getElementById('system-terminal');
         const line = document.createElement('div');
@@ -677,25 +693,6 @@ export class V2App {
                 }, 400);
             } else {
                 this.addDebugLine("FATAL_ERROR: CODE_INJECTION_REJECTED");
-                this.triggerGlitch();
-            }
-        }
-    }
-
-    winChallenge() {
-        clearInterval(this.gameTimer);
-        this.typeLog("CONQUEST_CONFIRMED: INITIATING_ORBITAL_STRIKE");
-        this.createOrbitalStrike();
-        
-        if (this.selectedHexIndex !== null) {
-            this.components.grid.setTerritoryColor([this.selectedHexIndex], 0x00f3ff);
-        }
-        setTimeout(() => {
-            alert('¡MAESTRÍA DEMOSTRADA! SECTOR ASEGURADO.');
-            this.closeChallenge();
-        }, 1500);
-    }
-
     createOrbitalStrike() {
         // Particle beam from sky
         const geometry = new THREE.BufferGeometry();
@@ -717,9 +714,24 @@ export class V2App {
     closeChallenge() {
         const overlay = document.getElementById('challenge-overlay');
         overlay.style.display = 'none';
+        
+        // --- TOTAL CLEANUP ---
+        this.commandGroup.clear();
+        this.isCommandMode = false;
+        this.controls.enabled = true;
         this.selectedHexIndex = null;
         clearInterval(this.gameTimer);
-        this.typeLog("SYSTEM_SHUTDOWN: TERMINATING_USER_SESSION");
+
+        // Restore Post-processing
+        const bloomPass = this.composer.passes.find(p => p.strength !== undefined);
+        if (bloomPass) gsap.to(bloomPass, { strength: 1.8, duration: 1 });
+
+        // Restore Map Opacity
+        gsap.to(this.components.grid.fills.material, { opacity: 0.45, duration: 1 });
+        gsap.to(this.components.grid.lines.material, { opacity: 0.9, duration: 1 });
+
+        this.typeLog("COMMAND_TERMINATED: RETURNING_TO_TACTICAL_MAP");
+        
         if (this.particles) {
             this.scene.remove(this.particles);
             this.particles = null;
