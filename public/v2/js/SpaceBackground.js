@@ -29,7 +29,7 @@ export class SpaceBackground {
     _addStarPhoto() {
         const loader = new THREE.TextureLoader();
         loader.load(
-            'assets/textures/8k_stars.jpg',
+            'assets/8k_stars.jpg',
             (tex) => {
                 tex.mapping = THREE.EquirectangularReflectionMapping;
                 const geo  = new THREE.SphereGeometry(8000, 64, 64);

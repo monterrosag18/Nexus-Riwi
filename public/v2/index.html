@@ -65,6 +65,10 @@
             transition: opacity 1s ease;
         }
 
+        #loading-perc {
+            font-size: 14px; margin-top: 10px; color: #00f3ff; font-family: 'Rajdhani', sans-serif;
+        }
+
         #game-content {
             opacity: 1;
             transition: opacity 0.5s ease;
@@ -496,7 +500,7 @@
 <body>
     <div id="loading-screen">
         <div class="loader"></div>
-        <p style="margin-top: 20px; letter-spacing: 4px;">INITIALIZING NEXUS V2...</p>
+        <div id="loading-perc">0%</div>
     </div>
 
     <div id="ui-overlay">
@@ -680,15 +684,24 @@
     <script type="module">
         import { V2App } from './js/V2App.js';
         
-        window.addEventListener('load', () => {
+        const initApp = () => {
             const app = new V2App();
             app.init().then(() => {
-                document.getElementById('loading-screen').style.opacity = '0';
                 setTimeout(() => {
-                    document.getElementById('loading-screen').remove();
-                }, 1000);
+                    const screen = document.getElementById('loading-screen');
+                    if (screen) {
+                        screen.style.opacity = '0';
+                        setTimeout(() => screen.remove(), 1000);
+                    }
+                }, 500); 
             });
-        });
+        };
+
+        if (document.readyState === 'complete') {
+            initApp();
+        } else {
+            window.addEventListener('load', initApp);
+        }
     </script>
 </body>
 </html>

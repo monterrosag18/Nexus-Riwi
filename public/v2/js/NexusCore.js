@@ -10,7 +10,7 @@ export class NexusCore {
     init() {
         return new Promise((resolve, reject) => {
             const loader = new THREE.GLTFLoader();
-            const loadingText = document.querySelector('#loading-screen p');
+            const loadingText = document.getElementById('loading-perc');
             
             loader.load('assets/nexus_model.glb', 
                 (gltf) => {
@@ -48,7 +48,7 @@ export class NexusCore {
                 (xhr) => {
                     if (loadingText) {
                         const percent = (xhr.total > 0) ? (xhr.loaded / xhr.total * 100).toFixed(0) : 0;
-                        loadingText.innerText = `SYNCHRONIZING NEXUS CORE: ${percent}%`;
+                        loadingText.innerText = `SYNCHRONIZING_CORE: ${percent}%`;
                     }
                 },
                 (error) => {
