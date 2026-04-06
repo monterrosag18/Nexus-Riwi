@@ -378,22 +378,37 @@ export class V2App {
         this.gameTimeLeft = 60;
         this.isCommandMode = true;
         
-        // UI RESET
-        document.getElementById('game-panel').style.display = 'block';
-        document.getElementById('game-content').style.opacity = '0'; 
+        // UI VISIBILITY RESTORATION (Standard Fidelity)
+        const panel = document.getElementById('game-panel');
+        const content = document.getElementById('game-content');
+        panel.style.display = 'block'; 
+        content.style.opacity = '1'; /* FIXED: Invisible No More */
+        panel.style.opacity = '1';
 
-        // --- CAMERA SHAKE & BOOM ---
+        // --- CAMERA "DEEPER ACTION" ZOOM & ANTI-DISTORTION ---
         const hexPos = this.components.grid.getHexPos(this.selectedHexIndex);
-        const shake = { val: 0 };
-        gsap.to(shake, {
-            val: 2, duration: 0.5, onUpdate: () => {
-                this.camera.position.x += (Math.random()-0.5) * shake.val;
-                this.camera.position.y += (Math.random()-0.5) * shake.val;
-            }
-        });
+        if (hexPos) {
+            // Lower Bloom for high readability
+            const bloomPass = this.composer.passes.find(p => p.strength !== undefined);
+            if (bloomPass) gsap.to(bloomPass, { strength: 1.2, duration: 1.5 });
 
-        const bloomPass = this.composer.passes.find(p => p.strength !== undefined);
-        if (bloomPass) gsap.to(bloomPass, { strength: 4, duration: 1 });
+            // MOVE IN DEEP (Inside the action)
+            gsap.to(this.camera.position, {
+                x: hexPos.x, y: 70, z: hexPos.z + 90,
+                duration: 2, ease: "expo.out"
+            });
+            gsap.to(this.controls.target, {
+                x: hexPos.x, y: 0, z: hexPos.z,
+                duration: 2, ease: "expo.out"
+            });
+
+            // LOCAL SPOTLIGHT (Dramatic Industrial Light)
+            const spotLight = new THREE.SpotLight(0x00f3ff, 2, 300, Math.PI/4, 0.5);
+            spotLight.position.set(hexPos.x, 150, hexPos.z);
+            spotLight.target.position.set(hexPos.x, 0, hexPos.z);
+            this.commandGroup.add(spotLight);
+            this.commandGroup.add(spotLight.target);
+        }
 
         this.renderChallenge(type);
         this.startTimer();
