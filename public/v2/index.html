@@ -291,15 +291,16 @@
         #challenge-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: transparent; /* NO DARK BACKGROUND */
+            background: transparent;
             backdrop-filter: none;
             z-index: 1000;
             display: none;
             justify-content: center;
             align-items: center;
+            pointer-events: none; /* ALLOW CLICKS TO PASS TO THREE.JS */
         }
         #challenge-overlay.active {
-            backdrop-filter: blur(2px); /* Minimal blur just for focus */
+            backdrop-filter: blur(2px);
         }
 
         .challenge-card {
@@ -360,7 +361,8 @@
         .challenge-card {
             width: 100%; height: 100%; border: none;
             background: transparent; box-shadow: none;
-            backdrop-filter: none; pointer-events: none;
+            backdrop-filter: none;
+            pointer-events: none; /* Pass clicks to 3D selector */
             position: relative;
             display: none; flex-direction: column;
         }
