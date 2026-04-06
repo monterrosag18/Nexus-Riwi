@@ -269,10 +269,13 @@ export class V2App {
 
         // Interaction during 3D Command Mode
         if (this.isCommandMode) {
-            const intersects = this.raycaster.intersectObjects(this.commandGroup.children);
+            this.raycaster.setFromCamera(this.pointer, this.camera);
+            const intersects = this.raycaster.intersectObjects(this.commandGroup.children, true);
             if (intersects.length > 0) {
                 const obj = intersects[0].object;
-                if (obj.userData.onSelect) obj.userData.onSelect();
+                // Check if object or its parent has user data
+                const target = obj.userData.onSelect ? obj : (obj.parent && obj.parent.userData.onSelect ? obj.parent : null);
+                if (target && target.userData.onSelect) target.userData.onSelect();
             }
             return;
         }
@@ -298,16 +301,21 @@ export class V2App {
         this.isCommandMode = true;
         document.getElementById('game-selector').style.display = 'none';
         
-        // Hide only the center logic area of the card, keep header/footer
+        // --- HUD HUD MINIMALISTA ---
         document.getElementById('game-panel').style.display = 'block';
-        document.getElementById('game-content').style.opacity = '0'; // We use 3D space instead
+        document.getElementById('game-content').style.opacity = '0'; 
 
-        // --- CINEMATIC CAMERA ZOOM ---
+        // --- CINEMATIC CAMERA ZOOM & BLOOM BOOST ---
         const hexPos = this.components.grid.getHexPos(this.selectedHexIndex);
         if (hexPos) {
             this.controls.enabled = false;
+            
+            // Boost Bloom for 3D UI
+            const bloomPass = this.composer.passes.find(p => p.strength !== undefined);
+            if (bloomPass) gsap.to(bloomPass, { strength: 4, threshold: 0.1, duration: 1 });
+
             gsap.to(this.camera.position, {
-                x: hexPos.x, y: 150, z: hexPos.z + 180,
+                x: hexPos.x, y: 120, z: hexPos.z + 140,
                 duration: 1.5, ease: "power2.inOut"
             });
             gsap.to(this.controls.target, {
@@ -319,9 +327,9 @@ export class V2App {
                 }
             });
 
-            // Focus Effect: Darken map background
-            gsap.to(this.components.grid.fills.material, { opacity: 0.1, duration: 1 });
-            gsap.to(this.components.grid.lines.material, { opacity: 0.2, duration: 1 });
+            // Technial Focus: Fade out map
+            gsap.to(this.components.grid.fills.material, { opacity: 0.05, duration: 1 });
+            gsap.to(this.components.grid.lines.material, { opacity: 0.1, duration: 1 });
         }
     }
 
@@ -384,31 +392,66 @@ export class V2App {
     _create3DNeuralFlow() {
         this.commandGroup.clear();
         const hexPos = this.components.grid.getHexPos(this.selectedHexIndex);
-        const startX = hexPos.x - 40;
+        const startX = hexPos.x;
         const startZ = hexPos.z;
 
+        // --- THE TECHNICAL GRID (The 3D Floor) ---
+        const gridHelper = new THREE.GridHelper(100, 10, 0x00f3ff, 0x222222);
+        gridHelper.position.set(startX, -40, startZ - 50);
+        this.commandGroup.add(gridHelper);
+
+        // --- Data Particles Cloud ---
+        const partGeo = new THREE.BufferGeometry();
+        const partCount = 300;
+        const posArr = new Float32Array(partCount * 3);
+        for(let i=0; i<partCount*3; i++) {
+            posArr[i*3] = (Math.random()-0.5) * 200;
+            posArr[i*3+1] = (Math.random()-0.5) * 100;
+            posArr[i*3+2] = (Math.random()-0.5) * 100;
+        }
+        partGeo.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
+        const partMat = new THREE.PointsMaterial({ color: 0x00f3ff, size: 0.5, transparent: true, opacity: 0.3 });
+        const cloud = new THREE.Points(partGeo, partMat);
+        cloud.position.set(startX, 0, startZ - 50);
+        this.commandGroup.add(cloud);
+
         const createNode = (id, x, y, z) => {
-            const geo = new THREE.CylinderGeometry(8, 8, 4, 6);
-            const mat = new THREE.MeshStandardMaterial({ 
-                color: 0xff4400, emissive: 0xff4400, emissiveIntensity: 0.5, transparent: true, opacity: 0.8 
-            });
-            const mesh = new THREE.Mesh(geo, mat);
-            mesh.position.set(x, y + 20, z);
-            mesh.rotation.x = Math.PI/2;
-            mesh.userData = { id, type: 'switch', onSelect: () => this.toggleSwitch(id) };
-            this.commandGroup.add(mesh);
-            return mesh;
+            const group = new THREE.Group();
+            // Complex Core node
+            const ringGeo = new THREE.TorusGeometry(12, 0.4, 8, 24);
+            const ringMat = new THREE.MeshStandardMaterial({ color: 0xff4400, emissive: 0xff4400, emissiveIntensity: 3 });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            
+            const coreGeo = new THREE.IcosahedronGeometry(7, 0);
+            const coreMat = new THREE.MeshStandardMaterial({ color: 0xff4400, emissive: 0xff4400, emissiveIntensity: 2, wireframe: true });
+            const core = new THREE.Mesh(coreGeo, coreMat);
+            
+            group.add(ring);
+            group.add(core); group.add(new THREE.Mesh(new THREE.BoxGeometry(2,15,2), ringMat)); // Vertical antenna
+            
+            group.position.set(x, y, z);
+            group.userData = { id, type: 'switch', onSelect: () => this.toggleSwitch(id) };
+            
+            const hitbox = new THREE.Mesh(new THREE.SphereGeometry(15), new THREE.MeshBasicMaterial({visible:false}));
+            hitbox.userData = group.userData;
+            this.commandGroup.add(hitbox);
+            hitbox.position.copy(group.position);
+            
+            this.commandGroup.add(group);
+            return group;
         };
 
-        this.nodeA = createNode('A', startX, 40, startZ - 30);
-        this.nodeB = createNode('B', startX, 0, startZ - 30);
-        this.nodeC = createNode('C', startX, -40, startZ - 30);
+        this.nodeA = createNode('A', startX - 50, 30, startZ - 60);
+        this.nodeB = createNode('B', startX - 50, 0, startZ - 60);
+        this.nodeC = createNode('C', startX - 50, -30, startZ - 60);
 
-        // Core
-        const coreGeo = new THREE.IcosahedronGeometry(15, 1);
-        const coreMat = new THREE.MeshStandardMaterial({ color: 0x222222, wireframe: true });
-        this.neuralCore = new THREE.Mesh(coreGeo, coreMat);
-        this.neuralCore.position.set(startX + 80, 0, startZ - 30);
+        // Core Hyper-Complex
+        const processorGeo = new THREE.TorusKnotGeometry(12, 3, 100, 16);
+        const processorMat = new THREE.MeshStandardMaterial({ 
+            color: 0x111111, emissive: 0x004455, emissiveIntensity: 0.5, wireframe: true 
+        });
+        this.neuralCore = new THREE.Mesh(processorGeo, processorMat);
+        this.neuralCore.position.set(startX + 60, 0, startZ - 60);
         this.commandGroup.add(this.neuralCore);
     }
 
@@ -450,24 +493,30 @@ export class V2App {
 
     updateCircuit() {
         const { A, B, C } = this.circuitState;
-        const g1 = A && B;
-        const g2 = g1 || C;
+        const g2 = (A && B) || C;
 
-        // Update 3D Nodes
-        const updateNode = (node, active) => {
-            node.material.color.set(active ? 0x00f3ff : 0xff4400);
-            node.material.emissive.set(active ? 0x00f3ff : 0xff4400);
-            node.material.emissiveIntensity = active ? 1.5 : 0.5;
+        const updateNode = (group, active) => {
+            if (!group) return;
+            group.children.forEach(child => {
+                if (child.material) {
+                    child.material.color.set(active ? 0x00f3ff : 0xff4400);
+                    child.material.emissive.set(active ? 0x00f3ff : 0xff4400);
+                    child.material.emissiveIntensity = active ? 4 : 1.5;
+                }
+            });
         };
 
-        if (this.nodeA) updateNode(this.nodeA, A);
-        if (this.nodeB) updateNode(this.nodeB, B);
-        if (this.nodeC) updateNode(this.nodeC, C);
+        updateNode(this.nodeA, A);
+        updateNode(this.nodeB, B);
+        updateNode(this.nodeC, C);
         
         if (g2 && this.neuralCore) {
             this.neuralCore.material.color.set(0x00f3ff);
+            this.neuralCore.material.emissive = new THREE.Color(0x00f3ff);
+            this.neuralCore.material.emissiveIntensity = 2;
             this.neuralCore.material.wireframe = false;
-            this.addDebugLine("NEURAL_HEX_STABILIZED: CONDUIT_OPEN");
+            gsap.to(this.neuralCore.scale, { x: 1.5, y: 1.5, z: 1.5, duration: 0.3, yoyo: true, repeat: 1 });
+            this.addDebugLine("NEURAL_FABRIC_SYNCED: ACCESS_GRANTED");
             setTimeout(() => this.winChallenge(), 1200);
         }
     }
