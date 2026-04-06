@@ -401,13 +401,13 @@ export class V2App {
 
             // MOVE IN DEEP (Inside the action - SHIFTED LEFT for HUD)
             gsap.to(this.camera.position, {
-                x: hexPos.x + 80, // Offset camera to view from right-to-left
-                y: 70, 
-                z: hexPos.z + 100,
+                x: hexPos.x + 70, // Slightly closer to center
+                y: 65, 
+                z: hexPos.z + 110,
                 duration: 2, ease: "expo.out"
             });
             gsap.to(this.controls.target, {
-                x: hexPos.x - 40, // Shift target LEFT to make room for HUD
+                x: hexPos.x - 100, // Shift target more LEFT to ensure HUD doesn't block
                 y: 0, 
                 z: hexPos.z,
                 duration: 2, ease: "expo.out"
@@ -415,8 +415,8 @@ export class V2App {
 
             // LOCAL SPOTLIGHT
             const spotLight = new THREE.SpotLight(0x00f3ff, 2, 300, Math.PI/4, 0.5);
-            spotLight.position.set(hexPos.x - 40, 150, hexPos.z);
-            spotLight.target.position.set(hexPos.x - 40, 0, hexPos.z);
+            spotLight.position.set(hexPos.x - 100, 150, hexPos.z);
+            spotLight.target.position.set(hexPos.x - 100, 0, hexPos.z);
             this.commandGroup.add(spotLight);
             this.commandGroup.add(spotLight.target);
         }
@@ -495,14 +495,14 @@ export class V2App {
         this.canPlayerInput = false;
 
         const hexPos = this.components.grid.getHexPos(this.selectedHexIndex);
-        const radius = 60;
+        const radius = 40; // Tighter radius to stay away from HUD
 
         for (let i = 0; i < 4; i++) {
             const angle = (i / 4) * Math.PI * 2;
             const x = hexPos.x + Math.cos(angle) * radius;
             const z = hexPos.z + Math.sin(angle) * radius;
 
-            const geo = new THREE.IcosahedronGeometry(12, 0);
+            const geo = new THREE.IcosahedronGeometry(9, 0); // Smaller nodes
             const mat = new THREE.MeshPhysicalMaterial({ 
                 color: 0x00f3ff, emissive: 0x00f3ff, emissiveIntensity: 1, 
                 transparent: true, opacity: 0.8, wireframe: true 
