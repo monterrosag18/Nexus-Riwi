@@ -603,42 +603,21 @@
 
     <!-- CHALLENGE SYSTEM OVERLAY -->
     <div id="challenge-overlay">
-        <!-- 1. SELECTOR MENU -->
-        <div id="game-selector" class="challenge-card hologram-flicker" style="display: block;">
-            <div class="scanline"></div>
-            <h3 style="text-align: center; letter-spacing: 5px; margin-bottom: 30px; font-size: 14px; opacity: 0.8;">[CHOOSE_PROTOCOL_V.04]</h3>
-            <div class="selector-menu">
-                <div class="select-btn" onclick="window.v2app.startChallenge('code')">
-                    <svg class="svg-icon" viewBox="0 0 24 24"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/><path d="M12 4.5l-4 15"/></svg>
-                    <div style="font-size: 10px; letter-spacing: 3px; font-weight: 700;">INJEKTOR</div>
-                    <div style="font-size: 8px; opacity: 0.4; margin-top: 5px;">ENGINE_SYNC</div>
-                </div>
-                <div class="select-btn" onclick="window.v2app.startChallenge('english')">
-                    <svg class="svg-icon" viewBox="0 0 24 24"><path d="M4 11V4h7M4 4l7 7m6-7v7h-7m7-7l-7 7m-4 8v7h7m-7-7l7 7m6-7v7h-7m7-7l-7 7"/></svg>
-                    <div style="font-size: 10px; letter-spacing: 3px; font-weight: 700;">LINGUA</div>
-                    <div style="font-size: 8px; opacity: 0.4; margin-top: 5px;">TAC_SIGNAL</div>
-                </div>
-                <div class="select-btn" onclick="window.v2app.startChallenge('soft')">
-                    <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
-                    <div style="font-size: 10px; letter-spacing: 3px; font-weight: 700;">NEURAL</div>
-                    <div style="font-size: 8px; opacity: 0.4; margin-top: 5px;">DATA_FLOW</div>
-                </div>
-            </div>
-            <p style="text-align: center; margin-top: 30px; opacity: 0.4; font-size: 10px; cursor: pointer;" onclick="window.v2app.closeChallenge()">ABORT_COMMAND_X</p>
-        </div>
+        <!-- SELECTOR IS NOW 3D (Holographic Interface) -->
+        <div id="game-selector" style="display: none;"></div>
 
-        <!-- 2. BRIDGE CONSOLE PANELS -->
+        <!-- 2. BRIDGE CONSOLE PANELS (Glass HUD) -->
         <div id="game-panel" class="challenge-card hologram-flicker">
             <div class="scanline"></div>
             
             <!-- Bridge Header -->
             <div class="bridge-header">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <div style="width: 8px; height: 8px; background: #00f3ff; border-radius: 50%; box-shadow: 0 0 10px #00f3ff;"></div>
-                    <span>[BRIDGE_STATION_ALPHA]</span>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="width: 10px; height: 10px; background: #00f3ff; border-radius: 50%; box-shadow: 0 0 15px #00f3ff; animation: pulse 2s infinite;"></div>
+                    <span style="letter-spacing: 5px; font-weight: 700;">[CHRONOS_COMMAND_v.04]</span>
                 </div>
-                <div id="bridge-objective" style="font-size: 10px; color: #ff3344; letter-spacing: 2px; text-transform: uppercase;">OBJ: ANALYZING_SYSTEM_NEEDS...</div>
-                <button class="exit-btn" onclick="window.v2app.closeChallenge()">[EXIT_STATION_X]</button>
+                <div id="bridge-objective" style="font-size: 14px; font-weight: 900; color: #ffae00; letter-spacing: 3px; border-left: 3px solid #ffae00; padding-left: 15px;">INITIALIZING_QUANTUM_LINK...</div>
+                <button class="exit-btn" onclick="window.v2app.closeChallenge()" style="background: rgba(255,0,0,0.2); border: 1px solid #ff3344; padding: 5px 15px;">[ABORT_X]</button>
             </div>
 
             <div class="bridge-body">

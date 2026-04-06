@@ -291,46 +291,105 @@ export class V2App {
     openSelector() {
         const overlay = document.getElementById('challenge-overlay');
         overlay.style.display = 'flex';
-        setTimeout(() => overlay.classList.add('active'), 10);
-        document.getElementById('game-selector').style.display = 'block';
+        overlay.classList.add('active');
         document.getElementById('game-panel').style.display = 'none';
-    }
 
-    startChallenge(type) {
-        this.gameTimeLeft = 60;
+        // --- 3D SELECTOR TRANSITION ---
         this.isCommandMode = true;
-        document.getElementById('game-selector').style.display = 'none';
-        
-        // --- HUD HUD MINIMALISTA ---
-        document.getElementById('game-panel').style.display = 'block';
-        document.getElementById('game-content').style.opacity = '0'; 
-
-        // --- CINEMATIC CAMERA ZOOM & BLOOM BOOST ---
         const hexPos = this.components.grid.getHexPos(this.selectedHexIndex);
         if (hexPos) {
             this.controls.enabled = false;
-            
-            // Boost Bloom for 3D UI
-            const bloomPass = this.composer.passes.find(p => p.strength !== undefined);
-            if (bloomPass) gsap.to(bloomPass, { strength: 4, threshold: 0.1, duration: 1 });
-
             gsap.to(this.camera.position, {
-                x: hexPos.x, y: 120, z: hexPos.z + 140,
-                duration: 1.5, ease: "power2.inOut"
+                x: hexPos.x, y: 150, z: hexPos.z + 200,
+                duration: 1.2, ease: "power2.out"
             });
             gsap.to(this.controls.target, {
                 x: hexPos.x, y: 0, z: hexPos.z,
-                duration: 1.5, ease: "power2.inOut",
-                onComplete: () => {
-                    this.renderChallenge(type);
-                    this.startTimer();
-                }
+                duration: 1.2, ease: "power2.out",
+                onComplete: () => this._create3DSelector()
             });
 
-            // Technial Focus: Fade out map
-            gsap.to(this.components.grid.fills.material, { opacity: 0.05, duration: 1 });
-            gsap.to(this.components.grid.lines.material, { opacity: 0.1, duration: 1 });
+            // Dim map for selection
+            gsap.to(this.components.grid.fills.material, { opacity: 0.1, duration: 1 });
+            gsap.to(this.components.grid.lines.material, { opacity: 0.2, duration: 1 });
         }
+    }
+
+    _create3DSelector() {
+        this.commandGroup.clear();
+        const hexPos = this.components.grid.getHexPos(this.selectedHexIndex);
+        
+        const createLabel = (text, x, y, z) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 256; canvas.height = 64;
+            ctx.fillStyle = '#00f3ff'; ctx.font = 'bold 32px Rajdhani';
+            ctx.textAlign = 'center'; ctx.fillText(text, 128, 48);
+            const tex = new THREE.CanvasTexture(canvas);
+            const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
+            const sprite = new THREE.Sprite(mat);
+            sprite.position.set(x, y + 25, z);
+            sprite.scale.set(40, 10, 1);
+            this.commandGroup.add(sprite);
+        };
+
+        const createIcon = (type, x, z) => {
+            let geo;
+            if (type === 'code') geo = new THREE.BoxGeometry(15, 15, 15);
+            else if (type === 'english') geo = new THREE.TorusKnotGeometry(8, 2, 64, 8);
+            else geo = new THREE.IcosahedronGeometry(12, 0);
+
+            const mat = new THREE.MeshPhysicalMaterial({ 
+                color: 0x00f3ff, emissive: 0x00f3ff, emissiveIntensity: 2,
+                transparent: true, opacity: 0.7, transmission: 0.5, thickness: 2
+            });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.set(x, 20, z);
+            mesh.userData = { type, onSelect: () => this.startChallenge(type) };
+            this.commandGroup.add(mesh);
+            createLabel(type.toUpperCase(), x, 20, z);
+            
+            // Animation
+            gsap.to(mesh.rotation, { y: Math.PI * 2, duration: 5, repeat: -1, ease: "none" });
+            gsap.to(mesh.position, { y: 25, duration: 2, repeat: -1, yoyo: true, ease: "sine.inOut" });
+
+            // Hitbox
+            const hb = new THREE.Mesh(new THREE.SphereGeometry(20), new THREE.MeshBasicMaterial({visible:false}));
+            hb.position.copy(mesh.position); hb.userData = mesh.userData;
+            this.commandGroup.add(hb);
+        };
+
+        createIcon('code', hexPos.x - 50, hexPos.z);
+        createIcon('english', hexPos.x, hexPos.z);
+        createIcon('soft', hexPos.x + 50, hexPos.z);
+        
+        this.addDebugLine("PROTOCOL_SELECTOR_DEPLOYED");
+    }
+
+    startChallenge(type) {
+        this.commandGroup.clear();
+        this.gameTimeLeft = 60;
+        this.isCommandMode = true;
+        
+        // UI RESET
+        document.getElementById('game-panel').style.display = 'block';
+        document.getElementById('game-content').style.opacity = '0'; 
+
+        // --- CAMERA SHAKE & BOOM ---
+        const hexPos = this.components.grid.getHexPos(this.selectedHexIndex);
+        const shake = { val: 0 };
+        gsap.to(shake, {
+            val: 2, duration: 0.5, onUpdate: () => {
+                this.camera.position.x += (Math.random()-0.5) * shake.val;
+                this.camera.position.y += (Math.random()-0.5) * shake.val;
+            }
+        });
+
+        const bloomPass = this.composer.passes.find(p => p.strength !== undefined);
+        if (bloomPass) gsap.to(bloomPass, { strength: 4, duration: 1 });
+
+        this.renderChallenge(type);
+        this.startTimer();
     }
 
     startTimer() {
