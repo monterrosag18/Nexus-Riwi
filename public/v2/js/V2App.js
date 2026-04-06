@@ -51,6 +51,12 @@ export class V2App {
             stars:     null
         };
 
+        // --- NEURAL SYNC STATE ---
+        this.neuralSequence = [];
+        this.playerInput = [];
+        this.neuralNodes = [];
+        this.canPlayerInput = false;
+
 
         
         // Clans evenly spaced in a ring at radius 600
@@ -269,13 +275,14 @@ export class V2App {
 
         // Interaction during 3D Command Mode
         if (this.isCommandMode) {
-            this.raycaster.setFromCamera(this.pointer, this.camera);
-            const intersects = this.raycaster.intersectObjects(this.commandGroup.children, true);
+            const intersects = this.raycaster.intersectObjects(this.commandGroup.children);
             if (intersects.length > 0) {
                 const obj = intersects[0].object;
-                // Check if object or its parent has user data
-                const target = obj.userData.onSelect ? obj : (obj.parent && obj.parent.userData.onSelect ? obj.parent : null);
-                if (target && target.userData.onSelect) target.userData.onSelect();
+                if (obj.userData && obj.userData.onSelect) {
+                    obj.userData.onSelect();
+                } else if (obj.userData && obj.userData.neuralId !== undefined) {
+                    this._onNeuralNodeClick(obj);
+                }
             }
             return;
         }
@@ -466,78 +473,104 @@ export class V2App {
                 </div>
             `;
         } else {
-            obj.innerText = "[OBJECTIVE]: ALIGN HEX-LOGICAL CORES (A&B) OR C";
-            title.innerText = '[NEURAL_3D_ROUTING]';
-            this.circuitState = { A: false, B: false, C: false };
+            obj.innerText = "[OBJECTIVE]: SYNC RADIANT SYNAPSES SEQUENTIALLY";
+            title.innerText = '[NEURAL_SYNC_MASTER]';
+            content.innerHTML = `
+                <div id="sync-status" style="font-size: 14px; color: #00f3ff; margin-top: 20px; border: 1px solid #444; padding: 10px; text-align: center;">
+                    STATUS: WAITING_FOR_SYNC_PULSE...
+                </div>
+                <div style="margin-top: 20px; font-size: 11px; opacity: 0.6; color: #fff;">
+                    INTERACT_WITH_3D_NODES_DIRECTLY
+                </div>
+            `;
             this._create3DNeuralFlow();
-            content.innerHTML = ''; // Full 3D
         }
     }
 
     _create3DNeuralFlow() {
         this.commandGroup.clear();
+        this.neuralNodes = [];
+        this.neuralSequence = [];
+        this.playerInput = [];
+        this.canPlayerInput = false;
+
         const hexPos = this.components.grid.getHexPos(this.selectedHexIndex);
-        const startX = hexPos.x;
-        const startZ = hexPos.z;
+        const radius = 60;
 
-        // --- THE TECHNICAL GRID (The 3D Floor) ---
-        const gridHelper = new THREE.GridHelper(100, 10, 0x00f3ff, 0x222222);
-        gridHelper.position.set(startX, -40, startZ - 50);
-        this.commandGroup.add(gridHelper);
+        for (let i = 0; i < 4; i++) {
+            const angle = (i / 4) * Math.PI * 2;
+            const x = hexPos.x + Math.cos(angle) * radius;
+            const z = hexPos.z + Math.sin(angle) * radius;
 
-        // --- Data Particles Cloud ---
-        const partGeo = new THREE.BufferGeometry();
-        const partCount = 300;
-        const posArr = new Float32Array(partCount * 3);
-        for(let i=0; i<partCount*3; i++) {
-            posArr[i*3] = (Math.random()-0.5) * 200;
-            posArr[i*3+1] = (Math.random()-0.5) * 100;
-            posArr[i*3+2] = (Math.random()-0.5) * 100;
+            const geo = new THREE.IcosahedronGeometry(12, 0);
+            const mat = new THREE.MeshPhysicalMaterial({ 
+                color: 0x00f3ff, emissive: 0x00f3ff, emissiveIntensity: 1, 
+                transparent: true, opacity: 0.8, wireframe: true 
+            });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.set(x, 25, z);
+            mesh.userData = { neuralId: i };
+            this.commandGroup.add(mesh);
+            this.neuralNodes.push(mesh);
+            
+            // Animation Loop
+            gsap.to(mesh.rotation, { y: Math.PI * 2, duration: 8 + i, repeat: -1, ease: "none" });
         }
-        partGeo.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
-        const partMat = new THREE.PointsMaterial({ color: 0x00f3ff, size: 0.5, transparent: true, opacity: 0.3 });
-        const cloud = new THREE.Points(partGeo, partMat);
-        cloud.position.set(startX, 0, startZ - 50);
-        this.commandGroup.add(cloud);
 
-        const createNode = (id, x, y, z) => {
-            const group = new THREE.Group();
-            // Complex Core node
-            const ringGeo = new THREE.TorusGeometry(12, 0.4, 8, 24);
-            const ringMat = new THREE.MeshStandardMaterial({ color: 0xff4400, emissive: 0xff4400, emissiveIntensity: 3 });
-            const ring = new THREE.Mesh(ringGeo, ringMat);
-            
-            const coreGeo = new THREE.IcosahedronGeometry(7, 0);
-            const coreMat = new THREE.MeshStandardMaterial({ color: 0xff4400, emissive: 0xff4400, emissiveIntensity: 2, wireframe: true });
-            const core = new THREE.Mesh(coreGeo, coreMat);
-            
-            group.add(ring);
-            group.add(core); group.add(new THREE.Mesh(new THREE.BoxGeometry(2,15,2), ringMat)); // Vertical antenna
-            
-            group.position.set(x, y, z);
-            group.userData = { id, type: 'switch', onSelect: () => this.toggleSwitch(id) };
-            
-            const hitbox = new THREE.Mesh(new THREE.SphereGeometry(15), new THREE.MeshBasicMaterial({visible:false}));
-            hitbox.userData = group.userData;
-            this.commandGroup.add(hitbox);
-            hitbox.position.copy(group.position);
-            
-            this.commandGroup.add(group);
-            return group;
-        };
+        // Generate Random Sequence of 4
+        for (let i = 0; i < 4; i++) {
+            this.neuralSequence.push(Math.floor(Math.random() * 4));
+        }
 
-        this.nodeA = createNode('A', startX - 50, 30, startZ - 60);
-        this.nodeB = createNode('B', startX - 50, 0, startZ - 60);
-        this.nodeC = createNode('C', startX - 50, -30, startZ - 60);
+        setTimeout(() => this._playNeuralSequence(), 1500);
+    }
 
-        // Core Hyper-Complex
-        const processorGeo = new THREE.TorusKnotGeometry(12, 3, 100, 16);
-        const processorMat = new THREE.MeshStandardMaterial({ 
-            color: 0x111111, emissive: 0x004455, emissiveIntensity: 0.5, wireframe: true 
+    _playNeuralSequence() {
+        this.canPlayerInput = false;
+        const status = document.getElementById('sync-status');
+        if(status) status.innerText = "STATUS: OBSERVING_PULSE_SEQUENCE...";
+        
+        let tl = gsap.timeline({ onComplete: () => {
+            this.canPlayerInput = true;
+            if(status) status.innerText = "STATUS: REPEAT_SEQUENCE_NOW";
+        }});
+
+        this.neuralSequence.forEach((nodeId, index) => {
+            const node = this.neuralNodes[nodeId];
+            tl.to(node.material, { emissiveIntensity: 15, duration: 0.4 }, index * 0.8);
+            tl.to(node.scale, { x: 1.5, y: 1.5, z: 1.5, duration: 0.4 }, index * 0.8);
+            tl.to(node.material, { emissiveIntensity: 1, duration: 0.4 }, (index * 0.8) + 0.4);
+            tl.to(node.scale, { x: 1, y: 1, z: 1, duration: 0.4 }, (index * 0.8) + 0.4);
         });
-        this.neuralCore = new THREE.Mesh(processorGeo, processorMat);
-        this.neuralCore.position.set(startX + 60, 0, startZ - 60);
-        this.commandGroup.add(this.neuralCore);
+    }
+
+    _onNeuralNodeClick(node) {
+        if (!this.canPlayerInput) return;
+        
+        const id = node.userData.neuralId;
+        this.playerInput.push(id);
+        
+        // Visual Feedback
+        gsap.to(node.material, { emissiveIntensity: 10, duration: 0.2, yoyo: true, repeat: 1 });
+        gsap.to(node.scale, { x: 1.3, y: 1.3, z: 1.3, duration: 0.2, yoyo: true, repeat: 1 });
+
+        const step = this.playerInput.length - 1;
+        if (this.playerInput[step] !== this.neuralSequence[step]) {
+            // Fail
+            this.addDebugLine("ERROR: SYNAPSE_MISMATCH_REBOOTING...");
+            this.triggerGlitch();
+            this.playerInput = [];
+            this.canPlayerInput = false;
+            setTimeout(() => this._playNeuralSequence(), 1000);
+            return;
+        }
+
+        if (this.playerInput.length === this.neuralSequence.length) {
+            this.addDebugLine("SUCCESS: NEURAL_BRIDGE_STABILIZED");
+            this.winChallenge();
+        } else {
+            this.addDebugLine(`SYNC_PROGRES: STEP_0${this.playerInput.length}_LINKED`);
+        }
     }
 
     _create3DReactor() {
