@@ -298,20 +298,27 @@ export class V2App {
         this.isCommandMode = true;
         const hexPos = this.components.grid.getHexPos(this.selectedHexIndex);
         if (hexPos) {
-            this.controls.enabled = false;
-            gsap.to(this.camera.position, {
-                x: hexPos.x, y: 150, z: hexPos.z + 200,
-                duration: 1.2, ease: "power2.out"
-            });
-            gsap.to(this.controls.target, {
-                x: hexPos.x, y: 0, z: hexPos.z,
-                duration: 1.2, ease: "power2.out",
-                onComplete: () => this._create3DSelector()
-            });
+            try {
+                this.controls.enabled = false;
+                gsap.to(this.camera.position, {
+                    x: hexPos.x, y: 150, z: hexPos.z + 200,
+                    duration: 1.2, ease: "power2.out"
+                });
+                gsap.to(this.controls.target, {
+                    x: hexPos.x, y: 0, z: hexPos.z,
+                    duration: 1.2, ease: "power2.out",
+                    onComplete: () => this._create3DSelector()
+                });
 
-            // Dim map for selection
-            gsap.to(this.components.grid.fills.material, { opacity: 0.1, duration: 1 });
-            gsap.to(this.components.grid.lines.material, { opacity: 0.2, duration: 1 });
+                // Dim map for selection
+                gsap.to(this.components.grid.fills.material, { opacity: 0.1, duration: 1 });
+                gsap.to(this.components.grid.lines.material, { opacity: 0.2, duration: 1 });
+            } catch (e) {
+                console.error("CRITICAL_3D_ERROR:", e);
+                this.isCommandMode = false;
+                this.controls.enabled = true;
+                overlay.style.display = 'none';
+            }
         }
     }
 
@@ -319,58 +326,47 @@ export class V2App {
         this.commandGroup.clear();
         const hexPos = this.components.grid.getHexPos(this.selectedHexIndex);
         
-        const createLabel = (text, x, y, z) => {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 256; canvas.height = 64;
-            ctx.fillStyle = '#00f3ff'; ctx.font = 'bold 32px Rajdhani';
-            ctx.textAlign = 'center'; ctx.fillText(text, 128, 48);
-            const tex = new THREE.CanvasTexture(canvas);
-            const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
-            const sprite = new THREE.Sprite(mat);
-            sprite.position.set(x, y + 25, z);
-            sprite.scale.set(40, 10, 1);
-            this.commandGroup.add(sprite);
-        };
-
         const createIcon = (type, x, z) => {
+            const h_y = 25; // Base height for icons
             let geo;
             if (type === 'code') geo = new THREE.BoxGeometry(15, 15, 15);
             else if (type === 'english') geo = new THREE.TorusKnotGeometry(8, 2, 64, 8);
             else geo = new THREE.IcosahedronGeometry(12, 0);
 
             const mat = new THREE.MeshPhysicalMaterial({ 
-                color: 0x00f3ff, emissive: 0x00f3ff, emissiveIntensity: 5, /* MAXIMUM GLOW */
+                color: 0x00f3ff, emissive: 0x00f3ff, emissiveIntensity: 5,
                 transparent: true, opacity: 0.9, transmission: 0.8, thickness: 3
             });
             const mesh = new THREE.Mesh(geo, mat);
-            mesh.position.set(x, 20, z);
+            mesh.position.set(x, h_y, z);
             mesh.userData = { type, onSelect: () => this.startChallenge(type) };
             this.commandGroup.add(mesh);
             
             // LARGER TEXT LABELS
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 256; canvas.height = 64;
-            ctx.fillStyle = '#00f3ff'; ctx.font = 'bold 44px Rajdhani'; // Increased font
-            ctx.textAlign = 'center'; ctx.fillText(text, 128, 48);
-            const tex = new THREE.CanvasTexture(canvas);
+            const labelCanvas = document.createElement('canvas');
+            const labelCtx = labelCanvas.getContext('2d');
+            labelCanvas.width = 256; labelCanvas.height = 64;
+            labelCtx.fillStyle = '#00f3ff'; labelCtx.font = 'bold 44px Rajdhani';
+            labelCtx.textAlign = 'center'; labelCtx.fillText(type.toUpperCase(), 128, 48);
+            const tex = new THREE.CanvasTexture(labelCanvas);
             const spriteMat = new THREE.SpriteMaterial({ map: tex, transparent: true });
             const sprite = new THREE.Sprite(spriteMat);
-            sprite.position.set(x, y + 35, z); // Higher position
-            sprite.scale.set(60, 15, 1); // Larger scale
+            sprite.position.set(x, h_y + 35, z);
+            sprite.scale.set(60, 15, 1);
             this.commandGroup.add(sprite);
             
             // Animation Pulse
             gsap.to(mesh.scale, { x: 1.2, y: 1.2, z: 1.2, duration: 1, repeat: -1, yoyo: true });
+            gsap.to(mesh.rotation, { y: Math.PI * 2, duration: 5, repeat: -1, ease: "none" });
 
-            // Hitbox
-            const hb = new THREE.Mesh(new THREE.SphereGeometry(20), new THREE.MeshBasicMaterial({visible:false}));
-            hb.position.copy(mesh.position); hb.userData = mesh.userData;
+            // Hitbox - larger and centered on mesh
+            const hb = new THREE.Mesh(new THREE.SphereGeometry(25), new THREE.MeshBasicMaterial({visible:false}));
+            hb.position.set(x, h_y, z); 
+            hb.userData = mesh.userData;
             this.commandGroup.add(hb);
         };
 
-        createIcon('code', hexPos.x - 50, hexPos.z);
+        createIcon('code', hexPos.x - 60, hexPos.z);
         createIcon('english', hexPos.x, hexPos.z);
         createIcon('soft', hexPos.x + 50, hexPos.z);
         

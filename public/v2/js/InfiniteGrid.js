@@ -96,6 +96,11 @@ export class InfiniteGrid {
         this.group.add(this.fills);
     }
 
+    getHexPos(index) {
+        if (!this.hexPositions || index < 0 || index >= this.hexPositions.length) return { x: 0, z: 0, dist: 0 };
+        return this.hexPositions[index];
+    }
+
     setTerritoryColor(hexIndices, color) {
         if (!this.lines) return;
         const colors = this.lines.geometry.attributes.color;
