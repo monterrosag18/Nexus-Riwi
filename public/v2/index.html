@@ -367,7 +367,7 @@
             margin-top: 15px;
         }
 
-        /* ── CINEMATIC MASTERY: MINIMAL GLASS HUD (MAX READABILITY) ───────────── */
+        /* ── CINEMATIC MASTERY: COMPACT SIDE-HUD ───────────── */
         .challenge-card {
             width: 100%; height: 100%; border: none;
             background: transparent; box-shadow: none;
@@ -380,12 +380,14 @@
         .challenge-card * { pointer-events: auto; }
 
         .bridge-body { 
-            background: rgba(4, 8, 16, 0.4); /* Glass layer */
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(0, 243, 255, 0.2);
-            margin: 60px 40px; flex: 1; border-radius: 8px; /* Larger body */
-            display: flex; position: relative;
-            box-shadow: 0 0 50px rgba(0, 243, 255, 0.1);
+            background: rgba(4, 8, 20, 0.7); /* Stronger glass for side HUD readability */
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 243, 255, 0.4);
+            border-radius: 4px;
+            display: flex; flex-direction: column; 
+            position: absolute; right: 40px; top: 110px; bottom: 110px; width: 420px;
+            box-shadow: -10px 0 50px rgba(0, 0, 0, 0.5);
+            z-index: 50; overflow: hidden;
         }
 
         .bridge-header {
@@ -642,24 +644,25 @@
 
             <div class="bridge-body" style="padding: 10px;">
                 <!-- Sidebar Diagnostic -->
-                <div class="bridge-sidebar" style="padding: 20px;">
-                    <div class="diagnostic-label" style="font-size: 12px;">CPU_CORE</div>
-                    <div class="diag-bar-wrap"><div id="diag-cpu" class="diag-bar" style="width: 76%"></div></div>
-                    
-                    <div class="diagnostic-label" style="font-size: 12px;">SYNC_LINK</div>
-                    <div class="diag-bar-wrap"><div id="diag-sync" class="diag-bar" style="width: 42%; background: #ff3344;"></div></div>
-                    
-                    <div class="diagnostic-label" style="font-size: 12px;">REACTOR_STAB</div>
-                    <div class="diag-bar-wrap"><div id="diag-reactor" class="diag-bar" style="width: 88%"></div></div>
-                    
-                    <div style="margin-top: auto; font-size: 10px; opacity: 0.5;">LINK: STABLE<br>SEC: HIGH</div>
+                <div class="bridge-sidebar" style="width: 100%; padding: 20px; height: auto; border-bottom: 1px solid #111;">
+                    <div style="font-size: 11px; text-transform: uppercase; color: #00f3ff; margin-bottom: 15px; opacity: 0.6;">[DIAG_LINK_PRO]</div>
+                    <div id="diag-bars-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <div class="diagnostic-label" style="font-size: 9px; margin-bottom: 4px;">SYNC_L</div>
+                            <div class="diag-bar-wrap" style="height: 4px;"><div id="diag-sync" class="diag-bar" style="width: 42%; background: #ff3344;"></div></div>
+                        </div>
+                        <div>
+                            <div class="diagnostic-label" style="font-size: 9px; margin-bottom: 4px;">STAB_R</div>
+                            <div class="diag-bar-wrap" style="height: 4px;"><div id="diag-reactor" class="diag-bar" style="width: 88%"></div></div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Main Station Area -->
-                <div class="bridge-main" style="flex: 2; padding: 40px;">
-                    <h3 id="game-title" style="font-size: 20px; letter-spacing: 6px; color: #00f3ff; margin-bottom: 30px;">[INITIALIZING_STATION...]</h3>
-                    <div id="game-content" style="font-size: 22px; line-height: 1.6;">
-                        <!-- Ultra-Specialized game logic -->
+                <!-- Main Station Area (COMPACTED) -->
+                <div class="bridge-main" style="width: 100%; padding: 25px; flex: 1; overflow-y: auto;">
+                    <h3 id="game-title" style="font-size: 16px; letter-spacing: 4px; color: #00f3ff; margin-bottom: 20px;">[STATION_ACTIVE]</h3>
+                    <div id="game-content" style="font-size: 15px; line-height: 1.4;">
+                        <!-- Game Logic -->
                     </div>
                 </div>
 

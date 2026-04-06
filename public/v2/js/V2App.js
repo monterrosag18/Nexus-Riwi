@@ -392,20 +392,24 @@ export class V2App {
             const bloomPass = this.composer.passes.find(p => p.strength !== undefined);
             if (bloomPass) gsap.to(bloomPass, { strength: 1.2, duration: 1.5 });
 
-            // MOVE IN DEEP (Inside the action)
+            // MOVE IN DEEP (Inside the action - SHIFTED LEFT for HUD)
             gsap.to(this.camera.position, {
-                x: hexPos.x, y: 70, z: hexPos.z + 90,
+                x: hexPos.x + 80, // Offset camera to view from right-to-left
+                y: 70, 
+                z: hexPos.z + 100,
                 duration: 2, ease: "expo.out"
             });
             gsap.to(this.controls.target, {
-                x: hexPos.x, y: 0, z: hexPos.z,
+                x: hexPos.x - 40, // Shift target LEFT to make room for HUD
+                y: 0, 
+                z: hexPos.z,
                 duration: 2, ease: "expo.out"
             });
 
-            // LOCAL SPOTLIGHT (Dramatic Industrial Light)
+            // LOCAL SPOTLIGHT
             const spotLight = new THREE.SpotLight(0x00f3ff, 2, 300, Math.PI/4, 0.5);
-            spotLight.position.set(hexPos.x, 150, hexPos.z);
-            spotLight.target.position.set(hexPos.x, 0, hexPos.z);
+            spotLight.position.set(hexPos.x - 40, 150, hexPos.z);
+            spotLight.target.position.set(hexPos.x - 40, 0, hexPos.z);
             this.commandGroup.add(spotLight);
             this.commandGroup.add(spotLight.target);
         }
