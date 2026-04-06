@@ -340,18 +340,29 @@ export class V2App {
             else geo = new THREE.IcosahedronGeometry(12, 0);
 
             const mat = new THREE.MeshPhysicalMaterial({ 
-                color: 0x00f3ff, emissive: 0x00f3ff, emissiveIntensity: 2,
-                transparent: true, opacity: 0.7, transmission: 0.5, thickness: 2
+                color: 0x00f3ff, emissive: 0x00f3ff, emissiveIntensity: 5, /* MAXIMUM GLOW */
+                transparent: true, opacity: 0.9, transmission: 0.8, thickness: 3
             });
             const mesh = new THREE.Mesh(geo, mat);
             mesh.position.set(x, 20, z);
             mesh.userData = { type, onSelect: () => this.startChallenge(type) };
             this.commandGroup.add(mesh);
-            createLabel(type.toUpperCase(), x, 20, z);
             
-            // Animation
-            gsap.to(mesh.rotation, { y: Math.PI * 2, duration: 5, repeat: -1, ease: "none" });
-            gsap.to(mesh.position, { y: 25, duration: 2, repeat: -1, yoyo: true, ease: "sine.inOut" });
+            // LARGER TEXT LABELS
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 256; canvas.height = 64;
+            ctx.fillStyle = '#00f3ff'; ctx.font = 'bold 44px Rajdhani'; // Increased font
+            ctx.textAlign = 'center'; ctx.fillText(text, 128, 48);
+            const tex = new THREE.CanvasTexture(canvas);
+            const spriteMat = new THREE.SpriteMaterial({ map: tex, transparent: true });
+            const sprite = new THREE.Sprite(spriteMat);
+            sprite.position.set(x, y + 35, z); // Higher position
+            sprite.scale.set(60, 15, 1); // Larger scale
+            this.commandGroup.add(sprite);
+            
+            // Animation Pulse
+            gsap.to(mesh.scale, { x: 1.2, y: 1.2, z: 1.2, duration: 1, repeat: -1, yoyo: true });
 
             // Hitbox
             const hb = new THREE.Mesh(new THREE.SphereGeometry(20), new THREE.MeshBasicMaterial({visible:false}));
