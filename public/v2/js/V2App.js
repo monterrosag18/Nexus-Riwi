@@ -693,6 +693,11 @@ export class V2App {
                 }, 400);
             } else {
                 this.addDebugLine("FATAL_ERROR: CODE_INJECTION_REJECTED");
+                this.triggerGlitch();
+            }
+        }
+    }
+
     createOrbitalStrike() {
         // Particle beam from sky
         const geometry = new THREE.BufferGeometry();
