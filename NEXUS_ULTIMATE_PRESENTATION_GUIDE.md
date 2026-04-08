@@ -1,75 +1,66 @@
-# 🌌 NEXUS V2: GUÍA MAESTRA DE PRESENTACIÓN (EDICIÓN FINAL)
-**"Transformando el Aprendizaje en Conquista: El Ecosistema Nexus x Riwi"**
+# 🌌 NEXUS x RIWI: GUÍA DE PRESENTACIÓN MAESTRA (20 MINUTOS)
+**"La Evolución de la Educación Tech: Uniendo Datos, Dopamina y Destino"**
 
 ---
 
-## INTRODUCCIÓN Y CONTEXTO [0:00 - 5:00]
+## INTRODUCCIÓN (EL PORQUÉ) [0:00 - 4:00]
 
-### BLOQUE 1: Génesis y Visión Táctica (¿Qué es Nexus?)
-*   **Guion**: "Nexus no es solo un juego; es el **Espejo Digital del Coder**. Nació de la necesidad de dar un propósito táctico al esfuerzo diario en Riwi. Nexus V2 es el motor que hace que los datos de Moodle cobren vida, transformando la educación pasiva en una **Inmersión Técnica de Grado Industrial**."
-*   **[VISUALES]**:
-    ````carousel
-    ![Génesis del Nexo](./public/v2/presentation/assets/nexus_genesis_1775623683456.png)
-    <!-- slide -->
-    ![El Nexo Real V2](./public/v2/presentation/assets/nexus_v2_core_map_1775624168724.png)
-    ````
+**Diapositiva 1: El Génesis del Nexo (¿Qué es y por qué existe?)**
+*   **Guion**: "¿Qué es Nexus? Nexus no es un juego, es el **espejo digital del esfuerzo del Coder**. Nació de una observación crítica en nuestras aulas: los estudiantes son brillantes, pero a menudo se sienten aislados en una montaña de PDFs y notas frías en Moodle. Creamos Nexus para darles un propósito táctico; para que cada línea de código no sea solo un ejercicio, sino el combustible de su propia ciudadela."
+*   **[VISUAL SUGERIDO]**: Una imagen cinematográfica de un estudiante frente a una pantalla de código antigua que se transforma en un mapa 3D holográfico y vibrante.
 
-### BLOQUE 2: El Muro del Aburrimiento (El Problema)
-*   **Guion**: "El mayor enemigo de Riwi no es la dificultad del código, es el aburrimiento. Un estudiante que ve su progreso solo como un número en Moodle corre riesgo de deserción. Nexus destruye esa barrera convirtiendo el currículo en una misión de conquista donde cada aprendizaje suma territorio."
-*   **Visual**: ![Barrera del Aburrimiento](./public/v2/presentation/assets/nexus_boredom_barrier_1775623710352.png)
+**Diapositiva 2: La Visión Disruptiva**
+*   **Guion**: "Señores de Riwi, Nexus V2 es el motor que hace que esos datos de Moodle cobren vida. Es la transición de una educación pasiva a una **Inmersión Técnica de Grado Industrial**. No estamos aquí para entretener, estamos aquí para forjar ingenieros mediante el dominio del territorio digital."
+*   **[VISUAL SUGERIDO]**: Un render de alta fidelidad del Nexo central con luces de fibra óptica conectándose a dos ciudades (Medellín y Barranquilla) bajo un cielo neón.
 
----
-
-## OPERACIÓN TÉCNICA Y PEDAGOGÍA [5:00 - 10:00]
-
-### BLOQUE 3: Cerebro de Datos (Moodle Sync & Neural Sync)
-*   **Guion**: "Nuestra innovación es el **Puente de Datos**. Nexus lee Moodle y detecta debilidades en Inglés o Soft Skills. El juego reacciona lanzando 'Misiones de Rescate' personalizadas. Aquí, repasar no es aburrido, es necesario para sincronizar los nodos lógicos del nexo."
-*   **[VISUALES]**:
-    ````carousel
-    ![Moodle Smart Bridge](./public/v2/presentation/assets/nexus_v2_moodle_bridge_real_1775624224937.png)
-    <!-- slide -->
-    ![Icosaedros Neurales](./public/v2/presentation/assets/nexus_v2_neural_ui_1775624182785.png)
-    ````
-
-### BLOQUE 4: Integridad y Pedagogía del Error (Anti-Fraude)
-*   **Guion**: "Protegemos la honestidad técnica. Si el sistema detecta intento de fraude con IA o cambio de pestañas, el nexo se bloquea. En lugar de dar la respuesta, Nexus otorga **Tips Inteligentes**, forzando al estudiante a pensar y aprender de su propio error."
-*   **Visual**: ![Sistema Anti-Fraude](./public/v2/presentation/assets/nexus_anti_fraud_1775623743937.png)
+**Diapositiva 3: El Aburrimiento como Barrera Técnica**
+*   **Guion**: "El mayor enemigo de la retención no es la dificultad, es la desmotivación. Un estudiante aburrido es un estudiante que abandona. Nexus convierte el currículo en una misión de conquista, donde el 'error' es una falla de sistema que deben reparar en equipo."
+*   **[VISUAL SUGERIDO]**: Una infografía estilizada mostrando el contraste entre una pantalla de texto gris (Moodle) vs una pantalla 3D vibrante (Nexus).
 
 ---
 
-## MOTIVACIÓN Y VALOR ESTRATÉGICO [10:00 - 15:00]
+## BLOQUE 1: LA INTELIGENCIA DE DATOS (MOODLE SYNC) [3:00 - 8:00]
 
-### BLOQUE 5: Guerra Semanal y Dopamina (El Ranking)
-*   **Guion**: "La dopamina se mantiene viva con el **Reinicio Semanal**. Cada lunes es una nueva oportunidad. Los clanes compiten ferozmente y el ganador de la semana aparece coronado en la cima del Nexo. Este 15-20% de impacto en la nota real garantiza una participación del 100% de la sede."
-*   **[VISUALES]**:
-    ````carousel
-    ![Rayo de Conquista](./public/v2/presentation/assets/nexus_v2_conquest_real_1775624212275.png)
-    <!-- slide -->
-    ![Ganador Semanal](./public/v2/presentation/assets/nexus_weekly_champion_1775623761474.png)
-    ````
+**Diapositiva 4: El Puente de Datos (Moodle Integration)**
+*   **Guion**: "Nexus es el primer juego que 'escucha' a Moodle. Si un Coder tiene una nota baja en Inglés o Habilidades Socio-Emocionales, el Nexo lo detecta. El juego no le da un test aburrido; le da una **Misión de Rescate Crítica** para estabilizar su sector."
+*   **[VISUAL SUGERIDO]**: Esquema técnico del flujo de datos: `Moodle DB` -> `Nexus Logic Core` -> `Neural Sync Challenge`.
 
-### BLOQUE 6: Maestría, Estatus y Dashboard Admin
-*   **Guion**: "Nexus premia la disciplina. Asistencia perfecta y buen comportamiento socio-emocional desbloquean estatus de **Master** y naves premium. Para Riwi, esto se traduce en un **Dashboard de Talento** donde los directivos ven fallas académicas en tiempo real mediante mapas de calor."
-*   **[VISUALES]**:
-    ````carousel
-    ![Medallas de Maestría](./public/v2/presentation/assets/nexus_mastery_medals_1775623773452.png)
-    <!-- slide -->
-    ![Admin Dashboard](./public/v2/presentation/assets/nexus_v2_admin_control_1775624240376.png)
-    ````
+**Diapositiva 5: Pedagogía del Error y Anti-Fraude**
+*   **Guion**: "Nexus protege la integridad del aprendizaje. No permitimos el uso de IA para hacer trampa; el sistema detecta si el estudiante cambia de pestaña o intenta pegar código externo. Pero no castigamos el error, lo usamos para enseñar. Si alguien falla, el Nexo no le da la respuesta, le da **Tips Inteligentes** para obligarlo a pensar y descubrir la lógica por sí mismo. Aquí se aprende haciendo, no copiando."
+*   **[VISUAL SUGERIDO]**: Una ventana de alerta holográfica sutil que dice "INTEGRITY_CHECK_POSITIVE: SWITCHING_TO_HINT_MODE" y muestra una pista técnica en lugar de la solución.
 
 ---
 
-## FUTURO Y CIERRE [15:00 - 20:00]
+## BLOQUE 2: LA MAQUINARIA DE DOPAMINA [9:00 - 14:00]
 
-### BLOQUE 7: La Arena Global y Marketing Viral
-*   **Guion**: "Nuestra visión es global. Al abrir torneos donde los 5 mejores del mundo ganan una beca en Riwi, convertimos a Nexus en la herramienta de marketing más potente del sector. El mundo querrá ser parte de Riwi para conquistar este mapa."
-*   **Visual**: ![Marketing Global](./public/v2/presentation/assets/nexus_global_marketing_1775623812605.png)
+**Diapositiva 6: Ciclo Semanal: La Guerra de los Clanes**
+*   **Guion**: "La dopamina se mantiene viva gracias al **Reinicio Semanal**. Cada 7 días, el ranking se resetea y el clan ganador de la semana aparece coronado en la cima del Nexo 3D para que todos lo vean. Esto significa que cada lunes es una nueva oportunidad para que cualquier clan, por pequeño que sea, llegue a la gloria."
+*   **[VISUAL SUGERIDO]**: El modelo 3D del nexo central brillando con los colores del clan ganador y un banner holográfico que diga "WEEKLY_CHAMPION: CLAN_TESLA".
 
-### BLOQUE 8: El Coder de Élite y Despliegue
-*   **Guion**: "Al final, Riwi no entrega solo un diploma; entrega un **Perfil de Coder de Élite** validado por miles de horas de combate técnico. Estamos listos para el despliegue de la Fase Beta. Muchas gracias por su atención."
-*   **[VISUALES]**:
-    ````carousel
-    ![Perfil Coder Élite](./public/v2/presentation/assets/nexus_coder_elite_1775623826962.png)
-    <!-- slide -->
-    ![Cierre Logo Beta](./public/v2/presentation/assets/nexus_v2_closing_1775623838869.png)
-    ````
+**Diapositiva 7: Medallas de Maestría y Alta Dificultad**
+*   **Guion**: "Nexus también desafía a los mejores. Para los Coders de alto rendimiento, el sistema ofrece **Medallas de Maestría** y un 'Modo Experto' con mayor dificultad. Esto les da estatus, respeto en la comunidad y recompensas exclusivas, motivándolos a repasar y pulir cada tema hasta ser verdaderos maestros."
+*   **[VISUAL SUGERIDO]**: Una galería de medallas 3D giratorias (Master en JS, Master en Inglés, etc.) y un interruptor que dice "OVERCLOCK_MODE: ACTIVE".
+
+---
+
+## BLOQUE 3: VALOR ESTRATÉGICO PARA RIWI (ADMIN VIEW) [14:00 - 18:00]
+
+**Diapositiva 8: El Dashboard de Talento en Vivo**
+*   **Guion**: "Para los directivos, Nexus es un panel de control humano. Pueden ver en tiempo real qué temas son más difíciles para los estudiantes y actuar de inmediato. Nexus es big data educativo visualizado."
+*   **[VISUAL SUGERIDO]**: Vista de administración con 'Heatmaps' (mapas de calor) sobre el mapa 3D indicando dónde están fallando más los estudiantes.
+
+**Diapositiva 9: Escalabilidad y Marketing Viral**
+*   **Guion**: "Nexus es un imán de talento. Al abrir torneos globales donde los 'Top 5' ganan un cupo de ingreso a Riwi, estamos creando publicidad orgánica de nivel mundial. El mundo querrá entrar a Riwi por la puerta de Nexus."
+*   **[VISUAL SUGERIDO]**: Un poster publicitario cinemático con el texto "CONQUISTA EL NEXO... GANA TU LUGAR EN RIWI. TORNEO GLOBAL ABIERTO".
+
+---
+
+## CONCLUSIÓN (EL DESTINO) [18:00 - 20:00]
+
+**Diapositiva 10: El Coder de Élite del Mañana**
+*   **Guion**: "En resumen, Riwi no solo entregará certificados, entregará **Perfiles de Coder de Élite** validados por horas de reto táctico. Estamos listos para inyectar esta revolución en el ADN de Riwi."
+*   **[VISUAL SUGERIDO]**: Un estudiante real con un dispositivo holográfico mostrando su ciudadela personal llena de medallas y logros de Riwi.
+
+**Diapositiva 11: Preguntas y Cierre**
+*   **Guion**: "Estamos listos para el despliegue. Muchas gracias."
+*   **[VISUAL SUGERIDO]**: Logo de Nexus V2 con el QR de Riwi para el acceso a la fase beta.

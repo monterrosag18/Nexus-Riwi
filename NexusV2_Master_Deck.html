@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS RIWI MASTER DECK - Carlos Monterrosa</title>
+    <title>NEXUS RIWI </title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --tech-cyan: #00f3ff;
             --tech-blue: #0072ff;
             --carbon: #0a0a0b;
-            --glass: rgba(15, 15, 20, 0.9);
+            --glass: rgba(15, 15, 20, 0.95);
             --border: rgba(0, 243, 255, 0.4);
         }
 
@@ -36,22 +36,15 @@
             width: 100%;
             height: 100%;
             z-index: -1;
-            background: 
-                linear-gradient(rgba(10, 10, 11, 0.8), rgba(10, 10, 11, 0.8)),
-                url('./public/v2/presentation/assets/nexus_v2_core_map_1775624168724.png');
+            background: linear-gradient(rgba(10,10,11,0.9), rgba(10,10,11,0.9)), url('./public/v2/presentation/assets/nexus_v2_core_map_1775624168724.png');
             background-size: cover;
             background-position: center;
-            filter: blur(5px);
-            opacity: 0.4;
         }
 
         /* Slide System */
         .deck-container {
             flex: 1;
             position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             z-index: 10;
         }
 
@@ -63,31 +56,27 @@
             height: 100%;
             opacity: 0;
             visibility: hidden;
-            transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1), transform 1s ease-out;
-            transform: scale(1.05);
+            transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 60px;
+            padding: 40px;
         }
 
         .slide.active {
             opacity: 1;
             visibility: visible;
-            transform: scale(1);
         }
 
-        /* Layouts */
-        .slide-image-container {
-            position: relative;
+        .slide-image-frame {
             width: 90%;
-            height: 75%;
-            border: 2px solid var(--border);
-            border-radius: 20px;
+            height: 80%;
+            border: 1px solid var(--border);
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 0 60px rgba(0, 243, 255, 0.15);
             background: #000;
+            box-shadow: 0 0 40px rgba(0, 243, 255, 0.1);
         }
 
         .slide-image {
@@ -96,178 +85,104 @@
             object-fit: cover;
         }
 
-        /* Split View Table */
-        .split-view {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            width: 100%;
-            height: 100%;
-            gap: 2px;
-            background: var(--border);
-        }
-        
-        .split-image-box {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .split-label {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            background: rgba(0,0,0,0.7);
-            padding: 5px 15px;
-            border: 1px solid var(--tech-cyan);
-            border-radius: 4px;
-            font-size: 0.8rem;
-            color: var(--tech-cyan);
-            z-index: 5;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* Typography */
-        .slide-content {
-            margin-top: 25px;
+        .slide-footer {
+            margin-top: 20px;
             text-align: center;
         }
 
         .slide-title {
-            font-size: 3.5rem;
+            font-size: 2.8rem;
             text-transform: uppercase;
-            letter-spacing: 10px;
+            letter-spacing: 8px;
             color: var(--tech-cyan);
-            text-shadow: 0 0 30px rgba(0, 243, 255, 0.6);
             margin-bottom: 5px;
         }
 
-        .slide-subtitle {
-            font-size: 1.4rem;
-            opacity: 0.8;
-            font-family: 'Inter', sans-serif;
-            letter-spacing: 2px;
-        }
-
-        /* Intro & Author Special Styles */
-        .hero-title {
-            font-size: 6rem;
-            background: linear-gradient(90deg, #fff, var(--tech-cyan));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 700;
-        }
-        
-        .clan-labels {
-            display: flex;
-            gap: 40px;
-            margin-top: 40px;
-        }
-
-        .clan-badge {
-            padding: 10px 30px;
-            border: 1px solid var(--border);
-            border-radius: 50px;
-            background: rgba(255,255,255,0.05);
-            font-size: 1.2rem;
-            letter-spacing: 3px;
-        }
-
-        /* Teleprompter Panel */
+        /* Teleprompter */
         #teleprompter {
-            width: 480px;
+            width: 450px;
             background: var(--glass);
-            backdrop-filter: blur(25px);
-            border-left: 2px solid var(--border);
-            padding: 50px 40px;
+            backdrop-filter: blur(20px);
+            border-left: 1px solid var(--border);
+            padding: 40px;
             display: flex;
             flex-direction: column;
             z-index: 100;
-            box-shadow: -20px 0 50px rgba(0,0,0,0.5);
         }
 
         .tele-header {
             color: var(--tech-cyan);
             border-bottom: 1px solid var(--border);
-            padding-bottom: 25px;
-            margin-bottom: 35px;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
         }
 
         .tele-content {
             flex: 1;
-            overflow-y: auto;
-            font-size: 1.3rem;
-            line-height: 1.9;
+            font-size: 1.4rem;
+            line-height: 1.6;
             font-family: 'Inter', sans-serif;
+            color: #ddd;
         }
 
-        .tele-content span {
-            display: none;
-        }
+        .tele-content span { display: none; }
+        .tele-content span.active { display: block; animation: fadeIn 0.4s ease; }
 
-        .tele-content span.active {
-            display: block;
-            animation: slideUp 0.6s ease-out;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Navigation Controls */
-        .nav-controls {
+        /* Nav Dots */
+        .dot-nav {
             position: fixed;
             bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 25px;
+            gap: 12px;
             z-index: 1000;
         }
 
-        .btn {
-            background: rgba(0,0,0,0.6);
-            border: 1px solid var(--border);
-            color: #fff;
-            padding: 15px 35px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: 'Outfit', sans-serif;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            transition: 0.3s;
-        }
-
-        .btn:hover {
-            border-color: var(--tech-cyan);
-            background: var(--tech-cyan);
-            color: #000;
-            box-shadow: 0 0 30px var(--tech-cyan);
-        }
-
-        .dots {
-            position: fixed;
-            bottom: 120px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 15px;
-        }
-
         .dot {
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             background: rgba(255,255,255,0.2);
             cursor: pointer;
+            transition: 0.3s;
         }
 
         .dot.active {
             background: var(--tech-cyan);
             box-shadow: 0 0 10px var(--tech-cyan);
-            transform: scale(1.4);
+            transform: scale(1.5);
         }
+
+        .nav-btns {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+        }
+
+        .btn {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 10px 25px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .btn:hover { background: var(--tech-cyan); color: #000; }
 
     </style>
 </head>
@@ -277,241 +192,153 @@
 
     <div class="deck-container">
         
-        <!-- Diapositiva 0: Portada -->
-        <div class="slide active" id="slide-0">
-            <h1 class="hero-title">NEXUS RIWI</h1>
-            <p class="slide-subtitle">V2 | PROTOCOLO INFINITY</p>
-            <div class="clan-labels">
-                <div class="clan-badge" style="color: #ff3e3e;">CLAN MEDELLÍN</div>
-                <div class="clan-badge" style="color: var(--tech-cyan);">CLAN BARRANQUILLA</div>
+        <!-- S0: Portada -->
+        <div class="slide active">
+            <h1 style="font-size: 6rem; letter-spacing: 15px; color: #fff; text-shadow: 0 0 30px var(--tech-cyan);">NEXUS RIWI</h1>
+            <p style="font-size: 1.5rem; letter-spacing: 5px; opacity: 0.6;">V2 | INFINITY PROTOCOLS</p>
+            <div style="margin-top: 40px; display: flex; gap: 30px;">
+                <span style="color: red; font-size: 1.1rem; letter-spacing: 2px;">CLAN MEDELLÍN</span>
+                <span style="color: var(--tech-cyan); font-size: 1.1rem; letter-spacing: 2px;">CLAN BARRANQUILLA</span>
             </div>
         </div>
 
-        <!-- Diapositiva 1: Autor -->
-        <div class="slide" id="slide-1">
-            <div style="border-left: 10px solid var(--tech-cyan); padding-left: 40px; text-align: left;">
-                <h3 style="letter-spacing: 5px; opacity: 0.6; margin-bottom: 10px;">MASTER PITCH</h3>
-                <h2 style="font-size: 4.5rem; margin-bottom: 20px;">Carlos Andrés Monterrosa G.</h2>
-                <p style="font-size: 1.5rem; letter-spacing: 1px;">Proyecto Integrador | Fullstack Developer Elite</p>
+        <!-- S1: Carlos -->
+        <div class="slide">
+            <div style="text-align: left; border-left: 8px solid var(--tech-cyan); padding-left: 40px;">
+                <h3 style="opacity: 0.5; letter-spacing: 4px; margin-bottom: 10px;">PRESENTADO POR</h3>
+                <h2 style="font-size: 4rem;">Carlos Andrés Monterrosa G.</h2>
+                <p style="font-size: 1.2rem; letter-spacing: 1px; opacity: 0.7;">Proyecto Integrador</p>
             </div>
         </div>
 
-        <!-- Diapositiva 2: Bloque 1 (Génesis & Visión) -->
-        <div class="slide" id="slide-2">
-            <div class="slide-image-container">
-                <div class="split-view">
-                    <div class="split-image-box">
-                        <span class="split-label">Génesis</span>
-                        <img src="./public/v2/presentation/assets/nexus_genesis_1775623683456.png" class="slide-image">
-                    </div>
-                    <div class="split-image-box">
-                        <span class="split-label">Real Fidelity V2</span>
-                        <img src="./public/v2/presentation/assets/nexus_v2_core_map_1775624168724.png" class="slide-image">
-                    </div>
-                </div>
-            </div>
-            <div class="slide-content">
-                <h2 class="slide-title">Génesis y Visión</h2>
-                <p class="slide-subtitle">Del Código Tradicional a la Conquista 3D</p>
-            </div>
+        <!-- S2: Génesis -->
+        <div class="slide">
+            <div class="slide-image-frame"><img src="./public/v2/presentation/assets/nexus_genesis_1775623683456.png" class="slide-image"></div>
+            <div class="slide-footer"><h2 class="slide-title">1. El Génesis</h2></div>
         </div>
 
-        <!-- Diapositiva 3: Bloque 2 (Muro Aburrimiento) -->
-        <div class="slide" id="slide-3">
-            <div class="slide-image-container">
-                <img src="./public/v2/presentation/assets/nexus_boredom_barrier_1775623710352.png" class="slide-image">
-            </div>
-            <div class="slide-content">
-                <h2 class="slide-title">El Muro del Aburrimiento</h2>
-                <p class="slide-subtitle">Transformando la Deserción en Propósito</p>
-            </div>
+        <!-- S3: Visión -->
+        <div class="slide">
+            <div class="slide-image-frame"><img src="./public/v2/presentation/assets/nexus_v2_core_map_1775624168724.png" class="slide-image"></div>
+            <div class="slide-footer"><h2 class="slide-title">2. Visión Disruptiva</h2></div>
         </div>
 
-        <!-- Diapositiva 4: Bloque 3 (Moodle Sync & Neural) -->
-        <div class="slide" id="slide-4">
-            <div class="slide-image-container">
-                <div class="split-view">
-                    <div class="split-image-box">
-                        <span class="split-label">Integración DB</span>
-                        <img src="./public/v2/presentation/assets/nexus_v2_moodle_bridge_real_1775624224937.png" class="slide-image">
-                    </div>
-                    <div class="split-image-box">
-                        <span class="split-label">Mini-Juego Neural</span>
-                        <img src="./public/v2/presentation/assets/nexus_v2_neural_ui_1775624182785.png" class="slide-image">
-                    </div>
-                </div>
-            </div>
-            <div class="slide-content">
-                <h2 class="slide-title">Cerebro de Datos</h2>
-                <p class="slide-subtitle">Sincronización Inteligente Moodle x Nexus</p>
-            </div>
+        <!-- S4: Aburrimiento -->
+        <div class="slide">
+            <div class="slide-image-frame"><img src="./public/v2/presentation/assets/nexus_boredom_barrier_1775623710352.png" class="slide-image"></div>
+            <div class="slide-footer"><h2 class="slide-title">3. La Barrera del Aburrimiento</h2></div>
         </div>
 
-        <!-- Diapositiva 5: Bloque 4 (Anti-Fraude) -->
-        <div class="slide" id="slide-5">
-            <div class="slide-image-container">
-                <img src="./public/v2/presentation/assets/nexus_anti_fraud_1775623743937.png" class="slide-image">
-            </div>
-            <div class="slide-content">
-                <h2 class="slide-title">Integridad Técnica</h2>
-                <p class="slide-subtitle">Pedagogía del Error mediantes Tips IA</p>
-            </div>
+        <!-- S5: Moodle Sync -->
+        <div class="slide">
+            <div class="slide-image-frame"><img src="./public/v2/presentation/assets/nexus_v2_moodle_bridge_real_1775624224937.png" class="slide-image"></div>
+            <div class="slide-footer"><h2 class="slide-title">4. El Puente de Datos</h2></div>
         </div>
 
-        <!-- Diapositiva 6: Bloque 5 (Guerra Semanal) -->
-        <div class="slide" id="slide-6">
-            <div class="slide-image-container">
-                <div class="split-view">
-                    <div class="split-image-box">
-                        <span class="split-label">Dopamina</span>
-                        <img src="./public/v2/presentation/assets/nexus_v2_conquest_real_1775624212275.png" class="slide-image">
-                    </div>
-                    <div class="split-image-box">
-                        <span class="split-label">Ranking Semanal</span>
-                        <img src="./public/v2/presentation/assets/nexus_weekly_champion_1775623761474.png" class="slide-image">
-                    </div>
-                </div>
-            </div>
-            <div class="slide-content">
-                <h2 class="slide-title">Guerra de Clanes</h2>
-                <p class="slide-subtitle">La Mecánica de la Competición Infinita</p>
-            </div>
+        <!-- S6: Integridad -->
+        <div class="slide">
+            <div class="slide-image-frame"><img src="./public/v2/presentation/assets/nexus_anti_fraud_1775623743937.png" class="slide-image"></div>
+            <div class="slide-footer"><h2 class="slide-title">5. Integridad Técnica</h2></div>
         </div>
 
-        <!-- Diapositiva 7: Bloque 6 (Maestría & Admin) -->
-        <div class="slide" id="slide-7">
-            <div class="slide-image-container">
-                <div class="split-view">
-                    <div class="split-image-box">
-                        <span class="split-label">Estatus Master</span>
-                        <img src="./public/v2/presentation/assets/nexus_mastery_medals_1775623773452.png" class="slide-image">
-                    </div>
-                    <div class="split-image-box">
-                        <span class="split-label">Dashboard Riwi</span>
-                        <img src="./public/v2/presentation/assets/nexus_v2_admin_control_1775624240376.png" class="slide-image">
-                    </div>
-                </div>
-            </div>
-            <div class="slide-content">
-                <h2 class="slide-title">Estatus y Control</h2>
-                <p class="slide-subtitle">Recompensas de Honor y Big Data Educativo</p>
-            </div>
+        <!-- S7: Guerra Semanal -->
+        <div class="slide">
+            <div class="slide-image-frame"><img src="./public/v2/presentation/assets/nexus_v2_conquest_real_1775624212275.png" class="slide-image"></div>
+            <div class="slide-footer"><h2 class="slide-title">6. Guerra de Clanes</h2></div>
         </div>
 
-        <!-- Diapositiva 8: Bloque 7 (Expansión) -->
-        <div class="slide" id="slide-8">
-            <div class="slide-image-container">
-                <img src="./public/v2/presentation/assets/nexus_global_marketing_1775623812605.png" class="slide-image">
-            </div>
-            <div class="slide-content">
-                <h2 class="slide-title">Marketing Global</h2>
-                <p class="slide-subtitle">Nexus como Imán de Talento Internacional</p>
-            </div>
+        <!-- S8: Medallas -->
+        <div class="slide">
+            <div class="slide-image-frame"><img src="./public/v2/presentation/assets/nexus_mastery_medals_1775623773452.png" class="slide-image"></div>
+            <div class="slide-footer"><h2 class="slide-title">7. Medallas de Maestría</h2></div>
         </div>
 
-        <!-- Diapositiva 9: Bloque 8 (Elite & Cierre) -->
-        <div class="slide" id="slide-9">
-            <div class="slide-image-container">
-                <div class="split-view">
-                    <div class="split-image-box">
-                        <span class="split-label">Perfil de Elite</span>
-                        <img src="./public/v2/presentation/assets/nexus_coder_elite_1775623826962.png" class="slide-image">
-                    </div>
-                    <div class="split-image-box">
-                        <span class="split-label">Nexus V2 Beta</span>
-                        <img src="./public/v2/presentation/assets/nexus_v2_closing_1775623838869.png" class="slide-image">
-                    </div>
-                </div>
-            </div>
-            <div class="slide-content">
-                <h2 class="slide-title">El Final del Camino</h2>
-                <p class="slide-subtitle">Liderando la Evolución en Riwi</p>
-            </div>
+        <!-- S9: Dashboard -->
+        <div class="slide">
+            <div class="slide-image-frame"><img src="./public/v2/presentation/assets/nexus_v2_admin_control_1775624240376.png" class="slide-image"></div>
+            <div class="slide-footer"><h2 class="slide-title">8. Dashboard de Talento</h2></div>
         </div>
 
-    </div>
+        <!-- S10: Marketing -->
+        <div class="slide">
+            <div class="slide-image-frame"><img src="./public/v2/presentation/assets/nexus_global_marketing_1775623812605.png" class="slide-image"></div>
+            <div class="slide-footer"><h2 class="slide-title">9. Escalabilidad Global</h2></div>
+        </div>
 
-    <!-- Dots -->
-    <div class="dots" id="dots">
-        <div class="dot active"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
+        <!-- S11: Elite -->
+        <div class="slide">
+            <div class="slide-image-frame"><img src="./public/v2/presentation/assets/nexus_coder_elite_1775623826962.png" class="slide-image"></div>
+            <div class="slide-footer"><h2 class="slide-title">10. El Coder de Élite</h2></div>
+        </div>
+
+        <!-- S12: Cierre -->
+        <div class="slide">
+            <div class="slide-image-frame"><img src="./public/v2/presentation/assets/nexus_v2_closing_1775623838869.png" class="slide-image"></div>
+            <div class="slide-footer"><h2 class="slide-title">11. Despliegue Riwi V2</h2></div>
+        </div>
+
     </div>
 
     <!-- Teleprompter -->
     <aside id="teleprompter">
-        <div class="tele-header">
-            <h3 style="letter-spacing: 2px;">TELEPROMPTER V3</h3>
-            <span id="slide-counter" style="color: var(--tech-cyan);">01 / 10</span>
-        </div>
+        <div class="tele-header">TELEPROMPTER V3 | <span id="count">01 / 13</span></div>
         <div class="tele-content" id="tele-content">
-            <span class="active">Nexus V2 | Evolución | Protocolo Infinity</span>
-            <span>Carlos Monterrosa | Master Coder | Liderazgo</span>
-            <span>Génesis | Inmersión Técnica | Digital Mirror</span>
-            <span>Retención | Deserción | Propósito</span>
-            <span>Moodle DB | Neural Sync | Sincronización 3D</span>
-            <span>Integridad | Anti-Fraude | Tips Pedagógicos</span>
-            <span>Ranking Semanal | Dopamina | Motivación Clanes</span>
-            <span>Rango Master | Reconocimiento | Dashboard Big Data</span>
-            <span>Expansión | Viralidad | Talento Global</span>
-            <span>Perfil Élite | Fase Beta | Despliegue Riwi</span>
+            <span class="active">NEXUS RIWI | Protocolo V2 |</span>
+            <span>Carlos Andres Monterrosa G. </span>
+            <span>Génesis | Propósito Táctico | Espejo Digital</span>
+            <span>Visión Disruptiva | Inmersión Técnica Industrial</span>
+            <span>El Aburrimiento | Deserción vs Misión</span>
+            <span>Moodle Puente | Datos Reales | Misión Rescate</span>
+            <span>Integridad | Bloqueo IA | Tips Pedagógicos</span>
+            <span>Guerra Semanal | Dopamina | Reinicio Lunes</span>
+            <span>Maestría | Estatus de Honor | Modo Experto</span>
+            <span>Dashboard Admin | Heatmaps | Control Riwi</span>
+            <span>Marketing Viral | Torneo Mundial | Becas</span>
+            <span>Perfil Élite | Riwi DNA | Certificación Real</span>
+            <span>Fase Beta | Preguntas | Cierre</span>
         </div>
     </aside>
 
-    <div class="nav-controls">
-        <button class="btn" onclick="prev()">BLOQUE ANTERIOR</button>
-        <button class="btn" onclick="next()">SIGUIENTE PASO</button>
+    <div class="nav-btns">
+        <button class="btn" onclick="prev()">Anterior</button>
+        <button class="btn" onclick="next()">Siguiente</button>
     </div>
 
+    <div class="dot-nav" id="dots"></div>
+
     <script>
-        let currentIdx = 0;
         const slides = document.querySelectorAll('.slide');
+        const tele = document.querySelectorAll('.tele-content span');
+        const dotsContainer = document.getElementById('dots');
+        const countDisplay = document.getElementById('count');
+        let currentIdx = 0;
+
+        // Init dots
+        slides.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.className = i === 0 ? 'dot active' : 'dot';
+            dot.onclick = () => goTo(i);
+            dotsContainer.appendChild(dot);
+        });
+
         const dots = document.querySelectorAll('.dot');
-        const textBlocks = document.querySelectorAll('.tele-content span');
-        const counter = document.getElementById('slide-counter');
 
         function update() {
-            slides.forEach((s, i) => {
-                s.classList.toggle('active', i === currentIdx);
-                dots[i].classList.toggle('active', i === currentIdx);
-                textBlocks[i].classList.toggle('active', i === currentIdx);
-            });
-            counter.innerText = `${(currentIdx + 1).toString().padStart(2, '0')} / 10`;
+            slides.forEach((s, i) => s.classList.toggle('active', i === currentIdx));
+            tele.forEach((t, i) => t.classList.toggle('active', i === currentIdx));
+            dots.forEach((d, i) => d.classList.toggle('active', i === currentIdx));
+            countDisplay.innerText = `${(currentIdx + 1).toString().padStart(2, '0')} / 13`;
         }
 
-        function next() {
-            if (currentIdx < slides.length - 1) {
-                currentIdx++;
-                update();
-            }
-        }
-
-        function prev() {
-            if (currentIdx > 0) {
-                currentIdx--;
-                update();
-            }
-        }
+        function next() { if (currentIdx < slides.length - 1) { currentIdx++; update(); } }
+        function prev() { if (currentIdx > 0) { currentIdx--; update(); } }
+        function goTo(idx) { currentIdx = idx; update(); }
 
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowRight') next();
             if (e.key === 'ArrowLeft') prev();
         });
-
-        dots.forEach((d, i) => {
-            d.onclick = () => {
-                currentIdx = i;
-                update();
-            }
-        });
-
     </script>
+
 </body>
 </html>
