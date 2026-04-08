@@ -5,8 +5,8 @@
 
 ## INTRODUCCIÓN (EL PORQUÉ) [0:00 - 4:00]
 
-**Diapositiva 1: El Génesis del Nexo (¿Qué es y por qué existe?)**
-*   **Guion**: "¿Qué es Nexus? Nexus no es un juego, es el **espejo digital del esfuerzo del Coder**. Nació de una observación crítica en nuestras aulas: los estudiantes son brillantes, pero a menudo se sienten aislados en una montaña de PDFs y notas frías en Moodle. Creamos Nexus para darles un propósito táctico; para que cada línea de código no sea solo un ejercicio, sino el combustible de su propia ciudadela."
+**Diapositiva 1: El Génesis del Nexo (La Conexión Definitiva)**
+*   **Guion**: "¿Qué es Nexus? Nexus es la **CONEXIÓN** definitiva del esfuerzo del Coder. Es el puente que une el ecosistema Riwi: conectando el trabajo diario del estudiante con las métricas de Moodle y su proyección hacia la industria. Nació de una observación crítica: los estudiantes necesitaban ver cómo su código se conecta con su crecimiento real. Creamos Nexus para que esa conexión sea tangible, táctica y épica."
 *   **[VISUAL SUGERIDO]**: Una imagen cinematográfica de un estudiante frente a una pantalla de código antigua que se transforma en un mapa 3D holográfico y vibrante.
 
 **Diapositiva 2: La Visión Disruptiva**
