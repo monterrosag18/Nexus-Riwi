@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS V2 | La Revolución del Aprendizaje</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ec5b13;
+            --neon-cyan: #00f3ff;
+            --neon-magenta: #ff00ff;
+            --bg-dark: #050505;
+            --glass-bg: rgba(0, 0, 0, 0.7);
+            --glass-border: rgba(0, 243, 255, 0.2);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            font-family: 'Outfit', sans-serif;
+            color: #fff;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .reveal { background: #000; }
+
+        .reveal .slides section {
+            text-align: left;
+            padding: 30px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 2px solid var(--glass-border);
+            border-radius: 15px;
+            box-shadow: 0 0 50px rgba(0, 243, 255, 0.1);
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Rajdhani', sans-serif !important;
+            text-transform: uppercase;
+            font-weight: 700 !important;
+        }
+
+        h1 { font-size: 3.2em !important; color: var(--neon-cyan); margin: 0 !important; text-shadow: 0 0 15px var(--neon-cyan); }
+        h2 { font-size: 2em !important; color: var(--primary); margin-bottom: 20px !important; border-left: 6px solid var(--primary); padding-left: 20px; }
+        h3 { color: var(--neon-cyan); font-size: 1.3em !important; }
+
+        p, li { font-size: 0.85em; line-height: 1.6; color: #f0f0f0; }
+        .highlight { color: var(--neon-cyan); font-weight: bold; }
+        .accent { color: var(--neon-magenta); font-weight: bold; }
+        code { background: rgba(0,243,255,0.1); padding: 2px 6px; border-radius: 3px; }
+
+        .cyber-panel {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 95% 100%, 0 100%);
+            margin-bottom: 15px;
+        }
+
+        .grid-overlay {
+            position: fixed;
+            top: 0; left: 0; 
+            width: 100vw; height: 100vh;
+            background-image: linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .breach-button {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, var(--primary), var(--neon-magenta));
+            color: #fff;
+            text-transform: uppercase;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            clip-path: polygon(0 0, 100% 0, 100% 70%, 85% 100%, 0 100%);
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .breach-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--primary);
+        }
+
+        ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-overlay"></div>
+    <div class="reveal">
+        <div class="slides">
+
+            <!-- DIAPOSITIVA 1: PORTADA -->
+            <section>
+                <h1>NEXUS V2</h1>
+                <h3 style="color: var(--neon-magenta); margin-top: 20px;">LA GUÍA MAESTRA</h3>
+                <p style="margin-top: 40px; font-size: 0.95em;">De la Visualización Táctica a la Maestría Técnica:</p>
+                <p style="color: var(--neon-cyan); font-size: 1em;"><strong>El Futuro del Ecosistema Riwi</strong></p>
+            </section>
+
+            <!-- DIAPOSITIVA 2: INTRODUCCIÓN -->
+            <section>
+                <h2>01. LA GÉNESIS DE LA VERSIÓN 2</h2>
+                <div class="cyber-panel">
+                    <h3 style="color: var(--neon-magenta);">LA VERSIÓN 1:</h3>
+                    <p>Experimento exitoso que demostró que los estudiantes de Riwi querían competir. <span class="highlight">Pero era bidimensional, estática y limitada.</span></p>
+                    
+                    <h3 style="color: var(--neon-magenta); margin-top: 15px;">EL PROBLEMA:</h3>
+                    <p>Los estudiantes veían el aprendizaje como una tarea, no como una misión.</p>
+                    
+                    <h3 style="color: var(--neon-magenta); margin-top: 15px;">LA SOLUCIÓN V2:</h3>
+                    <p>Crear un <span class="accent">Entorno Laboral de Desarrollo Gamificado</span> donde:</p>
+                    <ul>
+                        <li>El "error" es una falla del sistema</li>
+                        <li>El "éxito" es una conquista territorial</li>
+                        <li>El código es la energía que mantiene viva la infraestructura de una ciudadela tecnológica</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- DIAPOSITIVA 3: ARQUITECTURA TECNOLÓGICA -->
+            <section>
+                <h2>02. ARQUITECTURA TECNOLÓGICA (MOTOR "INFINITY PRO")</h2>
+                <div class="cyber-panel">
+                    <h3 style="color: var(--neon-cyan);">A. THREE.JS (WebGL de Grado Industrial)</h3>
+                    <ul>
+                        <li>Procesamiento de <span class="highlight">mapa de hexágonos masivo</span></li>
+                        <li>Cada celda es un objeto con <span class="accent">iluminación dinámica</span></li>
+                        <li>Modelo central: <span class="highlight">82 MB</span></li>
+                        <li><span class="accent">Cargador Proactivo</span>: Sincronización en tiempo real, convierte la espera en parte de la narrativa</li>
+                    </ul>
+                    
+                    <h3 style="color: var(--neon-cyan); margin-top: 15px;">B. GSAP (Cinematografía Digital)</h3>
+                    <ul>
+                        <li>Transiciones de cámara <span class="highlight">suaves y fluidas</span></li>
+                        <li>Vista orbital (estilo satélite) → Vista "Deeper Action" (acción profunda)</li>
+                        <li>Prepara psicológicamente al estudiante para concentrarse en el reto</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- DIAPOSITIVA 4: FILOSOFÍA DE DISEÑO -->
+            <section>
+                <h2>03. FILOSOFÍA DE DISEÑO: HUD TÁCTICO "GLASSMORFISTA"</h2>
+                <div class="cyber-panel">
+                    <h3 style="color: var(--neon-cyan);">ERGONOMÍA DE PANTALLA:</h3>
+                    <p>Tras pruebas de usuario, el panel de interacción se movió a la <span class="highlight">DERECHA</span>.</p>
+                    <ul>
+                        <li>El ojo humano en entornos de juego busca acción en centro e izquierda</li>
+                        <li><span class="accent">70% de pantalla libre</span> para ver componentes 3D (reactor, nodos neurales)</li>
+                        <li>Estudiante ve mapa y lee instrucciones simultáneamente sin fatiga</li>
+                    </ul>
+                    
+                    <h3 style="color: var(--neon-cyan); margin-top: 15px;">TRANSPARENCIA Y FOCO:</h3>
+                    <p>El uso de <code>backdrop-filter: blur(20px)</code> <span class="highlight">no es estético, es funcional:</span></p>
+                    <ul>
+                        <li>El mapa permanece visible (mantiene la inmersión)</li>
+                        <li>Separa claramente la capa de información del contenido 3D</li>
+                        <li>Reduce fatiga visual durante retos largos de código</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- DIAPOSITIVA 5: PSICOLOGÍA DE LOS RETOS -->
+            <section>
+                <h2>04. PSICOLOGÍA DE LOS RETOS 3D</h2>
+                <div class="cyber-panel">
+                    <h3 style="color: var(--neon-cyan);">I. NEURAL SYNC MASTER</h3>
+                    <p><strong>Memoria y Algoritmia:</strong> Observar patrones de luz en nodos interdimensionales</p>
+                    <p style="font-size: 0.8em; color: var(--neon-magenta); margin: 5px 0;">→ Entrena preventiva para Code Review. Un programador capaz de recordar secuencias complejas es <span class="highlight">40% más rápido</span> encontrando bugs.</p>
+                    
+                    <h3 style="color: var(--neon-cyan); margin-top: 15px;">II. CODE INJEKTOR</h3>
+                    <p><strong>Implementación bajo Presión:</strong> Inyectar scripts en terminal holográfica</p>
+                    <p style="font-size: 0.8em; color: var(--neon-magenta); margin: 5px 0;">→ Simula entorno de despliegue real (Deployment). En la industria debes corregir código en producción mientras el sistema falla. <span class="highlight\">Entrena resiliencia.</span></p>
+                    
+                    <h3 style="color: var(--neon-cyan); margin-top: 15px;">III. REACTOR STABILIZER</h3>
+                    <p><strong>Lógica de Sistemas:</strong> Equilibrar barras de energía</p>
+                    <p style="font-size: 0.8em; color: var(--neon-magenta); margin: 5px 0;">→ Representa Optimización de Recursos.  No basta con que el código funcione; <span class="highlight">debe estar equilibrado.</span> Si el reactor se desestabiliza, la inyección falla.</p>
+                </div>
+            </section>
+
+            <!-- DIAPOSITIVA 6: PILARES ÉTICOS -->
+            <section>
+                <h2>05. LOS PILARES ÉTICOS: ANTI-CARRY Y BASTIÓN-LOCK</h2>
+                <div class="cyber-panel">
+                    <h3 style="color: var(--neon-cyan);">ANTI-CARRY: El Fin del 'Pasivo'</h3>
+                    <p>En el mundo real, los clanes suelen tener uno o dos "genios" que hacen todo.</p>
+                    <ul>
+                        <li>Nexus V2 bloquea progresión del clan si el <span class="highlight">80% de miembros</span> no superan reto semanal</li>
+                        <li>Obliga a líderes de clan a dar <span class="accent">mentoría a rezagados</span></li>
+                        <li><span class="highlight">El éxito de uno es responsabilidad de todos</span></li>
+                    </ul>
+                    
+                    <h3 style="color: var(--neon-cyan); margin-top: 15px;">BASTIÓN-LOCK: Integridad de Código</h3>
+                    <p>El sistema vigila la pestaña del navegador:</p>
+                    <ul>
+                        <li>Detecta intentos de copiar código de <span class="highlight">ChatGPT o fuentes externas</span></li>
+                        <li>Detecta cambios de contexto para "hacer trampa"</li>
+                        <li>El reto se <span class="accent">cierra instantáneamente</span></li>
+                        <li><span class="highlight">Formamos ingenieros que resuelven problemas por sí mismos</span></li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- DIAPOSITIVA 7: VISIÓN ADMINISTRATIVA -->
+            <section>
+                <h2>06. VISIÓN ADMINISTRATIVA: LA VISTA DE RIWI</h2>
+                <div class="cyber-panel">
+                    <h3 style="color: var(--neon-cyan);">MÉTRICAS DE FRICCIÓN:</h3>
+                    <p>Dashboard de <span class="highlight">Talento en Vivo</span> que muestra:</p>
+                    <ul>
+                        <li>Qué sectores del mapa tardan más en ser conquistados</li>
+                        <li>Si 60% de clanes fallan en "React Hooks" → reforzar en clases presenciales</li>
+                        <li>Identificar puntos débiles del currículum en <span class="accent">tiempo real</span></li>
+                    </ul>
+                    
+                    <h3 style="color: var(--neon-cyan); margin-top: 15px;">GEOPOLÍTICA DE SEDES:</h3>
+                    <ul>
+                        <li><span class="highlight">Competencia sana</span> entre Medellín y Barranquilla</li>
+                        <li>Impulsa velocidad de aprendizaje de ambas sedes</li>
+                        <li>Ninguna sede quiere ver el mapa pintado con <span class="accent">colores de la otra</span></li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- DIAPOSITIVA 8: ROADMAP FUTURO -->
+            <section>
+                <h2>07. EL CAMINO A V3 Y V4: LA EXPANSIÓN</h2>
+                <div class="cyber-panel">
+                    <h3 style="color: var(--neon-cyan);">VERSIÓN 3: IA MENTORS</h3>
+                    <p>Un <span class="highlight">agente de IA</span> que actúa como co-piloto dentro del Nexo:</p>
+                    <ul>
+                        <li>Analiza errores previos del estudiante</li>
+                        <li>Proporciona pistas contextuales y personalizadas</li>
+                        <li>Reduce frustración sin dar respuestas directas</li>
+                    </ul>
+                    
+                    <h3 style="color: var(--neon-cyan); margin-top: 15px;">VERSIÓN 4: MERCADO NEGRO GLOBAL</h3>
+                    <p>Sistema de economía real con <span class="accent">miles de usuarios globales:</span></p>
+                    <ul>
+                        <li>Puntos ganados por estudiar se canjean por: <span class="highlight\">Virus, Sabotaje de Energía</span></li>
+                        <li>O defensas: <span class="highlight">Muros de Fuego 3D, Escudos</span></li>
+                        <li>Abre el juego más allá de Riwi a la comunidad global</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- DIAPOSITIVA 9: CONCLUSIÓN -->
+            <section>
+                <h2>08. CONCLUSIÓN: EL IMPACTO EN LA INDUSTRIA</h2>
+                <div class="cyber-panel">
+                    <p style="font-size: 1.1em; color: var(--neon-cyan); font-weight: bold; margin-bottom: 20px; border: 2px solid var(--neon-cyan); padding: 15px;">
+                        "Nexus V2 no es solo software decorativo. Es una máquina de generación de talento."
+                    </p>
+                    <h3 style="color: var(--neon-magenta);">Un Coder de Riwi que ha navegado el Nexo:</h3>
+                    <ul>
+                        <li><span class="highlight">✓ No solo sabe programar</span></li>
+                        <li><span class="highlight">✓ Sabe trabajar en equipo</span></li>
+                        <li><span class="highlight">✓ Resiste la presión</span></li>
+                        <li><span class="highlight">✓ Es honesto con su código</span></li>
+                        <li><span class="highlight">✓ Está acostumbrado a interfaces de alta tecnología</span></li>
+                    </ul>
+                    <p style="margin-top: 20px; font-size: 1em; color: var(--neon-magenta); text-align: center;">
+                        <strong>Estamos graduando a los arquitectos del mañana, hoy.</strong>
+                    </p>
+                    <p style="margin-top: 30px; text-align: center; color: var(--primary); font-size: 1.1em; font-weight: bold;">
+                        ∞ Muchas gracias ∞
+                    </p>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            center: false,
+            width: '90%',
+            height: '90%',
+            margin: 0.05,
+            transition: 'fade',
+            transitionSpeed: 'fast',
+            keyboard: true,
+            touch: true,
+            loop: true
+        });
+    </script>
+</body>
+</html>
