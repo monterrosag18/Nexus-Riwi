@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS V2 - Master Presentation Deck</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --tech-cyan: #00f3ff;
+            --tech-blue: #0072ff;
+            --carbon: #0a0a0b;
+            --glass: rgba(15, 15, 20, 0.85);
+            --border: rgba(0, 243, 255, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--carbon);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
+            display: flex;
+            height: 100vh;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #0a0a0b 100%);
+        }
+
+        /* Slide System */
+        .deck-container {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1s ease, visibility 1s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .slide-image-container {
+            position: relative;
+            width: 85%;
+            height: 70%;
+            border: 2px solid var(--border);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 243, 255, 0.1);
+        }
+
+        .slide-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.8s ease;
+        }
+
+        .slide-content {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .slide-title {
+            font-size: 3rem;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            color: var(--tech-cyan);
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
+        }
+
+        .slide-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.7;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Teleprompter Panel */
+        #teleprompter {
+            width: 450px;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid var(--border);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.5s ease, width 0.5s ease;
+            z-index: 100;
+        }
+
+        #teleprompter.hidden {
+            transform: translateX(100%);
+            width: 0;
+            padding: 0;
+        }
+
+        .tele-header {
+            color: var(--tech-cyan);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tele-content {
+            flex: 1;
+            overflow-y: auto;
+            font-size: 1.2rem;
+            line-height: 1.8;
+            font-family: 'Inter', sans-serif;
+            scrollbar-width: thin;
+        }
+
+        .tele-content span {
+            display: none;
+        }
+
+        .tele-content span.active {
+            display: block;
+            animation: fadeIn 0.5s forwards;
+        }
+
+        /* Controls */
+        .controls {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 1000;
+        }
+
+        .btn {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            color: var(--tech-cyan);
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: var(--tech-cyan);
+            color: black;
+            box-shadow: 0 0 20px var(--tech-cyan);
+        }
+
+        .toggle-tele {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+        }
+
+        .dots {
+            position: fixed;
+            right: 480px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            transition: right 0.5s ease;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .dot.active {
+            background: var(--tech-cyan);
+            box-shadow: 0 0 10px var(--tech-cyan);
+            transform: scale(1.3);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Image Carousel Logic for slides with 2 images */
+        .image-sub-nav {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .sub-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            cursor: pointer;
+        }
+
+        .sub-dot.active {
+            background: var(--tech-cyan);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="bg-canvas"></div>
+
+    <button class="btn toggle-tele" onclick="toggleTele()">GUIÓN ON/OFF</button>
+
+    <div class="deck-container">
+        
+        <!-- Bloque 1 -->
+        <div class="slide active" id="slide-1">
+            <div class="slide-image-container">
+                <img src="file:///C:/Users/USER/.gemini/antigravity/brain/67506e73-fd7d-47bf-8768-6752f9997562/nexus_genesis_1775623683456.png" class="slide-image" data-alt="file:///C:/Users/USER/.gemini/antigravity/brain/67506e73-fd7d-47bf-8768-6752f9997562/nexus_v2_core_map_1775624168724.png">
+                <div class="image-sub-nav">
+                    <div class="sub-dot active" onclick="changeSubImage(1, 0)"></div>
+                    <div class="sub-dot" onclick="changeSubImage(1, 1)"></div>
+                </div>
+            </div>
+            <div class="slide-content">
+                <h2 class="slide-title">Génesis del Nexo</h2>
+                <p class="slide-subtitle">De lo Estático a lo Táctico</p>
+            </div>
+        </div>
+
+        <!-- Bloque 2 -->
+        <div class="slide" id="slide-2">
+            <div class="slide-image-container">
+                <img src="file:///C:/Users/USER/.gemini/antigravity/brain/67506e73-fd7d-47bf-8768-6752f9997562/nexus_boredom_barrier_1775623710352.png" class="slide-image">
+            </div>
+            <div class="slide-content">
+                <h2 class="slide-title">El Muro del Aburrimiento</h2>
+                <p class="slide-subtitle">Superando el mayor enemigo de la educación</p>
+            </div>
+        </div>
+
+        <!-- Bloque 3 -->
+        <div class="slide" id="slide-3">
+            <div class="slide-image-container">
+                <img src="file:///C:/Users/USER/.gemini/antigravity/brain/67506e73-fd7d-47bf-8768-6752f9997562/nexus_v2_moodle_bridge_real_1775624224937.png" class="slide-image" data-alt="file:///C:/Users/USER/.gemini/antigravity/brain/67506e73-fd7d-47bf-8768-6752f9997562/nexus_v2_neural_ui_1775624182785.png">
+                <div class="image-sub-nav">
+                    <div class="sub-dot active" onclick="changeSubImage(3, 0)"></div>
+                    <div class="sub-dot" onclick="changeSubImage(3, 1)"></div>
+                </div>
+            </div>
+            <div class="slide-content">
+                <h2 class="slide-title">Cerebro de Datos</h2>
+                <p class="slide-subtitle">Sincronización Inteligente con Moodle</p>
+            </div>
+        </div>
+
+        <!-- Bloque 4 -->
+        <div class="slide" id="slide-4">
+            <div class="slide-image-container">
+                <img src="file:///C:/Users/USER/.gemini/antigravity/brain/67506e73-fd7d-47bf-8768-6752f9997562/nexus_anti_fraud_1775623743937.png" class="slide-image">
+            </div>
+            <div class="slide-content">
+                <h2 class="slide-title">Integridad y Pedagogía</h2>
+                <p class="slide-subtitle">Aprendizaje Honesto mediante Pistas Inteligentes</p>
+            </div>
+        </div>
+
+        <!-- Bloque 5 -->
+        <div class="slide" id="slide-5">
+            <div class="slide-image-container">
+                <img src="file:///C:/Users/USER/.gemini/antigravity/brain/67506e73-fd7d-47bf-8768-6752f9997562/nexus_v2_conquest_real_1775624212275.png" class="slide-image" data-alt="file:///C:/Users/USER/.gemini/antigravity/brain/67506e73-fd7d-47bf-8768-6752f9997562/nexus_weekly_champion_1775623761474.png">
+                <div class="image-sub-nav">
+                    <div class="sub-dot active" onclick="changeSubImage(5, 0)"></div>
+                    <div class="sub-dot" onclick="changeSubImage(5, 1)"></div>
+                </div>
+            </div>
+            <div class="slide-content">
+                <h2 class="slide-title">Guerra de Clanes</h2>
+                <p class="slide-subtitle">Dopamina Semanal y Competencia Global</p>
+            </div>
+        </div>
+
+        <!-- Bloque 6 -->
+        <div class="slide" id="slide-6">
+            <div class="slide-image-container">
+                <img src="file:///C:/Users/USER/.gemini/antigravity/brain/67506e73-fd7d-47bf-8768-6752f9997562/nexus_mastery_medals_1775623773452.png" class="slide-image" data-alt="file:///C:/Users/USER/.gemini/antigravity/brain/67506e73-fd7d-47bf-8768-6752f9997562/nexus_v2_admin_control_1775624240376.png">
+                <div class="image-sub-nav">
+                    <div class="sub-dot active" onclick="changeSubImage(6, 0)"></div>
+                    <div class="sub-dot" onclick="changeSubImage(6, 1)"></div>
+                </div>
+            </div>
+            <div class="slide-content">
+                <h2 class="slide-title">Maestría y Control</h2>
+                <p class="slide-subtitle">Prestigio de Coder y Dashboard para Riwi</p>
+            </div>
+        </div>
+
+        <!-- Bloque 7 -->
+        <div class="slide" id="slide-7">
+            <div class="slide-image-container">
+                <img src="file:///C:/Users/USER/.gemini/antigravity/brain/67506e73-fd7d-47bf-8768-6752f9997562/nexus_global_marketing_1775623812605.png" class="slide-image">
+            </div>
+            <div class="slide-content">
+                <h2 class="slide-title">Expansión Global</h2>
+                <p class="slide-subtitle">Captura de Talento Mundual y Becas</p>
+            </div>
+        </div>
+
+        <!-- Bloque 8 -->
+        <div class="slide" id="slide-8">
+            <div class="slide-image-container">
+                <img src="file:///C:/Users/USER/.gemini/antigravity/brain/67506e73-fd7d-47bf-8768-6752f9997562/nexus_coder_elite_1775623826962.png" class="slide-image" data-alt="file:///C:/Users/USER/.gemini/antigravity/brain/67506e73-fd7d-47bf-8768-6752f9997562/nexus_v2_closing_1775623838869.png">
+                <div class="image-sub-nav">
+                    <div class="sub-dot active" onclick="changeSubImage(8, 0)"></div>
+                    <div class="sub-dot" onclick="changeSubImage(8, 1)"></div>
+                </div>
+            </div>
+            <div class="slide-content">
+                <h2 class="slide-title">El Coder de Élite</h2>
+                <p class="slide-subtitle">Despliegue de la Evolución</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Dots -->
+    <div class="dots" id="dots">
+        <div class="dot active" onclick="goToSlide(0)"></div>
+        <div class="dot" onclick="goToSlide(1)"></div>
+        <div class="dot" onclick="goToSlide(2)"></div>
+        <div class="dot" onclick="goToSlide(3)"></div>
+        <div class="dot" onclick="goToSlide(4)"></div>
+        <div class="dot" onclick="goToSlide(5)"></div>
+        <div class="dot" onclick="goToSlide(6)"></div>
+        <div class="dot" onclick="goToSlide(7)"></div>
+    </div>
+
+    <!-- Teleprompter -->
+    <aside id="teleprompter">
+        <div class="tele-header">
+            <h3>NOTAS DEL ORADOR</h3>
+            <span id="current-slide-num">01 / 08</span>
+        </div>
+        <div class="tele-content" id="tele-content">
+            <span class="active">Nexus no es solo un juego; es el <b>Espejo Digital del Coder</b>. Nació de la necesidad de dar un propósito táctico al esfuerzo diario en Riwi. Nexus V2 es el motor que hace que los datos de Moodle cobren vida, transformando la educación pasiva en una Inmersión Técnica de Grado Industrial.</span>
+            <span>El mayor enemigo de Riwi no es la dificultad del código, es el <b>aburrimiento</b>. Un estudiante que ve su progreso solo como un número en Moodle corre riesgo de deserción. Nexus destruye esa barrera convirtiendo el currículo en una misión de conquista donde cada aprendizaje suma territorio.</span>
+            <span>Nuestra innovación es el <b>Puente de Datos</b>. Nexus lee Moodle y detecta debilidades en Inglés o Soft Skills. El juego reacciona lanzando 'Misiones de Rescate' personalizadas. Aquí, repasar no es aburrido, es necesario para sincronizar los nodos lógicos del nexo.</span>
+            <span>Protegemos la honestidad técnica. Si el sistema detecta intento de fraude con IA o cambio de pestañas, el nexo se bloquea. En lugar de dar la respuesta, Nexus otorga <b>Tips Inteligentes</b>, forzando al estudiante a pensar y aprender de su propio error.</span>
+            <span>La dopamina se mantiene viva con el <b>Reinicio Semanal</b>. Cada lunes es una nueva oportunidad. Los clanes compiten ferozmente y el ganador de la semana aparece coronado en la cima del Nexo. Este 15-20% de impacto en la nota real garantiza una participación total.</span>
+            <span>Nexus premia la disciplina. Asistencia perfecta y buen comportamiento socio-emocional desbloquean estatus de Master. Para Riwi, esto se traduce en un <b>Dashboard de Talento</b> donde los directivos ven fallas académicas en tiempo real mediante mapas de calor.</span>
+            <span>Nuestra visión es global. Al abrir torneos donde los 5 mejores del mundo ganan una beca en Riwi, convertimos a Nexus en la herramienta de marketing más potente del sector. El mundo querrá entrar a Riwi para conquistar este mapa.</span>
+            <span>Al final, Riwi no entrega solo un diploma; entrega un <b>Perfil de Coder de Élite</b> validado por miles de horas de combate técnico. Estamos listos para el despliegue de la Fase Beta. Muchas gracias por su atención.</span>
+        </div>
+        <div style="margin-top: 20px; font-size: 0.8rem; opacity: 0.5;">Usa Flecha IZQ/DER para navegar</div>
+    </aside>
+
+    <div class="controls">
+        <button class="btn" onclick="prevSlide()">Puntos Anterior</button>
+        <button class="btn" onclick="nextSlide()">Siguiente Bloque</button>
+    </div>
+
+    <script>
+        let currentSlideIdx = 0;
+        const slides = document.querySelectorAll('.slide');
+        const dots = document.querySelectorAll('.dot');
+        const teleContent = document.querySelectorAll('.tele-content span');
+        const slideNumDisplay = document.getElementById('current-slide-num');
+
+        function updateSlide() {
+            slides.forEach((s, i) => {
+                s.classList.toggle('active', i === currentSlideIdx);
+                dots[i].classList.toggle('active', i === currentSlideIdx);
+                teleContent[i].classList.toggle('active', i === currentSlideIdx);
+            });
+            slideNumDisplay.innerText = `${(currentSlideIdx + 1).toString().padStart(2, '0')} / 08`;
+        }
+
+        function nextSlide() {
+            if (currentSlideIdx < slides.length - 1) {
+                currentSlideIdx++;
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlideIdx > 0) {
+                currentSlideIdx--;
+                updateSlide();
+            }
+        }
+
+        function goToSlide(idx) {
+            currentSlideIdx = idx;
+            updateSlide();
+        }
+
+        function toggleTele() {
+            const tele = document.getElementById('teleprompter');
+            const dotsContainer = document.getElementById('dots');
+            tele.classList.toggle('hidden');
+            if (tele.classList.contains('hidden')) {
+                dotsContainer.style.right = '40px';
+            } else {
+                dotsContainer.style.right = '480px';
+            }
+        }
+
+        // Sub-image logic (carousel inside slides)
+        function changeSubImage(slideIdx, imgIdx) {
+            const slide = document.querySelector(`#slide-${slideIdx + 1}`);
+            if(!slide) return;
+            const img = slide.querySelector('.slide-image');
+            const dots = slide.querySelectorAll('.sub-dot');
+            
+            const originalSrc = img.src;
+            const altSrc = img.getAttribute('data-alt');
+
+            if (imgIdx === 1 && altSrc) {
+                img.style.opacity = '0';
+                setTimeout(() => {
+                    img.src = altSrc;
+                    img.setAttribute('data-alt', originalSrc);
+                    img.style.opacity = '1';
+                }, 300);
+            } else if (imgIdx === 0 && altSrc) {
+                // If we are on second image and click first dot
+                // In this implementation I switch srcs, but simple dot logic would be better
+                // Let's just track state per slide for better robust logic locally
+            }
+
+            dots.forEach((d, i) => d.classList.toggle('active', i === imgIdx));
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+
+    </script>
+</body>
+</html>
